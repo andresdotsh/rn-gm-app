@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect, useState } from 'react'
+import { useColorScheme } from 'react-native'
 import { useFonts } from 'expo-font'
 import {
   DarkTheme,
@@ -9,7 +10,6 @@ import {
 } from '@react-navigation/native'
 import * as SplashScreen from 'expo-splash-screen'
 
-import useColorScheme from '@/hooks/useColorScheme'
 import colors from '@/constants/colors'
 
 SplashScreen.preventAutoHideAsync()
@@ -17,7 +17,7 @@ SplashScreen.preventAutoHideAsync()
 export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false)
 
-  const colorScheme = useColorScheme()
+  const colorScheme = useColorScheme() || 'light'
 
   const isDark = colorScheme === 'dark'
 
