@@ -7,16 +7,16 @@ const tintColorDark = '#fff'
 
 const colors = {
   light: {
-    color: '#11181C',
-    backgroundColor: '#fff',
+    color: '#ffffff',
+    backgroundColor: '#2b1a14',
     tint: tintColorLight,
     icon: '#687076',
     tabIconDefault: '#687076',
     tabIconSelected: tintColorLight,
   },
   dark: {
-    color: '#ECEDEE',
-    backgroundColor: '#151718',
+    color: '#ffffff',
+    backgroundColor: '#2b1a14',
     tint: tintColorDark,
     icon: '#9BA1A6',
     tabIconDefault: '#9BA1A6',

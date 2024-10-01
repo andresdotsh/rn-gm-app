@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useFonts } from 'expo-font'
 import {
   DarkTheme,
@@ -15,7 +15,10 @@ import colors from '@/constants/colors'
 SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
+  const [appIsReady, setAppIsReady] = useState(false)
+
   const colorScheme = useColorScheme()
+
   const isDark = colorScheme === 'dark'
 
   const [fontsLoaded, fontsLoadError] = useFonts({
@@ -31,11 +34,19 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (fontsLoaded || fontsLoadError) {
-      SplashScreen.hideAsync()
+      setAppIsReady(true)
     }
   }, [fontsLoaded, fontsLoadError])
 
-  if (!fontsLoaded && !fontsLoadError) {
+  useEffect(() => {
+    if (appIsReady) {
+      setTimeout(() => {
+        SplashScreen.hideAsync()
+      }, 1000)
+    }
+  }, [appIsReady])
+
+  if (!appIsReady) {
     return null
   }
 
@@ -44,13 +55,16 @@ export default function RootLayout() {
       <StatusBar style='auto' />
       <Stack
         screenOptions={{
+          headerShown: true,
+          headerShadowVisible: false,
+          headerTransparent: true,
           headerStyle: {
             backgroundColor: isDark
               ? colors.dark.backgroundColor
               : colors.light.backgroundColor,
           },
           headerTitleStyle: {
-            color: '#000',
+            color: isDark ? '#fff' : '#000', // TODO: -> change this
           },
           headerTitle: '',
         }}
