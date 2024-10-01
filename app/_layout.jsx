@@ -2,11 +2,22 @@ import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect } from 'react'
 import { useFonts } from 'expo-font'
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from '@react-navigation/native'
 import * as SplashScreen from 'expo-splash-screen'
+
+import useColorScheme from '@/hooks/useColorScheme'
+import colors from '@/constants/colors'
 
 SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
+  const colorScheme = useColorScheme()
+  const isDark = colorScheme === 'dark'
+
   const [fontsLoaded, fontsLoadError] = useFonts({
     Ubuntu400: require('../assets/fonts/UbuntuSansMono/Regular.ttf'),
     Ubuntu400Italic: require('../assets/fonts/UbuntuSansMono/RegularItalic.ttf'),
@@ -29,12 +40,14 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
       <StatusBar style='auto' />
       <Stack
         screenOptions={{
           headerStyle: {
-            backgroundColor: 'lightgray',
+            backgroundColor: isDark
+              ? colors.dark.backgroundColor
+              : colors.light.backgroundColor,
           },
           headerTitleStyle: {
             color: '#000',
@@ -42,6 +55,6 @@ export default function RootLayout() {
           headerTitle: '',
         }}
       />
-    </>
+    </ThemeProvider>
   )
 }
