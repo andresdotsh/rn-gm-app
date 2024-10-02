@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useColorScheme } from 'react-native'
 import { useFonts } from 'expo-font'
 import {
@@ -9,12 +9,24 @@ import {
   ThemeProvider,
 } from '@react-navigation/native'
 import * as SplashScreen from 'expo-splash-screen'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { initializeApp } from 'firebase/app'
+import {
+  initializeAuth,
+  getReactNativePersistence,
+  onAuthStateChanged,
+} from 'firebase/auth'
+import { getFirestore } from 'firebase/firestore'
 
 import colors from '@/constants/colors'
+import firebaseConfig from '@/constants/firebaseConfig'
 
 SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
+  const authRef = useRef(null)
+  const dbRef = useRef(null)
+
   const [appIsReady, setAppIsReady] = useState(false)
 
   const colorScheme = useColorScheme() || 'light'
@@ -31,6 +43,24 @@ export default function RootLayout() {
     Ubuntu700: require('../assets/fonts/UbuntuSansMono/Bold.ttf'),
     Ubuntu700Italic: require('../assets/fonts/UbuntuSansMono/BoldItalic.ttf'),
   })
+
+  useEffect(() => {
+    const app = initializeApp(firebaseConfig)
+    authRef.current = initializeAuth(app, {
+      persistence: getReactNativePersistence(AsyncStorage),
+    })
+    dbRef.current = getFirestore(app)
+
+    authRef.current.useDeviceLanguage()
+
+    const unsubscribe = onAuthStateChanged(authRef.current, (user) => {
+      console.log(`🚀🚀🚀 -> user:`, user) // TODO: -> ltd
+    })
+
+    return () => {
+      unsubscribe()
+    }
+  }, [])
 
   useEffect(() => {
     if (fontsLoaded || fontsLoadError) {
