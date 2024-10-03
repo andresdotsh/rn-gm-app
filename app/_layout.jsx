@@ -1,7 +1,6 @@
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect, useState, useRef } from 'react'
-import { useColorScheme } from 'react-native'
 import { useFonts } from 'expo-font'
 import {
   DarkTheme,
@@ -18,6 +17,7 @@ import {
 } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 
+import useTheme from '@/hooks/useTheme'
 import colors from '@/constants/colors'
 import firebaseConfig from '@/constants/firebaseConfig'
 
@@ -29,9 +29,8 @@ export default function RootLayout() {
 
   const [appIsReady, setAppIsReady] = useState(false)
 
-  const colorScheme = useColorScheme() || 'light'
-
-  const isDark = colorScheme === 'dark'
+  const theme = useTheme()
+  const isDark = theme === 'dark'
 
   const [fontsLoaded, fontsLoadError] = useFonts({
     Ubuntu400: require('../assets/fonts/UbuntuSansMono/Regular.ttf'),
@@ -90,12 +89,14 @@ export default function RootLayout() {
           headerTransparent: true,
           headerStyle: {
             backgroundColor: isDark
-              ? colors.dark.backgroundColor
-              : colors.light.backgroundColor,
+              ? colors.dark.mainBackgroundColor
+              : colors.light.mainBackgroundColor,
           },
           headerTitleStyle: {
-            color: isDark ? '#fff' : '#000', // TODO: -> change this
+            color: isDark ? colors.dark.color : colors.light.color,
+            fontFamily: 'Ubuntu700',
           },
+          headerTintColor: isDark ? colors.dark.color : colors.light.color,
           headerTitle: '',
         }}
       />

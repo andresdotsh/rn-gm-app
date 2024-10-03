@@ -4,12 +4,36 @@
  */
 const colors = {
   light: {
-    color: '#ffffff',
-    backgroundColor: '#2b1a14',
+    color: '#ffffff', // white
+    color2: '#acb6c4', // gray blue
+    color3: '#a4adbb', // gray blue darker
+    color4: '#ff6e3c', // orange color
+    mainBackgroundColor: '#2b1a14', // darkest brown
+    backgroundColor: '#0d0d0d', // darkest background
+    btnColor: '#ffffff', // white
+    btnBg: '#ff6937', // primary orange
+    btnBg2: '#fe8054', // lighter orange
+    btnBg3: '#b43d1c', // darker orange
+    btnBg4: '#992906', // darkest orange
+    modalBg: '#1f1f1f', // modal background
+    cardBg: '#383838', // card background darker
+    cardBg2: '#292929', // card background darkest
   },
   dark: {
-    color: '#ffffff',
-    backgroundColor: '#2b1a14',
+    color: '#ffffff', // white
+    color2: '#acb6c4', // gray blue
+    color3: '#a4adbb', // gray blue darker
+    color4: '#ff6e3c', // orange color
+    mainBackgroundColor: '#2b1a14', // darkest brown
+    backgroundColor: '#0d0d0d', // darkest background
+    btnColor: '#ffffff', // white
+    btnBg: '#ff6937', // primary orange
+    btnBg2: '#fe8054', // lighter orange
+    btnBg3: '#b43d1c', // darker orange
+    btnBg4: '#992906', // darkest orange
+    modalBg: '#1f1f1f', // modal background
+    cardBg: '#383838', // card background darker
+    cardBg2: '#292929', // card background darkest
   },
 }
 
