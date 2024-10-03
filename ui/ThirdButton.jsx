@@ -3,13 +3,13 @@ import { Pressable, StyleSheet, Text } from 'react-native'
 
 import useThemeColor from '@/hooks/useThemeColor'
 
-const MainButton = forwardRef(function MainPressableButton(
+const ThirdButton = forwardRef(function ThirdPressableButton(
   { children, onPress, disabled, style },
   ref,
 ) {
-  const backgroundColor = useThemeColor('btnBg')
-  const btnColor = useThemeColor('btnColor')
-  const borderColor = useThemeColor('btnBg4')
+  const backgroundColor = useThemeColor('btnBg5')
+  const btnColor = useThemeColor('color')
+  const borderColor = useThemeColor('color3')
 
   return (
     <Pressable
@@ -33,7 +33,7 @@ const MainButton = forwardRef(function MainPressableButton(
   )
 })
 
-export default MainButton
+export default ThirdButton
 
 const styles = StyleSheet.create({
   pressable: {

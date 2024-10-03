@@ -84,7 +84,7 @@ export default function RootLayout() {
       <StatusBar style='auto' />
       <Stack
         screenOptions={{
-          headerShown: true,
+          headerShown: false, // TODO: -> true when the user is logged in
           headerShadowVisible: false,
           headerTransparent: false,
           headerStyle: {

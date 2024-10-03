@@ -1,10 +1,13 @@
 import { StyleSheet, Text, View } from 'react-native'
 
 import useThemeColor from '@/hooks/useThemeColor'
+import LoginSignup from '@/components/LoginSignup/LoginSignup'
 
 export default function App() {
   const mainBgColor = useThemeColor('mainBackgroundColor')
   const textColor = useThemeColor('color')
+
+  return <LoginSignup />
 
   return (
     <View style={[styles.container, { backgroundColor: mainBgColor }]}>

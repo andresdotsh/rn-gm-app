@@ -14,7 +14,7 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarShowLabel: false,
         tabBarStyle: {
-          display: 'flex', // TODO: -> or 'none' if the user is not logged in
+          display: 'none', // TODO: -> or 'none' if the user is not logged in
           backgroundColor: tabsBg,
         },
       }}

@@ -15,6 +15,7 @@ const colors = {
     btnBg2: '#fe8054', // lighter orange
     btnBg3: '#b43d1c', // darker orange
     btnBg4: '#992906', // darkest orange
+    btnBg5: '#202020', // darkest button background
     modalBg: '#1f1f1f', // modal background
     cardBg: '#383838', // card background darker
     cardBg2: '#292929', // card background darkest
@@ -31,6 +32,7 @@ const colors = {
     btnBg2: '#fe8054', // lighter orange
     btnBg3: '#b43d1c', // darker orange
     btnBg4: '#992906', // darkest orange
+    btnBg5: '#202020', // darkest button background
     modalBg: '#1f1f1f', // modal background
     cardBg: '#383838', // card background darker
     cardBg2: '#292929', // card background darkest
