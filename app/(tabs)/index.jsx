@@ -8,9 +8,7 @@ export default function App() {
 
   return (
     <View style={[styles.container, { backgroundColor: mainBgColor }]}>
-      <Text
-        style={{ fontSize: 20, fontFamily: 'Ubuntu400', color: textColor }}
-      >{`Hello World!`}</Text>
+      <Text style={[styles.text, { color: textColor }]}>{`Hello World!`}</Text>
     </View>
   )
 }
@@ -21,5 +19,9 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  text: {
+    fontSize: 20,
+    fontFamily: 'Ubuntu400',
   },
 })

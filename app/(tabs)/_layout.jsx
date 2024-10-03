@@ -40,7 +40,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ size, focused }) => {
             return (
               <FontAwesome
-                name='about'
+                name='info'
                 size={size}
                 color={focused ? activeTabIconColor : tabIconColor}
               />
