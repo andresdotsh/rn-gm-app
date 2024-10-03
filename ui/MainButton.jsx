@@ -15,8 +15,6 @@ const MainButton = forwardRef(function PressableButton(
 
   return (
     <Pressable
-      disabled={disabled}
-      onPress={onPress}
       style={({ pressed }) => {
         return [
           {
@@ -32,6 +30,8 @@ const MainButton = forwardRef(function PressableButton(
           style,
         ]
       }}
+      disabled={disabled}
+      onPress={onPress}
       ref={ref}
     >
       <Text style={[{ color: btnColor }, styles.text]}>{children}</Text>
