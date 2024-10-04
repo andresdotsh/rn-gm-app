@@ -5,9 +5,10 @@
 const colors = {
   light: {
     color: '#ffffff', // white
-    color2: '#acb6c4', // gray blue
+    color2: '#d1d6dd', // gray blue
     color3: '#a4adbb', // gray blue darker
     color4: '#ff6e3c', // orange color
+    color5: '#000000', // black
     mainBackgroundColor: '#2b1a14', // darkest brown
     backgroundColor: '#0d0d0d', // darkest background
     btnColor: '#ffffff', // white
@@ -22,9 +23,10 @@ const colors = {
   },
   dark: {
     color: '#ffffff', // white
-    color2: '#acb6c4', // gray blue
+    color2: '#d1d6dd', // gray blue
     color3: '#a4adbb', // gray blue darker
     color4: '#ff6e3c', // orange color
+    color5: '#000000', // black
     mainBackgroundColor: '#2b1a14', // darkest brown
     backgroundColor: '#0d0d0d', // darkest background
     btnColor: '#ffffff', // white

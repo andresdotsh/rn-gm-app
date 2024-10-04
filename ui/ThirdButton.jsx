@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text } from 'react-native'
 import useThemeColor from '@/hooks/useThemeColor'
 
 const ThirdButton = forwardRef(function ThirdPressableButton(
-  { children, onPress, disabled, style },
+  { children, onPress, disabled, style, leftIcon, rightIcon },
   ref,
 ) {
   const backgroundColor = useThemeColor('btnBg5')
@@ -28,7 +28,9 @@ const ThirdButton = forwardRef(function ThirdPressableButton(
       onPress={onPress}
       ref={ref}
     >
+      {Boolean(leftIcon) && leftIcon}
       <Text style={[{ color: btnColor }, styles.text]}>{children}</Text>
+      {Boolean(rightIcon) && rightIcon}
     </Pressable>
   )
 })
@@ -37,6 +39,11 @@ export default ThirdButton
 
 const styles = StyleSheet.create({
   pressable: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
     paddingHorizontal: 25,
     paddingVertical: 10,
     borderRadius: 50,
