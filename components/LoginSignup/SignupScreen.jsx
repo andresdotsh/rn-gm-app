@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useRef, useEffect } from 'react'
 import {
   View,
   Text,
@@ -14,6 +14,8 @@ import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { getApp } from 'firebase/app'
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth'
 
 import useThemeColor from '@/hooks/useThemeColor'
 import BlankSpaceView from '@/ui/BlankSpaceView'
@@ -28,7 +30,8 @@ import {
   FIELD_PASSWORD_MAX_LENGTH,
   FIELD_PASSWORD_MIN_LENGTH,
   REGEX_USER_PASSWORD,
-} from '@/constants/formFields'
+} from '@/constants/constants'
+import normalizeSpaces from '@/utils/normalizeSpaces'
 
 const schema = yup
   .object({
@@ -61,7 +64,11 @@ export default function SignupScreen({
   scrollToIndex,
   isAuthenticating,
   setIsAuthenticating,
+  handleErrorMessage,
+  performLogin,
 }) {
+  const authRef = useRef(null)
+
   const bgColor = useThemeColor('btnBg5')
   const titleColor = useThemeColor('color4')
   const color = useThemeColor('color')
@@ -80,12 +87,32 @@ export default function SignupScreen({
     reset,
   } = useForm({ resolver: yupResolver(schema) })
 
+  useEffect(() => {
+    const app = getApp()
+    authRef.current = getAuth(app)
+    authRef.current.useDeviceLanguage()
+  }, [])
+
   const onSubmit = useCallback(
-    (formData) => {
-      console.log(`🚀🚀🚀 -> formData:`, formData)
-      setIsAuthenticating(true)
+    async (formData) => {
+      try {
+        setIsAuthenticating(true)
+
+        const cleanedDisplayName = normalizeSpaces(formData.name)
+        const result = await createUserWithEmailAndPassword(
+          authRef.current,
+          formData.email,
+          formData.password,
+        )
+        await performLogin(result, cleanedDisplayName, reset)
+      } catch (error) {
+        console.error(error)
+        console.error(`💥> SSU '${error?.message}'`)
+        handleErrorMessage(error)
+        setIsAuthenticating(false)
+      }
     },
-    [setIsAuthenticating],
+    [setIsAuthenticating, handleErrorMessage, performLogin, reset],
   )
 
   return (

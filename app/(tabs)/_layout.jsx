@@ -2,11 +2,14 @@ import { Tabs } from 'expo-router'
 import FontAwesome from '@expo/vector-icons/FontAwesome'
 
 import useThemeColor from '@/hooks/useThemeColor'
+import { useCurrentUserStore } from '@/hooks/useStore'
 
 export default function TabsLayout() {
   const tabsBg = useThemeColor('cardBg2')
   const tabIconColor = useThemeColor('color2')
   const activeTabIconColor = useThemeColor('color4')
+
+  const userIsLoggedIn = useCurrentUserStore((state) => state.isLoggedIn)
 
   return (
     <Tabs
@@ -14,7 +17,7 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarShowLabel: false,
         tabBarStyle: {
-          display: 'none', // TODO: -> or 'none' if the user is not logged in
+          display: userIsLoggedIn ? 'flex' : 'none',
           backgroundColor: tabsBg,
         },
       }}

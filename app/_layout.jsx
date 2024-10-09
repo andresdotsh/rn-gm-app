@@ -15,22 +15,26 @@ import {
   getReactNativePersistence,
   onAuthStateChanged,
 } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
 
 import useTheme from '@/hooks/useTheme'
 import colors from '@/constants/colors'
 import firebaseConfig from '@/constants/firebaseConfig'
+import { useCurrentUserStore } from '@/hooks/useStore'
 
 SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
   const authRef = useRef(null)
-  const dbRef = useRef(null)
 
   const [appIsReady, setAppIsReady] = useState(false)
+  const [userStatusChanged, setUserStatusChanged] = useState(false)
+  const [userHasEmailVerified, setUserHasEmailVerified] = useState(false)
 
   const theme = useTheme()
   const isDark = theme === 'dark'
+
+  const userIsLoggedIn = useCurrentUserStore((state) => state.isLoggedIn)
+  const setUserIsLoggedIn = useCurrentUserStore((state) => state.setIsLoggedIn)
 
   const [fontsLoaded, fontsLoadError] = useFonts({
     Ubuntu400: require('../assets/fonts/UbuntuSansMono/Regular.ttf'),
@@ -48,24 +52,41 @@ export default function RootLayout() {
     authRef.current = initializeAuth(app, {
       persistence: getReactNativePersistence(AsyncStorage),
     })
-    dbRef.current = getFirestore(app)
 
     authRef.current.useDeviceLanguage()
 
     const unsubscribe = onAuthStateChanged(authRef.current, (user) => {
-      console.log(`🚀🚀🚀 -> user:`, user) // TODO: -> ltd
+      setUserStatusChanged(true)
+
+      if (user) {
+        setUserHasEmailVerified(user.emailVerified)
+      } else {
+        setUserIsLoggedIn(false)
+      }
     })
 
     return () => {
       unsubscribe()
     }
-  }, [])
+  }, [setUserIsLoggedIn])
 
   useEffect(() => {
-    if (fontsLoaded || fontsLoadError) {
+    // this only must run once at the beginning
+    if (!appIsReady && userStatusChanged && (fontsLoaded || fontsLoadError)) {
+      if (userHasEmailVerified) {
+        setUserIsLoggedIn(true)
+      }
+
       setAppIsReady(true)
     }
-  }, [fontsLoaded, fontsLoadError])
+  }, [
+    appIsReady,
+    fontsLoadError,
+    fontsLoaded,
+    setUserIsLoggedIn,
+    userHasEmailVerified,
+    userStatusChanged,
+  ])
 
   useEffect(() => {
     if (appIsReady) {
@@ -84,7 +105,7 @@ export default function RootLayout() {
       <StatusBar style='auto' />
       <Stack
         screenOptions={{
-          headerShown: false, // TODO: -> true when the user is logged in
+          headerShown: userIsLoggedIn,
           headerShadowVisible: false,
           headerTransparent: false,
           headerStyle: {

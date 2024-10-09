@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useRef, useEffect } from 'react'
 import {
   View,
   Text,
@@ -14,6 +14,8 @@ import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { getApp } from 'firebase/app'
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
 
 import useThemeColor from '@/hooks/useThemeColor'
 import ShowToggleButton from '@/ui/ShowToggleButton'
@@ -25,7 +27,7 @@ import {
   FIELD_EMAIL_MAX_LENGTH,
   FIELD_PASSWORD_MAX_LENGTH,
   FIELD_PASSWORD_MIN_LENGTH,
-} from '@/constants/formFields'
+} from '@/constants/constants'
 
 const schema = yup
   .object({
@@ -48,7 +50,11 @@ export default function LoginScreen({
   scrollToIndex,
   isAuthenticating,
   setIsAuthenticating,
+  handleErrorMessage,
+  performLogin,
 }) {
+  const authRef = useRef(null)
+
   const bgColor = useThemeColor('color4')
   const titleColor = useThemeColor('color5')
   const color = useThemeColor('color5')
@@ -68,12 +74,31 @@ export default function LoginScreen({
     reset,
   } = useForm({ resolver: yupResolver(schema) })
 
+  useEffect(() => {
+    const app = getApp()
+    authRef.current = getAuth(app)
+    authRef.current.useDeviceLanguage()
+  }, [])
+
   const onSubmit = useCallback(
-    (formData) => {
-      console.log(`🚀🚀🚀 -> formData:`, formData)
-      setIsAuthenticating(true)
+    async (formData) => {
+      try {
+        setIsAuthenticating(true)
+
+        const result = await signInWithEmailAndPassword(
+          authRef.current,
+          formData.email,
+          formData.password,
+        )
+        await performLogin(result, null, reset)
+      } catch (error) {
+        console.error(error)
+        console.error(`💥> SSI '${error?.message}'`)
+        handleErrorMessage(error)
+        setIsAuthenticating(false)
+      }
     },
-    [setIsAuthenticating],
+    [handleErrorMessage, performLogin, reset, setIsAuthenticating],
   )
 
   return (

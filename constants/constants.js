@@ -18,3 +18,11 @@ export const REGEX_USER_PASSWORD = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/
 export const REGEX_USER_USERNAME = /^[a-z0-9_-]+$/
 export const REGEX_USER_PHONE = /^\+?[1-9]\d{1,14}$/
 export const REGEX_SN_USERNAME = /^[^\s]*$/
+
+// custom errors
+export const ERROR_CODE_ACCOUNT_EXISTS =
+  'auth/account-exists-with-different-credential'
+export const ERROR_CODE_EMAIL_ALREADY_IN_USE = 'auth/email-already-in-use'
+export const ERROR_CODE_INVALID_CREDENTIAL = 'auth/invalid-credential'
+export const ERROR_CODE_POPUP_CLOSED = 'auth/popup-closed-by-user'
+export const ERROR_CODE_TOO_MANY_REQUESTS = 'auth/too-many-requests'
