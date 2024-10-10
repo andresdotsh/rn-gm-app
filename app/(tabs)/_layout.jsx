@@ -6,7 +6,8 @@ import { useCurrentUserStore } from '@/hooks/useStore'
 
 export default function TabsLayout() {
   const tabsBg = useThemeColor('cardBg2')
-  const tabIconColor = useThemeColor('color2')
+  const tabsBorderColor = useThemeColor('cardBg')
+  const tabIconColor = useThemeColor('color3')
   const activeTabIconColor = useThemeColor('color4')
 
   const userIsLoggedIn = useCurrentUserStore((state) => state.isLoggedIn)
@@ -19,6 +20,7 @@ export default function TabsLayout() {
         tabBarStyle: {
           display: userIsLoggedIn ? 'flex' : 'none',
           backgroundColor: tabsBg,
+          borderTopColor: tabsBorderColor,
         },
       }}
     >

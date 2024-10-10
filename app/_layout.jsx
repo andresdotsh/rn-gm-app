@@ -15,6 +15,7 @@ import {
   getReactNativePersistence,
   onAuthStateChanged,
 } from 'firebase/auth'
+import { useNavigationState } from '@react-navigation/native'
 
 import useTheme from '@/hooks/useTheme'
 import colors from '@/constants/colors'
@@ -25,16 +26,18 @@ SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
   const authRef = useRef(null)
+  const userEmailVerifiedRef = useRef(false)
 
   const [appIsReady, setAppIsReady] = useState(false)
   const [userStatusChanged, setUserStatusChanged] = useState(false)
-  const [userHasEmailVerified, setUserHasEmailVerified] = useState(false)
 
   const theme = useTheme()
   const isDark = theme === 'dark'
 
   const userIsLoggedIn = useCurrentUserStore((state) => state.isLoggedIn)
   const setUserIsLoggedIn = useCurrentUserStore((state) => state.setIsLoggedIn)
+
+  const navState = useNavigationState((state) => state)
 
   const [fontsLoaded, fontsLoadError] = useFonts({
     Ubuntu400: require('../assets/fonts/UbuntuSansMono/Regular.ttf'),
@@ -59,7 +62,7 @@ export default function RootLayout() {
       setUserStatusChanged(true)
 
       if (user) {
-        setUserHasEmailVerified(user.emailVerified)
+        userEmailVerifiedRef.current = user.emailVerified
       } else {
         setUserIsLoggedIn(false)
       }
@@ -73,7 +76,7 @@ export default function RootLayout() {
   useEffect(() => {
     // this only must run once at the beginning
     if (!appIsReady && userStatusChanged && (fontsLoaded || fontsLoadError)) {
-      if (userHasEmailVerified) {
+      if (userEmailVerifiedRef.current) {
         setUserIsLoggedIn(true)
       }
 
@@ -84,7 +87,6 @@ export default function RootLayout() {
     fontsLoadError,
     fontsLoaded,
     setUserIsLoggedIn,
-    userHasEmailVerified,
     userStatusChanged,
   ])
 
@@ -100,25 +102,42 @@ export default function RootLayout() {
     return null
   }
 
+  const activeRouteState = navState.routes?.[navState.index]?.state
+  const activeTabName =
+    activeRouteState?.routes?.[activeRouteState?.index]?.name
+
   return (
     <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
-      <StatusBar style='auto' />
+      <StatusBar style='light' />
       <Stack
-        screenOptions={{
-          headerShown: userIsLoggedIn,
-          headerShadowVisible: false,
-          headerTransparent: false,
-          headerStyle: {
-            backgroundColor: isDark
-              ? colors.dark.mainBackgroundColor
-              : colors.light.mainBackgroundColor,
-          },
-          headerTitleStyle: {
-            color: isDark ? colors.dark.color : colors.light.color,
-            fontFamily: 'Ubuntu700',
-          },
-          headerTintColor: isDark ? colors.dark.color : colors.light.color,
-          headerTitle: '',
+        screenOptions={({ route }) => {
+          const options = {
+            headerShadowVisible: false,
+            headerTransparent: false,
+            headerStyle: {
+              backgroundColor: isDark
+                ? colors.dark.mainBackgroundColor
+                : colors.light.mainBackgroundColor,
+            },
+            headerTitleStyle: {
+              color: isDark ? colors.dark.color : colors.light.color,
+              fontFamily: 'Ubuntu700',
+            },
+            headerTintColor: isDark ? colors.dark.color : colors.light.color,
+            headerShown: userIsLoggedIn,
+            headerTitle: '',
+          }
+
+          if (route.name === '(tabs)') {
+            if (activeTabName === 'index') {
+              options.headerTitle = ''
+            }
+            if (activeTabName === 'about') {
+              options.headerTitle = 'About'
+            }
+          }
+
+          return options
         }}
       />
     </ThemeProvider>

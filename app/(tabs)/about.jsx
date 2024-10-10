@@ -1,6 +1,7 @@
-import { StyleSheet, ScrollView, Text, View } from 'react-native'
+import { StyleSheet, ScrollView, Text } from 'react-native'
 
 import useThemeColor from '@/hooks/useThemeColor'
+import BlankSpaceView from '@/ui/BlankSpaceView'
 
 export default function About() {
   const mainBgColor = useThemeColor('mainBackgroundColor')
@@ -52,7 +53,7 @@ export default function About() {
         by H. Rackham.
       </Text>
 
-      <View style={styles.bottomSpace} />
+      <BlankSpaceView />
     </ScrollView>
   )
 }
@@ -70,8 +71,5 @@ const styles = StyleSheet.create({
     fontFamily: 'Ubuntu400',
     fontSize: 18,
     marginBottom: 20,
-  },
-  bottomSpace: {
-    height: 40,
   },
 })
