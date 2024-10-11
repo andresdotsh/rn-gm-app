@@ -1,7 +1,7 @@
 import { Modal, View, StyleSheet, Pressable, Text } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { isNonEmptyString } from 'ramda-adjunct'
+import { isNonEmptyString, isFunction } from 'ramda-adjunct'
 
 import useThemeColor from '@/hooks/useThemeColor'
 
@@ -9,6 +9,7 @@ export default function MainModal({
   title,
   visible,
   onPressClose,
+  disabled,
   children,
   transparent = true,
   animationType = 'slide',
@@ -23,7 +24,11 @@ export default function MainModal({
       visible={visible}
       animationType={animationType}
       transparent={transparent}
-      onRequestClose={onPressClose}
+      onRequestClose={() => {
+        if (!disabled && isFunction(onPressClose)) {
+          onPressClose()
+        }
+      }}
     >
       <View
         style={[
@@ -38,10 +43,14 @@ export default function MainModal({
           <Pressable
             style={({ pressed }) => {
               return {
-                opacity: pressed ? 0.8 : 1,
+                opacity: disabled ? 0.6 : pressed ? 0.8 : 1,
               }
             }}
-            onPress={onPressClose}
+            onPress={(e) => {
+              if (!disabled && isFunction(onPressClose)) {
+                onPressClose(e)
+              }
+            }}
           >
             <Ionicons name='close-sharp' size={24} color={modalTitleColor} />
           </Pressable>

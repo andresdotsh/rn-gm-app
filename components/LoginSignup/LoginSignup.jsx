@@ -1,5 +1,5 @@
 import { useRef, useCallback, useState, useEffect } from 'react'
-import { View, StyleSheet, Text } from 'react-native'
+import { View, StyleSheet, Text, TextInput } from 'react-native'
 import { SwiperFlatList } from 'react-native-swiper-flatlist'
 import { pick } from 'ramda'
 import { isNonEmptyString, isFunction } from 'ramda-adjunct'
@@ -17,8 +17,12 @@ import {
   FacebookAuthProvider,
   getAuth,
   sendEmailVerification,
+  sendPasswordResetEmail,
 } from 'firebase/auth'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import { useForm, Controller } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from 'yup'
 
 import {
   ERROR_CODE_ACCOUNT_EXISTS,
@@ -26,14 +30,28 @@ import {
   ERROR_CODE_INVALID_CREDENTIAL,
   ERROR_CODE_POPUP_CLOSED,
   ERROR_CODE_TOO_MANY_REQUESTS,
+  FIELD_EMAIL_MAX_LENGTH,
 } from '@/constants/constants'
 import MainModal from '@/ui/MainModal'
+import MainButton from '@/ui/MainButton'
 import colors from '@/constants/colors'
 import LoginScreen from '@/components/LoginSignup/LoginScreen'
 import SignupScreen from '@/components/LoginSignup/SignupScreen'
 import useThemeColor from '@/hooks/useThemeColor'
 import { useCurrentUserStore } from '@/hooks/useStore'
 import generateUsername from '@/utils/generateUsername'
+
+const schema = yup
+  .object({
+    email: yup
+      .string()
+      .trim()
+      .lowercase()
+      .required('Campo requerido')
+      .email('Email inválido')
+      .max(FIELD_EMAIL_MAX_LENGTH, 'Máximo ${max} caracteres'),
+  })
+  .required()
 
 export default function LoginSignup() {
   const swiperRef = useRef(null)
@@ -47,12 +65,26 @@ export default function LoginSignup() {
   const [infoTitle, setInfoTitle] = useState('')
   const [infoMessage, setInfoMessage] = useState('')
   const [showVerifyModal, setShowVerifyModal] = useState(false)
+  const [showRecoveryModal, setShowRecoveryModal] = useState(false)
+  const [isRecovAuthenticating, setIsRecovAuthenticating] = useState(false)
+  const [recovSentMode, setRecovSentMode] = useState(false)
 
   const modalTitleColor = useThemeColor('color')
   const modalColor = useThemeColor('color2')
   const modalIconColor = useThemeColor('color4')
+  const recovTitleColor = useThemeColor('color4')
+  const recovColor = useThemeColor('color')
+  const recovPlaceholderColor = useThemeColor('color3')
+  const recovTextInputBgColor = useThemeColor('backgroundColor')
 
   const setUserIsLoggedIn = useCurrentUserStore((state) => state.setIsLoggedIn)
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset: recovReset,
+  } = useForm({ resolver: yupResolver(schema) })
 
   useEffect(() => {
     const app = getApp()
@@ -66,6 +98,10 @@ export default function LoginSignup() {
 
   const scrollToIndex = useCallback((index) => {
     swiperRef.current.scrollToIndex({ animated: true, index })
+  }, [])
+
+  const openChangePasswdModal = useCallback(() => {
+    setShowRecoveryModal(true)
   }, [])
 
   const handleErrorMessage = useCallback((error) => {
@@ -152,9 +188,31 @@ export default function LoginSignup() {
       if (isFunction(resetFn)) {
         resetFn()
       }
+      setIsAuthenticating(false)
       setUserIsLoggedIn(true)
     },
     [setUserIsLoggedIn],
+  )
+
+  const recovOnSubmit = useCallback(
+    async (formData) => {
+      try {
+        setIsRecovAuthenticating(true)
+
+        await sendPasswordResetEmail(authRef.current, formData.email)
+
+        recovReset()
+        setRecovSentMode(true)
+      } catch (error) {
+        console.error(error)
+        console.error(`💥> CPS '${error?.message}'`)
+        setShowRecoveryModal(false)
+        handleErrorMessage(error)
+      } finally {
+        setIsRecovAuthenticating(false)
+      }
+    },
+    [handleErrorMessage, recovReset],
   )
 
   return (
@@ -166,6 +224,7 @@ export default function LoginSignup() {
           setIsAuthenticating={setIsAuthenticating}
           handleErrorMessage={handleErrorMessage}
           performLogin={performLogin}
+          openChangePasswdModal={openChangePasswdModal}
         />
 
         <SignupScreen
@@ -221,6 +280,75 @@ export default function LoginSignup() {
           </Text>
         </View>
       </MainModal>
+
+      <MainModal
+        title='Cambiar Contraseña'
+        visible={showRecoveryModal}
+        onPressClose={() => {
+          setShowRecoveryModal(false)
+          recovReset()
+        }}
+      >
+        {recovSentMode ? (
+          <View style={styles.modalRecovContainer}>
+            <MaterialCommunityIcons
+              name='email-check'
+              size={96}
+              color={modalIconColor}
+            />
+            <Text style={[styles.modalRecovTitle, { color: modalTitleColor }]}>
+              {`Revisa Tu Email`}
+            </Text>
+            <Text style={[styles.modalRecovMessage, { color: modalColor }]}>
+              {`Te enviamos un link a tu email para cambiar tu contraseña.`}
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.modalRecovContainer}>
+            <Text style={[styles.modalRecovMessage, { color: modalColor }]}>
+              {`Te enviaremos un link a tu email para que puedas cambiar tu contraseña.`}
+            </Text>
+
+            <Controller
+              control={control}
+              name='email'
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  style={[
+                    styles.recovInput,
+                    {
+                      backgroundColor: recovTextInputBgColor,
+                      color: recovColor,
+                    },
+                  ]}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  keyboardType='email-address'
+                  placeholder='* Email'
+                  placeholderTextColor={recovPlaceholderColor}
+                  editable={!isRecovAuthenticating}
+                  autoCapitalize='none'
+                />
+              )}
+            />
+            {errors.email && (
+              <Text style={[styles.recovError, { color: recovTitleColor }]}>
+                {errors.email.message}
+              </Text>
+            )}
+
+            <MainButton
+              onPress={handleSubmit(recovOnSubmit)}
+              disabled={isRecovAuthenticating}
+              loading={isRecovAuthenticating}
+              style={styles.recovSubmit}
+            >
+              {`Enviar link`}
+            </MainButton>
+          </View>
+        )}
+      </MainModal>
     </View>
   )
 }
@@ -260,5 +388,38 @@ const styles = StyleSheet.create({
     fontFamily: 'Ubuntu400',
     textAlign: 'center',
     marginBottom: 20,
+  },
+  modalRecovContainer: {
+    paddingVertical: 20,
+    paddingHorizontal: 40,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalRecovTitle: {
+    fontSize: 24,
+    fontFamily: 'Ubuntu600',
+    textAlign: 'center',
+    marginTop: 40,
+    marginBottom: 20,
+  },
+  modalRecovMessage: {
+    fontSize: 18,
+    fontFamily: 'Ubuntu400',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  recovError: { fontFamily: 'Ubuntu400', fontSize: 16, textAlign: 'center' },
+  recovInput: {
+    fontFamily: 'Ubuntu400',
+    fontSize: 18,
+    borderRadius: 50,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    width: '100%',
+  },
+  recovSubmit: {
+    width: '100%',
+    marginTop: 20,
   },
 })

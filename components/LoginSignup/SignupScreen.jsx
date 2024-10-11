@@ -154,7 +154,7 @@ export default function SignupScreen({
 
           {/* <View style={styles.pt1}>
           <SecondButton
-            disabled={true}
+            disabled={isAuthenticating}
             leftIcon={
               <Fontisto name='facebook' size={16} color={secondButtonColor} />
             }
@@ -261,6 +261,7 @@ export default function SignupScreen({
             <MainButton
               onPress={handleSubmit(onSubmit)}
               disabled={isAuthenticating}
+              loading={isAuthenticating}
             >
               {`Crear cuenta`}
             </MainButton>

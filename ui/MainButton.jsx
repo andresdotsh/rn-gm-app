@@ -1,10 +1,10 @@
 import { forwardRef } from 'react'
-import { Pressable, StyleSheet, Text } from 'react-native'
+import { Pressable, StyleSheet, Text, ActivityIndicator } from 'react-native'
 
 import useThemeColor from '@/hooks/useThemeColor'
 
 const MainButton = forwardRef(function MainPressableButton(
-  { children, onPress, disabled, style, leftIcon, rightIcon },
+  { children, onPress, disabled, loading, style, leftIcon, rightIcon },
   ref,
 ) {
   const backgroundColor = useThemeColor('btnBg')
@@ -28,6 +28,7 @@ const MainButton = forwardRef(function MainPressableButton(
       onPress={onPress}
       ref={ref}
     >
+      {Boolean(loading) && <ActivityIndicator size='small' color={btnColor} />}
       {Boolean(leftIcon) && leftIcon}
       <Text style={[{ color: btnColor }, styles.text]}>{children}</Text>
       {Boolean(rightIcon) && rightIcon}

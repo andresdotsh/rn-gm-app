@@ -52,6 +52,7 @@ export default function LoginScreen({
   setIsAuthenticating,
   handleErrorMessage,
   performLogin,
+  openChangePasswdModal,
 }) {
   const authRef = useRef(null)
 
@@ -140,7 +141,7 @@ export default function LoginScreen({
 
           {/* <View style={styles.pt1}>
           <SecondButton
-            disabled={true}
+            disabled={isAuthenticating}
             leftIcon={
               <Fontisto name='facebook' size={16} color={secondButtonColor} />
             }
@@ -224,6 +225,7 @@ export default function LoginScreen({
             <ThirdButton
               onPress={handleSubmit(onSubmit)}
               disabled={isAuthenticating}
+              loading={isAuthenticating}
             >
               {`Ingresar`}
             </ThirdButton>
@@ -236,6 +238,15 @@ export default function LoginScreen({
               }}
               disabled={isAuthenticating}
             >{`No tengo una cuenta`}</MainButton>
+          </View>
+
+          <View style={styles.pt1}>
+            <MainButton
+              onPress={() => {
+                openChangePasswdModal()
+              }}
+              disabled={isAuthenticating}
+            >{`Olvidé mi contraseña`}</MainButton>
           </View>
           <BlankSpaceView />
         </View>
