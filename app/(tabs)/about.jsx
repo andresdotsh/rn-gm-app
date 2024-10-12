@@ -19,7 +19,7 @@ export default function About() {
 
   const navigation = useNavigation()
 
-  const setUserIsLoggedIn = useCurrentUserStore((state) => state.setIsLoggedIn)
+  const actionLogOut = useCurrentUserStore((state) => state.actionLogOut)
 
   useEffect(() => {
     const app = getApp()
@@ -32,7 +32,7 @@ export default function About() {
       setDisabledLogOut(true)
       await signOut(authRef.current)
       setDisabledLogOut(false)
-      setUserIsLoggedIn(false)
+      actionLogOut()
 
       navigation.reset({
         index: 0,
@@ -42,7 +42,7 @@ export default function About() {
       console.error(error)
       setDisabledLogOut(false)
     }
-  }, [navigation, setUserIsLoggedIn])
+  }, [navigation, actionLogOut])
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: mainBgColor }]}>

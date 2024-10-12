@@ -13,8 +13,6 @@ import {
   increment,
 } from 'firebase/firestore'
 import {
-  GoogleAuthProvider,
-  FacebookAuthProvider,
   getAuth,
   sendEmailVerification,
   sendPasswordResetEmail,
@@ -40,6 +38,7 @@ import SignupScreen from '@/components/LoginSignup/SignupScreen'
 import useThemeColor from '@/hooks/useThemeColor'
 import { useCurrentUserStore } from '@/hooks/useStore'
 import generateUsername from '@/utils/generateUsername'
+import dispatchRefreshAvatarData from '@/events/dispatchRefreshAvatarData'
 
 const schema = yup
   .object({
@@ -57,8 +56,6 @@ export default function LoginSignup() {
   const swiperRef = useRef(null)
   const authRef = useRef(null)
   const dbRef = useRef(null)
-  const googleProviderRef = useRef(null)
-  const facebookProviderRef = useRef(null)
 
   const [isAuthenticating, setIsAuthenticating] = useState(false)
   const [showInfoModal, setShowInfoModal] = useState(false)
@@ -91,9 +88,6 @@ export default function LoginSignup() {
     authRef.current = getAuth(app)
     dbRef.current = getFirestore(app)
     authRef.current.useDeviceLanguage()
-
-    googleProviderRef.current = new GoogleAuthProvider()
-    facebookProviderRef.current = new FacebookAuthProvider()
   }, [])
 
   const scrollToIndex = useCallback((index) => {
@@ -188,6 +182,7 @@ export default function LoginSignup() {
       if (isFunction(resetFn)) {
         resetFn()
       }
+      dispatchRefreshAvatarData(uid)
       setIsAuthenticating(false)
       setUserIsLoggedIn(true)
     },
