@@ -8,17 +8,11 @@ import {
   ThemeProvider,
 } from '@react-navigation/native'
 import * as SplashScreen from 'expo-splash-screen'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { initializeApp } from 'firebase/app'
-import { getFirestore, doc, getDoc } from 'firebase/firestore'
-import {
-  initializeAuth,
-  getReactNativePersistence,
-  onAuthStateChanged,
-} from 'firebase/auth'
+import { doc, getDoc } from 'firebase/firestore'
+import { onAuthStateChanged } from 'firebase/auth'
 import { useNavigationState } from '@react-navigation/native'
 
-import firebaseConfig from '@/constants/firebaseConfig'
+import { auth, db } from '@/data/firebase'
 import colors from '@/constants/colors'
 import { EVENT_REFRESH_USER_DATA } from '@/constants/constants'
 import eventEmitter from '@/events/eventEmitter'
@@ -29,8 +23,6 @@ import formatUserData from '@/utils/formatUserData'
 SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
-  const authRef = useRef(null)
-  const dbRef = useRef(null)
   const userEmailVerifiedRef = useRef(false)
 
   const [appIsReady, setAppIsReady] = useState(false)
@@ -63,14 +55,7 @@ export default function RootLayout() {
   })
 
   useEffect(() => {
-    const app = initializeApp(firebaseConfig)
-    authRef.current = initializeAuth(app, {
-      persistence: getReactNativePersistence(AsyncStorage),
-    })
-    dbRef.current = getFirestore(app)
-    authRef.current.useDeviceLanguage()
-
-    const unsubscribe = onAuthStateChanged(authRef.current, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUserStatusChanged(true)
 
       if (user) {
@@ -94,7 +79,7 @@ export default function RootLayout() {
       if (uidParam) {
         console.info(`🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋`)
         setUserUid(uidParam)
-        const userDocRef = doc(dbRef.current, 'users', uidParam)
+        const userDocRef = doc(db, 'users', uidParam)
         getDoc(userDocRef)
           .then((userDocSnap) => {
             const userData = userDocSnap.data()

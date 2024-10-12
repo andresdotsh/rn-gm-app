@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef, useEffect } from 'react'
+import { useCallback, useState } from 'react'
 import {
   View,
   Text,
@@ -14,9 +14,9 @@ import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { getApp } from 'firebase/app'
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
 
+import { auth } from '@/data/firebase'
 import useThemeColor from '@/hooks/useThemeColor'
 import BlankSpaceView from '@/ui/BlankSpaceView'
 import MainButton from '@/ui/MainButton'
@@ -67,8 +67,6 @@ export default function SignupScreen({
   handleErrorMessage,
   performLogin,
 }) {
-  const authRef = useRef(null)
-
   const bgColor = useThemeColor('btnBg5')
   const titleColor = useThemeColor('color4')
   const color = useThemeColor('color')
@@ -87,12 +85,6 @@ export default function SignupScreen({
     reset,
   } = useForm({ resolver: yupResolver(schema) })
 
-  useEffect(() => {
-    const app = getApp()
-    authRef.current = getAuth(app)
-    authRef.current.useDeviceLanguage()
-  }, [])
-
   const onSubmit = useCallback(
     async (formData) => {
       try {
@@ -100,7 +92,7 @@ export default function SignupScreen({
 
         const cleanedDisplayName = normalizeSpaces(formData.name)
         const result = await createUserWithEmailAndPassword(
-          authRef.current,
+          auth,
           formData.email,
           formData.password,
         )

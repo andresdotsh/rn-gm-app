@@ -1,10 +1,10 @@
-import { useEffect, useRef, useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
-import { getAuth, signOut } from 'firebase/auth'
+import { signOut } from 'firebase/auth'
 import { useNavigation } from '@react-navigation/native'
-import { getApp } from 'firebase/app'
 
+import { auth } from '@/data/firebase'
 import { useCurrentUserStore } from '@/hooks/useStore'
 import useThemeColor from '@/hooks/useThemeColor'
 import MainButton from '@/ui/MainButton'
@@ -12,8 +12,6 @@ import ThirdButton from '@/ui/ThirdButton'
 import MainModal from '@/ui/MainModal'
 
 export default function Settings() {
-  const authRef = useRef(null)
-
   const [logoutModal, setLogoutModal] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
 
@@ -27,16 +25,10 @@ export default function Settings() {
 
   const actionLogOut = useCurrentUserStore((state) => state.actionLogOut)
 
-  useEffect(() => {
-    const app = getApp()
-    authRef.current = getAuth(app)
-    authRef.current.useDeviceLanguage()
-  }, [])
-
   const logOut = useCallback(async () => {
     try {
       setLoggingOut(true)
-      await signOut(authRef.current)
+      await signOut(auth)
       setLogoutModal(false)
       setLoggingOut(false)
       actionLogOut()

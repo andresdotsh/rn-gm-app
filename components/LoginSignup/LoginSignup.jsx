@@ -1,27 +1,22 @@
-import { useRef, useCallback, useState, useEffect } from 'react'
+import { useRef, useCallback, useState } from 'react'
 import { View, StyleSheet, Text, TextInput } from 'react-native'
 import { SwiperFlatList } from 'react-native-swiper-flatlist'
 import { pick } from 'ramda'
 import { isNonEmptyString, isFunction } from 'ramda-adjunct'
-import { getApp } from 'firebase/app'
 import {
-  getFirestore,
   doc,
   getDoc,
   setDoc,
   serverTimestamp,
   increment,
 } from 'firebase/firestore'
-import {
-  getAuth,
-  sendEmailVerification,
-  sendPasswordResetEmail,
-} from 'firebase/auth'
+import { sendEmailVerification, sendPasswordResetEmail } from 'firebase/auth'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 
+import { auth, db } from '@/data/firebase'
 import {
   ERROR_CODE_ACCOUNT_EXISTS,
   ERROR_CODE_EMAIL_ALREADY_IN_USE,
@@ -54,8 +49,6 @@ const schema = yup
 
 export default function LoginSignup() {
   const swiperRef = useRef(null)
-  const authRef = useRef(null)
-  const dbRef = useRef(null)
 
   const [isAuthenticating, setIsAuthenticating] = useState(false)
   const [showInfoModal, setShowInfoModal] = useState(false)
@@ -82,13 +75,6 @@ export default function LoginSignup() {
     formState: { errors },
     reset: recovReset,
   } = useForm({ resolver: yupResolver(schema) })
-
-  useEffect(() => {
-    const app = getApp()
-    authRef.current = getAuth(app)
-    dbRef.current = getFirestore(app)
-    authRef.current.useDeviceLanguage()
-  }, [])
 
   const scrollToIndex = useCallback((index) => {
     swiperRef.current.scrollToIndex({ animated: true, index })
@@ -150,7 +136,7 @@ export default function LoginSignup() {
         loginCount: increment(1),
       }
 
-      const userDocRef = doc(dbRef.current, 'users', uid)
+      const userDocRef = doc(db, 'users', uid)
       const userDocSnap = await getDoc(userDocRef)
       const userExists = userDocSnap.exists()
 
@@ -194,7 +180,7 @@ export default function LoginSignup() {
       try {
         setIsRecovAuthenticating(true)
 
-        await sendPasswordResetEmail(authRef.current, formData.email)
+        await sendPasswordResetEmail(auth, formData.email)
 
         recovReset()
         setRecovSentMode(true)
