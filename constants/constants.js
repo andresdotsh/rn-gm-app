@@ -28,4 +28,4 @@ export const ERROR_CODE_POPUP_CLOSED = 'auth/popup-closed-by-user'
 export const ERROR_CODE_TOO_MANY_REQUESTS = 'auth/too-many-requests'
 
 // custom events
-export const EVENT_REFRESH_AVATAR_DATA = 'GM_CE_ID_REFRESH_AVATAR_DATA'
+export const EVENT_REFRESH_USER_DATA = 'GM_CE_ID_REFRESH_USER_DATA'

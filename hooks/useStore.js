@@ -5,7 +5,7 @@ import { create } from 'zustand'
 export const useCurrentUserStore = create((set) => ({
   isLoggedIn: false,
   uid: null,
-  avatarData: null,
+  data: null,
   setIsLoggedIn: (value) => {
     set({ isLoggedIn: Boolean(value) })
   },
@@ -14,12 +14,12 @@ export const useCurrentUserStore = create((set) => ({
       set({ uid: value })
     }
   },
-  setAvatarData: (value) => {
+  setData: (value) => {
     if (type(value) === 'Object' || value === null) {
-      set({ avatarData: value })
+      set({ data: value })
     }
   },
   actionLogOut: () => {
-    set({ isLoggedIn: false, uid: null, avatarData: null })
+    set({ isLoggedIn: false, uid: null, data: null })
   },
 }))

@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native'
 
 import useThemeColor from '@/hooks/useThemeColor'
 
-export default function App() {
+export default function Index() {
   const mainBgColor = useThemeColor('mainBackgroundColor')
   const textColor = useThemeColor('color')
 

@@ -24,6 +24,8 @@ export default function NotFoundScreen() {
   )
 }
 
+// TODO: -> verify if href='/' goes to index
+
 const styles = StyleSheet.create({
   container: {
     padding: 20,

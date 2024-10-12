@@ -1,5 +1,7 @@
 import { Tabs } from 'expo-router'
 import FontAwesome from '@expo/vector-icons/FontAwesome'
+import EvilIcons from '@expo/vector-icons/EvilIcons'
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 
 import LoginSignup from '@/components/LoginSignup/LoginSignup'
 import useThemeColor from '@/hooks/useThemeColor'
@@ -32,11 +34,11 @@ export default function TabsLayout() {
       <Tabs.Screen
         name='index'
         options={{
-          tabBarIcon: ({ size, focused }) => {
+          tabBarIcon: ({ focused }) => {
             return (
-              <FontAwesome
-                name='home'
-                size={size}
+              <MaterialCommunityIcons
+                name='approximately-equal'
+                size={28}
                 color={focused ? activeTabIconColor : tabIconColor}
               />
             )
@@ -47,11 +49,26 @@ export default function TabsLayout() {
       <Tabs.Screen
         name='about'
         options={{
-          tabBarIcon: ({ size, focused }) => {
+          tabBarIcon: ({ focused }) => {
             return (
               <FontAwesome
                 name='info'
-                size={size}
+                size={28}
+                color={focused ? activeTabIconColor : tabIconColor}
+              />
+            )
+          },
+        }}
+      />
+
+      <Tabs.Screen
+        name='settings'
+        options={{
+          tabBarIcon: ({ focused }) => {
+            return (
+              <EvilIcons
+                name='gear'
+                size={28}
                 color={focused ? activeTabIconColor : tabIconColor}
               />
             )

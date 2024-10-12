@@ -38,7 +38,7 @@ import SignupScreen from '@/components/LoginSignup/SignupScreen'
 import useThemeColor from '@/hooks/useThemeColor'
 import { useCurrentUserStore } from '@/hooks/useStore'
 import generateUsername from '@/utils/generateUsername'
-import dispatchRefreshAvatarData from '@/events/dispatchRefreshAvatarData'
+import dispatchRefreshUserData from '@/events/dispatchRefreshUserData'
 
 const schema = yup
   .object({
@@ -182,7 +182,7 @@ export default function LoginSignup() {
       if (isFunction(resetFn)) {
         resetFn()
       }
-      dispatchRefreshAvatarData(uid)
+      dispatchRefreshUserData(uid)
       setIsAuthenticating(false)
       setUserIsLoggedIn(true)
     },

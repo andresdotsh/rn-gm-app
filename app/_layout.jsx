@@ -1,7 +1,6 @@
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect, useState, useRef } from 'react'
-import { pick } from 'ramda'
 import { useFonts } from 'expo-font'
 import {
   DarkTheme,
@@ -21,10 +20,11 @@ import { useNavigationState } from '@react-navigation/native'
 
 import firebaseConfig from '@/constants/firebaseConfig'
 import colors from '@/constants/colors'
-import { EVENT_REFRESH_AVATAR_DATA } from '@/constants/constants'
+import { EVENT_REFRESH_USER_DATA } from '@/constants/constants'
 import eventEmitter from '@/events/eventEmitter'
 import useTheme from '@/hooks/useTheme'
 import { useCurrentUserStore } from '@/hooks/useStore'
+import formatUserData from '@/utils/formatUserData'
 
 SplashScreen.preventAutoHideAsync()
 
@@ -43,8 +43,11 @@ export default function RootLayout() {
   const userIsLoggedIn = useCurrentUserStore((state) => state.isLoggedIn)
   const setUserIsLoggedIn = useCurrentUserStore((state) => state.setIsLoggedIn)
   const setUserUid = useCurrentUserStore((state) => state.setUid)
-  const setUserAvatarData = useCurrentUserStore((state) => state.setAvatarData)
+  const setUserData = useCurrentUserStore((state) => state.setData)
   const actionLogOut = useCurrentUserStore((state) => state.actionLogOut)
+
+  const usrData = useCurrentUserStore((state) => state.data)
+  console.log(`🚀🚀🚀 ->`, usrData)
 
   const navState = useNavigationState((state) => state)
 
@@ -87,8 +90,9 @@ export default function RootLayout() {
   }, [actionLogOut])
 
   useEffect(() => {
-    function refreshAvatarData(uidParam) {
+    function refreshUserData(uidParam) {
       if (uidParam) {
+        console.log(`🟠🟠🟠🟠🟠🟠 refreshUserData`)
         setUserUid(uidParam)
         const userDocRef = doc(dbRef.current, 'users', uidParam)
         getDoc(userDocRef)
@@ -96,12 +100,8 @@ export default function RootLayout() {
             const userData = userDocSnap.data()
 
             if (userData) {
-              const newAvatarData = pick(
-                ['displayName', 'email', 'phoneNumber', 'photoURL', 'username'],
-                userData,
-              )
-              newAvatarData.uid = uidParam
-              setUserAvatarData(newAvatarData)
+              const newData = formatUserData(uidParam, userData)
+              setUserData(newData)
             }
           })
           .catch((error) => {
@@ -110,16 +110,16 @@ export default function RootLayout() {
       }
     }
 
-    eventEmitter.on(EVENT_REFRESH_AVATAR_DATA, refreshAvatarData)
+    eventEmitter.on(EVENT_REFRESH_USER_DATA, refreshUserData)
 
     if (authUid) {
-      refreshAvatarData(authUid)
+      refreshUserData(authUid)
     }
 
     return () => {
-      eventEmitter.off(EVENT_REFRESH_AVATAR_DATA, refreshAvatarData)
+      eventEmitter.off(EVENT_REFRESH_USER_DATA, refreshUserData)
     }
-  }, [authUid, setUserAvatarData, setUserUid])
+  }, [authUid, setUserData, setUserUid])
 
   useEffect(() => {
     // this only must run once at the beginning
@@ -182,6 +182,9 @@ export default function RootLayout() {
             }
             if (activeTabName === 'about') {
               options.headerTitle = 'About'
+            }
+            if (activeTabName === 'settings') {
+              options.headerTitle = 'Ajustes'
             }
           }
 
