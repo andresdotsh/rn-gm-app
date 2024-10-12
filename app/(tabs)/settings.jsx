@@ -57,7 +57,9 @@ export default function Settings() {
         <Text style={[styles.text, { color: textColor }]}>{`Hello`}</Text>
       </View>
 
-      <View style={[styles.logoutCard, { backgroundColor: cardBg1 }]}>
+      <View
+        style={[styles.card, styles.logoutCard, { backgroundColor: cardBg1 }]}
+      >
         <MainButton
           leftIcon={
             <FontAwesome6 name='power-off' size={18} color={btnColor} />
@@ -119,11 +121,10 @@ const styles = StyleSheet.create({
   card: {
     padding: 20,
     borderRadius: 10,
+    marginBottom: 20,
   },
   logoutCard: {
-    padding: 20,
-    borderRadius: 10,
-    marginTop: 40,
+    marginTop: 20,
   },
   logoutModalContainer: {
     flex: 1,

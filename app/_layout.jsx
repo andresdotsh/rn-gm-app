@@ -47,7 +47,7 @@ export default function RootLayout() {
   const actionLogOut = useCurrentUserStore((state) => state.actionLogOut)
 
   const usrData = useCurrentUserStore((state) => state.data)
-  console.log(`🚀🚀🚀 ->`, usrData)
+  console.log(`🚀🚀🚀 ->`, usrData) // TODO: -> ltd
 
   const navState = useNavigationState((state) => state)
 
@@ -92,7 +92,7 @@ export default function RootLayout() {
   useEffect(() => {
     function refreshUserData(uidParam) {
       if (uidParam) {
-        console.log(`🟠🟠🟠🟠🟠🟠 refreshUserData`)
+        console.info(`🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋`)
         setUserUid(uidParam)
         const userDocRef = doc(dbRef.current, 'users', uidParam)
         getDoc(userDocRef)
