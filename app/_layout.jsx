@@ -8,18 +8,17 @@ import {
   ThemeProvider,
 } from '@react-navigation/native'
 import * as SplashScreen from 'expo-splash-screen'
-import { doc, getDoc } from 'firebase/firestore'
 import { onAuthStateChanged } from 'firebase/auth'
 import { useNavigationState } from '@react-navigation/native'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
-import { auth, db } from '@/data/firebase'
+import { auth } from '@/data/firebase'
 import colors from '@/constants/colors'
 import { EVENT_REFRESH_USER_DATA } from '@/constants/constants'
 import eventEmitter from '@/events/eventEmitter'
 import useTheme from '@/hooks/useTheme'
-import { useCurrentUserStore } from '@/hooks/useStore'
-import formatUserData from '@/utils/formatUserData'
+import { useLoggedUserStore } from '@/hooks/useStore'
+import getUserByUid from '@/data/getUserByUid'
 
 SplashScreen.preventAutoHideAsync()
 
@@ -35,11 +34,11 @@ export default function RootLayout() {
   const theme = useTheme()
   const isDark = theme === 'dark'
 
-  const userIsLoggedIn = useCurrentUserStore((state) => state.isLoggedIn)
-  const setUserIsLoggedIn = useCurrentUserStore((state) => state.setIsLoggedIn)
-  const setUserUid = useCurrentUserStore((state) => state.setUid)
-  const setUserData = useCurrentUserStore((state) => state.setData)
-  const actionLogOut = useCurrentUserStore((state) => state.actionLogOut)
+  const isUserLoggedIn = useLoggedUserStore((s) => s.isUserLoggedIn)
+  const setIsUserLoggedIn = useLoggedUserStore((s) => s.setIsUserLoggedIn)
+  const setLoggedUserUid = useLoggedUserStore((s) => s.setLoggedUserUid)
+  const setLoggedUserData = useLoggedUserStore((s) => s.setLoggedUserData)
+  const actionLogout = useLoggedUserStore((s) => s.actionLogout)
 
   const navState = useNavigationState((state) => state)
 
@@ -65,27 +64,27 @@ export default function RootLayout() {
           setAuthUid(user.uid)
         }
       } else {
-        actionLogOut()
+        actionLogout()
       }
     })
 
     return () => {
       unsubscribe()
     }
-  }, [actionLogOut])
+  }, [actionLogout])
 
   useEffect(() => {
     function refreshUserData(uidParam) {
       if (uidParam) {
         console.info(`🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋`)
-        setUserUid(uidParam)
 
-        getDoc(doc(db, 'users', uidParam))
-          .then((userDocSnap) => {
-            const userData = userDocSnap.data()
-            const newData = formatUserData(uidParam, userData)
+        setLoggedUserUid(uidParam)
 
-            setUserData(newData)
+        getUserByUid(uidParam)
+          .then((newData) => {
+            if (newData) {
+              setLoggedUserData(newData)
+            }
           })
           .catch((error) => {
             console.error(error)
@@ -102,13 +101,13 @@ export default function RootLayout() {
     return () => {
       eventEmitter.off(EVENT_REFRESH_USER_DATA, refreshUserData)
     }
-  }, [authUid, setUserData, setUserUid])
+  }, [authUid, setLoggedUserData, setLoggedUserUid])
 
   useEffect(() => {
     // this only must run once at the beginning
     if (!appIsReady && userStatusChanged && (fontsLoaded || fontsLoadError)) {
       if (userEmailVerifiedRef.current) {
-        setUserIsLoggedIn(true)
+        setIsUserLoggedIn(true)
       }
 
       setAppIsReady(true)
@@ -117,7 +116,7 @@ export default function RootLayout() {
     appIsReady,
     fontsLoadError,
     fontsLoaded,
-    setUserIsLoggedIn,
+    setIsUserLoggedIn,
     userStatusChanged,
   ])
 
@@ -156,7 +155,7 @@ export default function RootLayout() {
                 fontFamily: 'Ubuntu700',
               },
               headerTintColor: isDark ? colors.dark.color : colors.light.color,
-              headerShown: userIsLoggedIn,
+              headerShown: isUserLoggedIn,
               headerTitle: '',
             }
 

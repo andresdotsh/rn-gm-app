@@ -31,7 +31,7 @@ import colors from '@/constants/colors'
 import LoginScreen from '@/components/LoginSignup/LoginScreen'
 import SignupScreen from '@/components/LoginSignup/SignupScreen'
 import useThemeColor from '@/hooks/useThemeColor'
-import { useCurrentUserStore } from '@/hooks/useStore'
+import { useLoggedUserStore } from '@/hooks/useStore'
 import generateUsername from '@/utils/generateUsername'
 import dispatchRefreshUserData from '@/events/dispatchRefreshUserData'
 
@@ -67,7 +67,7 @@ export default function LoginSignup() {
   const recovPlaceholderColor = useThemeColor('color3')
   const recovTextInputBgColor = useThemeColor('backgroundColor')
 
-  const setUserIsLoggedIn = useCurrentUserStore((state) => state.setIsLoggedIn)
+  const setIsUserLoggedIn = useLoggedUserStore((s) => s.setIsUserLoggedIn)
 
   const {
     control,
@@ -170,9 +170,9 @@ export default function LoginSignup() {
       }
       dispatchRefreshUserData(uid)
       setIsAuthenticating(false)
-      setUserIsLoggedIn(true)
+      setIsUserLoggedIn(true)
     },
-    [setUserIsLoggedIn],
+    [setIsUserLoggedIn],
   )
 
   const recovOnSubmit = useCallback(

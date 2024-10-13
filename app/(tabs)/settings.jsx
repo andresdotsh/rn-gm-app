@@ -6,7 +6,7 @@ import { useNavigation } from '@react-navigation/native'
 import { Link } from 'expo-router'
 
 import { auth } from '@/data/firebase'
-import { useCurrentUserStore } from '@/hooks/useStore'
+import { useLoggedUserStore } from '@/hooks/useStore'
 import useThemeColor from '@/hooks/useThemeColor'
 import MainButton from '@/ui/MainButton'
 import ThirdButton from '@/ui/ThirdButton'
@@ -24,8 +24,10 @@ export default function Settings() {
 
   const navigation = useNavigation()
 
-  const actionLogOut = useCurrentUserStore((state) => state.actionLogOut)
-  const userUid = useCurrentUserStore((state) => state.uid)
+  const actionLogout = useLoggedUserStore((s) => s.actionLogout)
+  const loggedUserUid = useLoggedUserStore((s) => s.loggedUserUid)
+  const loggedUserData = useLoggedUserStore((s) => s.loggedUserData)
+  console.log(`🚀🚀🚀 -> loggedUserData:`, loggedUserData)
 
   const logOut = useCallback(async () => {
     try {
@@ -33,7 +35,7 @@ export default function Settings() {
       await signOut(auth)
       setLogoutModal(false)
       setLoggingOut(false)
-      actionLogOut()
+      actionLogout()
 
       navigation.reset({
         index: 0,
@@ -43,7 +45,7 @@ export default function Settings() {
       console.error(error)
       setLoggingOut(false)
     }
-  }, [navigation, actionLogOut])
+  }, [navigation, actionLogout])
 
   return (
     <View style={[styles.container, { backgroundColor: mainBgColor }]}>
@@ -54,7 +56,7 @@ export default function Settings() {
           asChild
           href={{
             pathname: '/user/[uid]',
-            params: { uid: userUid },
+            params: { uid: loggedUserUid },
           }}
         >
           <MainButton>{`User profile`}</MainButton>

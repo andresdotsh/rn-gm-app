@@ -3,7 +3,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome'
 
 import LoginSignup from '@/components/LoginSignup/LoginSignup'
 import useThemeColor from '@/hooks/useThemeColor'
-import { useCurrentUserStore } from '@/hooks/useStore'
+import { useLoggedUserStore } from '@/hooks/useStore'
 
 export default function TabsLayout() {
   const tabsBg = useThemeColor('cardBg2')
@@ -11,9 +11,9 @@ export default function TabsLayout() {
   const tabIconColor = useThemeColor('color3')
   const activeTabIconColor = useThemeColor('color4')
 
-  const userIsLoggedIn = useCurrentUserStore((state) => state.isLoggedIn)
+  const isUserLoggedIn = useLoggedUserStore((s) => s.isUserLoggedIn)
 
-  if (!userIsLoggedIn) {
+  if (!isUserLoggedIn) {
     return <LoginSignup />
   }
 

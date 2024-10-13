@@ -2,24 +2,24 @@ import { type } from 'ramda'
 import { isString } from 'ramda-adjunct'
 import { create } from 'zustand'
 
-export const useCurrentUserStore = create((set) => ({
-  isLoggedIn: false,
-  uid: null,
-  data: null,
-  setIsLoggedIn: (value) => {
-    set({ isLoggedIn: Boolean(value) })
+export const useLoggedUserStore = create((set) => ({
+  isUserLoggedIn: false,
+  loggedUserUid: null,
+  loggedUserData: null,
+  setIsUserLoggedIn: (value) => {
+    set({ isUserLoggedIn: Boolean(value) })
   },
-  setUid: (value) => {
+  setLoggedUserUid: (value) => {
     if (isString(value) || value === null) {
-      set({ uid: value })
+      set({ loggedUserUid: value })
     }
   },
-  setData: (value) => {
+  setLoggedUserData: (value) => {
     if (type(value) === 'Object' || value === null) {
-      set({ data: value })
+      set({ loggedUserData: value })
     }
   },
-  actionLogOut: () => {
-    set({ isLoggedIn: false, uid: null, data: null })
+  actionLogout: () => {
+    set({ isUserLoggedIn: false, loggedUserUid: null, loggedUserData: null })
   },
 }))
