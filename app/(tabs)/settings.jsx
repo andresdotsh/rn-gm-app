@@ -1,9 +1,11 @@
 import { useCallback, useState } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View, Image, Pressable } from 'react-native'
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
+import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import { signOut } from 'firebase/auth'
 import { useNavigation } from '@react-navigation/native'
-import { Link } from 'expo-router'
+import { useRouter } from 'expo-router'
+import { isNonEmptyString } from 'ramda-adjunct'
 
 import { auth } from '@/data/firebase'
 import { useLoggedUserStore } from '@/hooks/useStore'
@@ -18,16 +20,18 @@ export default function Settings() {
 
   const mainBgColor = useThemeColor('mainBackgroundColor')
   const textColor = useThemeColor('color')
+  const textColor2 = useThemeColor('color2')
+  const textColor4 = useThemeColor('color4')
   const cardBg1 = useThemeColor('cardBg')
   const btnColor = useThemeColor('btnColor')
   const modalColor = useThemeColor('color2')
 
+  const router = useRouter()
   const navigation = useNavigation()
 
   const actionLogout = useLoggedUserStore((s) => s.actionLogout)
   const loggedUserUid = useLoggedUserStore((s) => s.loggedUserUid)
   const loggedUserData = useLoggedUserStore((s) => s.loggedUserData)
-  console.log(`🚀🚀🚀 -> loggedUserData:`, loggedUserData)
 
   const logOut = useCallback(async () => {
     try {
@@ -50,17 +54,54 @@ export default function Settings() {
   return (
     <View style={[styles.container, { backgroundColor: mainBgColor }]}>
       <View style={[styles.card, { backgroundColor: cardBg1 }]}>
-        <Text style={[styles.text, { color: textColor }]}>{`Hello`}</Text>
-
-        <Link
-          asChild
-          href={{
-            pathname: '/user/[uid]',
-            params: { uid: loggedUserUid },
+        <Pressable
+          style={({ pressed }) => {
+            return { opacity: pressed ? 0.8 : 1 }
+          }}
+          onPress={() => {
+            router.push({
+              pathname: '/user/[uid]',
+              params: { uid: loggedUserUid },
+            })
           }}
         >
-          <MainButton>{`User profile`}</MainButton>
-        </Link>
+          <View style={styles.profileLink}>
+            <View>
+              {isNonEmptyString(loggedUserData?.photoURL) ? (
+                <Image
+                  source={{ uri: loggedUserData?.photoURL }}
+                  style={styles.profileImage}
+                />
+              ) : (
+                <MaterialIcons
+                  name='add-a-photo'
+                  size={40}
+                  color={textColor2}
+                />
+              )}
+            </View>
+
+            <View style={styles.profileTextContainer}>
+              <Text style={[styles.profileLinkTitle, { color: textColor }]}>
+                {`Ver mi perfil`}
+              </Text>
+
+              {isNonEmptyString(loggedUserData?.username) && (
+                <Text
+                  style={[styles.profileLinkUsername, { color: textColor4 }]}
+                >
+                  {'@' + loggedUserData?.username}
+                </Text>
+              )}
+
+              {isNonEmptyString(loggedUserData?.displayName) && (
+                <Text style={[styles.profileLinkName, { color: textColor }]}>
+                  {loggedUserData?.displayName}
+                </Text>
+              )}
+            </View>
+          </View>
+        </Pressable>
       </View>
 
       <View
@@ -120,9 +161,30 @@ const styles = StyleSheet.create({
     padding: 20,
     flex: 1,
   },
-  text: {
-    fontSize: 20,
+  profileLink: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  profileImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+  },
+  profileTextContainer: { flexShrink: 1 },
+  profileLinkTitle: {
+    fontSize: 16,
+    fontFamily: 'Ubuntu600',
+  },
+  profileLinkName: {
+    fontSize: 18,
     fontFamily: 'Ubuntu400',
+  },
+  profileLinkUsername: {
+    fontSize: 16,
+    fontFamily: 'Ubuntu400',
+    marginTop: 5,
   },
   card: {
     padding: 20,

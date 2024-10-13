@@ -50,12 +50,7 @@ export default function UserDetail() {
   }, [data, loggedUserUid, setLoggedUserData, uid])
 
   console.log(`-----------------------------------------`)
-  console.log(`🚀🚀🚀 >>>`, {
-    isLoading,
-    isFetching,
-    error,
-    data: Boolean(data),
-  })
+  console.log(`🚀🚀🚀 >>>`, data)
 
   return (
     <ScrollView

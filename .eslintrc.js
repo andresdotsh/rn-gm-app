@@ -5,8 +5,8 @@ module.exports = {
       'babel-module': {},
     },
   },
-  extends: ['expo', 'prettier'],
-  plugins: ['prettier'],
+  extends: ['expo', 'prettier', 'plugin:react-native/all'],
+  plugins: ['prettier', 'react', 'react-native'],
   env: { node: true },
   rules: {
     'prettier/prettier': [
@@ -17,5 +17,7 @@ module.exports = {
         jsxSingleQuote: true,
       },
     ],
+    'react-native/no-raw-text': 'off',
+    'react-native/sort-styles': 'off',
   },
 }

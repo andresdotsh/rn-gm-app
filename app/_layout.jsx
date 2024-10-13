@@ -122,9 +122,11 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (appIsReady) {
+      const splashTime = __DEV__ ? 0 : 1000
+
       setTimeout(() => {
         SplashScreen.hideAsync()
-      }, 1000)
+      }, splashTime)
     }
   }, [appIsReady])
 
