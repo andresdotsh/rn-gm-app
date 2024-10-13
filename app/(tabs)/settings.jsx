@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native'
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 import { signOut } from 'firebase/auth'
 import { useNavigation } from '@react-navigation/native'
+import { Link } from 'expo-router'
 
 import { auth } from '@/data/firebase'
 import { useCurrentUserStore } from '@/hooks/useStore'
@@ -24,6 +25,7 @@ export default function Settings() {
   const navigation = useNavigation()
 
   const actionLogOut = useCurrentUserStore((state) => state.actionLogOut)
+  const userUid = useCurrentUserStore((state) => state.uid)
 
   const logOut = useCallback(async () => {
     try {
@@ -47,6 +49,16 @@ export default function Settings() {
     <View style={[styles.container, { backgroundColor: mainBgColor }]}>
       <View style={[styles.card, { backgroundColor: cardBg1 }]}>
         <Text style={[styles.text, { color: textColor }]}>{`Hello`}</Text>
+
+        <Link
+          asChild
+          href={{
+            pathname: '/user/[uid]',
+            params: { uid: userUid },
+          }}
+        >
+          <MainButton>{`User profile`}</MainButton>
+        </Link>
       </View>
 
       <View

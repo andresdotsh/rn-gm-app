@@ -11,6 +11,7 @@ import * as SplashScreen from 'expo-splash-screen'
 import { doc, getDoc } from 'firebase/firestore'
 import { onAuthStateChanged } from 'firebase/auth'
 import { useNavigationState } from '@react-navigation/native'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import { auth, db } from '@/data/firebase'
 import colors from '@/constants/colors'
@@ -21,6 +22,8 @@ import { useCurrentUserStore } from '@/hooks/useStore'
 import formatUserData from '@/utils/formatUserData'
 
 SplashScreen.preventAutoHideAsync()
+
+const queryClient = new QueryClient()
 
 export default function RootLayout() {
   const userEmailVerifiedRef = useRef(false)
@@ -37,9 +40,6 @@ export default function RootLayout() {
   const setUserUid = useCurrentUserStore((state) => state.setUid)
   const setUserData = useCurrentUserStore((state) => state.setData)
   const actionLogOut = useCurrentUserStore((state) => state.actionLogOut)
-
-  const usrData = useCurrentUserStore((state) => state.data)
-  console.log(`🚀🚀🚀 ->`, usrData) // TODO: -> ltd
 
   const navState = useNavigationState((state) => state)
 
@@ -79,15 +79,13 @@ export default function RootLayout() {
       if (uidParam) {
         console.info(`🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋`)
         setUserUid(uidParam)
-        const userDocRef = doc(db, 'users', uidParam)
-        getDoc(userDocRef)
+
+        getDoc(doc(db, 'users', uidParam))
           .then((userDocSnap) => {
             const userData = userDocSnap.data()
+            const newData = formatUserData(uidParam, userData)
 
-            if (userData) {
-              const newData = formatUserData(uidParam, userData)
-              setUserData(newData)
-            }
+            setUserData(newData)
           })
           .catch((error) => {
             console.error(error)
@@ -141,41 +139,43 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
-      <StatusBar style='light' />
-      <Stack
-        screenOptions={({ route }) => {
-          const options = {
-            headerShadowVisible: false,
-            headerTransparent: false,
-            headerStyle: {
-              backgroundColor: isDark
-                ? colors.dark.mainBackgroundColor
-                : colors.light.mainBackgroundColor,
-            },
-            headerTitleStyle: {
-              color: isDark ? colors.dark.color : colors.light.color,
-              fontFamily: 'Ubuntu700',
-            },
-            headerTintColor: isDark ? colors.dark.color : colors.light.color,
-            headerShown: userIsLoggedIn,
-            headerTitle: '',
-          }
+      <QueryClientProvider client={queryClient}>
+        <StatusBar style='light' />
+        <Stack
+          screenOptions={({ route }) => {
+            const options = {
+              headerShadowVisible: false,
+              headerTransparent: false,
+              headerStyle: {
+                backgroundColor: isDark
+                  ? colors.dark.mainBackgroundColor
+                  : colors.light.mainBackgroundColor,
+              },
+              headerTitleStyle: {
+                color: isDark ? colors.dark.color : colors.light.color,
+                fontFamily: 'Ubuntu700',
+              },
+              headerTintColor: isDark ? colors.dark.color : colors.light.color,
+              headerShown: userIsLoggedIn,
+              headerTitle: '',
+            }
 
-          if (route.name === '(tabs)') {
-            if (activeTabName === 'index') {
-              options.headerTitle = ''
+            if (route.name === '(tabs)') {
+              if (activeTabName === 'index') {
+                options.headerTitle = ''
+              }
+              if (activeTabName === 'about') {
+                options.headerTitle = 'About'
+              }
+              if (activeTabName === 'settings') {
+                options.headerTitle = 'Ajustes'
+              }
             }
-            if (activeTabName === 'about') {
-              options.headerTitle = 'About'
-            }
-            if (activeTabName === 'settings') {
-              options.headerTitle = 'Ajustes'
-            }
-          }
 
-          return options
-        }}
-      />
+            return options
+          }}
+        />
+      </QueryClientProvider>
     </ThemeProvider>
   )
 }
