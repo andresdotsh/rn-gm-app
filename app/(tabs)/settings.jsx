@@ -18,7 +18,7 @@ export default function Settings() {
   const [logoutModal, setLogoutModal] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
 
-  const mainBg = useThemeColor('mainBg1')
+  const mainBg2 = useThemeColor('mainBg2')
   const textColor = useThemeColor('color1')
   const textColor2 = useThemeColor('color2')
   const settingsItemBorderColor = useThemeColor('btn5')
@@ -54,7 +54,7 @@ export default function Settings() {
   }, [navigation, actionLogout])
 
   return (
-    <View style={[styles.container, { backgroundColor: mainBg }]}>
+    <View style={[styles.container, { backgroundColor: mainBg2 }]}>
       <View style={styles.settingItemsContainer}>
         <Pressable
           style={({ pressed }) => {

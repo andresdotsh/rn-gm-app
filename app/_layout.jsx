@@ -172,6 +172,9 @@ export default function RootLayout() {
               }
               if (activeTabName === 'settings') {
                 options.headerTitle = 'Ajustes'
+                options.headerStyle.backgroundColor = isDark
+                  ? colors.dark.mainBg2
+                  : colors.light.mainBg2
               }
             }
 

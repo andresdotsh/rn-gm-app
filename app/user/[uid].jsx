@@ -18,8 +18,8 @@ import ThirdButton from '@/ui/ThirdButton'
 export default function UserDetail() {
   const [refreshing, setRefreshing] = useState(false)
 
-  const mainBg = useThemeColor('mainBg2')
-  const textColor = useThemeColor('color1')
+  const mainBg2 = useThemeColor('mainBg2')
+  const textColor1 = useThemeColor('color1')
 
   const { uid } = useLocalSearchParams()
 
@@ -54,15 +54,15 @@ export default function UserDetail() {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: mainBg }]}
+      style={[styles.container, { backgroundColor: mainBg2 }]}
       contentContainerStyle={styles.contentContainer}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          progressBackgroundColor={mainBg}
-          colors={[textColor]}
-          tintColor={textColor}
+          progressBackgroundColor={mainBg2}
+          colors={[textColor1]}
+          tintColor={textColor1}
         />
       }
     >
@@ -72,18 +72,18 @@ export default function UserDetail() {
           headerLeft: null,
           headerRight: null,
           headerStyle: {
-            backgroundColor: mainBg,
+            backgroundColor: mainBg2,
           },
         }}
       />
       {isLoading ? (
         <View style={styles.noContent}>
-          <ActivityIndicator size='large' color={textColor} />
+          <ActivityIndicator size='large' color={textColor1} />
         </View>
       ) : !data || error ? (
         <View style={styles.noContent}>
           <Text
-            style={[styles.errorText, { color: textColor }]}
+            style={[styles.errorText, { color: textColor1 }]}
           >{`Ha ocurrido un error al obtener los datos, o puede ser que no tengas conexión a internet.`}</Text>
           <ThirdButton
             loading={isFetching}
@@ -94,7 +94,7 @@ export default function UserDetail() {
       ) : (
         <View style={{}}>
           <Text
-            style={[styles.text, { color: textColor }]}
+            style={[styles.text, { color: textColor1 }]}
           >{`User detail: ${uid}`}</Text>
         </View>
       )}
