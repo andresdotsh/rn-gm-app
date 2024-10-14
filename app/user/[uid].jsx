@@ -11,7 +11,7 @@ import {
   Linking,
 } from 'react-native'
 import { useQuery } from '@tanstack/react-query'
-import { useLocalSearchParams, Stack } from 'expo-router'
+import { useLocalSearchParams, Stack, Link } from 'expo-router'
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons'
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 import { isNonEmptyString, isNonEmptyArray, isValidNumber } from 'ramda-adjunct'
@@ -28,6 +28,7 @@ import useThemeColor from '@/hooks/useThemeColor'
 import getUserByUid from '@/data/getUserByUid'
 import getAllSkills from '@/data/getAllSkills'
 import { useLoggedUserStore } from '@/hooks/useStore'
+import MainButton from '@/ui/MainButton'
 import ThirdButton from '@/ui/ThirdButton'
 import ProgressBar from 'react-native-progress/Bar'
 
@@ -47,6 +48,8 @@ export default function UserDetail() {
 
   const loggedUserUid = useLoggedUserStore((s) => s.loggedUserUid)
   const setLoggedUserData = useLoggedUserStore((s) => s.setLoggedUserData)
+
+  const isTheLoggedUserProfile = uid === loggedUserUid
 
   const {
     isFetching: userIsFetching,
@@ -81,10 +84,10 @@ export default function UserDetail() {
   }, [userIsFetching])
 
   useEffect(() => {
-    if (loggedUserUid && loggedUserUid === uid && userData) {
+    if (isTheLoggedUserProfile && userData) {
       setLoggedUserData(userData)
     }
-  }, [userData, loggedUserUid, setLoggedUserData, uid])
+  }, [isTheLoggedUserProfile, setLoggedUserData, userData])
 
   const isThereAnySnLink =
     isNonEmptyString(userData?.snUserTiktok) ||
@@ -151,7 +154,7 @@ export default function UserDetail() {
               )}
             </View>
 
-            <View style={styles.pt2}>
+            <View>
               <Text style={[styles.cardText2, { color: color4 }]}>
                 {'@' + userData?.username}
               </Text>
@@ -160,8 +163,16 @@ export default function UserDetail() {
               </Text>
             </View>
 
+            {isTheLoggedUserProfile && (
+              <Link asChild href={'/edit-profile'}>
+                <MainButton
+                  disabled={userIsFetching}
+                >{`Editar Perfil`}</MainButton>
+              </Link>
+            )}
+
             {isNonEmptyArray(skillsData) ? (
-              <View style={styles.pt2}>
+              <View>
                 {skillsData.map((skill) => {
                   const rawValue = userData?.[skill?.key]
                   const skillValue = isValidNumber(rawValue) ? rawValue : 0
@@ -354,6 +365,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     marginBottom: 20,
+    gap: 25,
   },
   mediaCard: {
     gap: 10,
@@ -362,7 +374,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Ubuntu500',
     textAlign: 'center',
-    marginVertical: 20,
   },
   cardText1: {
     fontSize: 20,
@@ -390,8 +401,5 @@ const styles = StyleSheet.create({
   skillValueText: {
     fontSize: 18,
     fontFamily: 'Ubuntu600',
-  },
-  pt2: {
-    paddingTop: 20,
   },
 })

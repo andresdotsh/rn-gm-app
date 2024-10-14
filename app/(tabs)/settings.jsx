@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
   profileLinkUsername: {
     fontSize: 16,
     fontFamily: 'Ubuntu400',
-    marginTop: 5,
+    marginVertical: 2,
   },
   settingItemsContainer: {
     marginBottom: 20,
