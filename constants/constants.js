@@ -29,3 +29,22 @@ export const ERROR_CODE_TOO_MANY_REQUESTS = 'auth/too-many-requests'
 
 // custom events
 export const EVENT_REFRESH_USER_DATA = 'GM_CE_ID_REFRESH_USER_DATA'
+
+// social networks
+export const SN_TIKTOK_USER_LINK = 'https://www.tiktok.com/@'
+export const SN_TIKTOK_USER_LABEL = 'tiktok.com/@'
+
+export const SN_INSTAGRAM_USER_LINK = 'https://www.instagram.com/'
+export const SN_INSTAGRAM_USER_LABEL = 'instagram.com/'
+
+export const SN_X_USER_LINK = 'https://x.com/'
+export const SN_X_USER_LABEL = 'x.com/'
+
+export const SN_SNAPCHAT_USER_LINK = 'https://www.snapchat.com/add/'
+export const SN_SNAPCHAT_USER_LABEL = 'snapchat.com/add/'
+
+export const SN_YOUTUBE_USER_LINK = 'https://www.youtube.com/@'
+export const SN_YOUTUBE_USER_LABEL = 'youtube.com/@'
+
+export const SN_FACEBOOK_USER_LINK = 'https://www.facebook.com/'
+export const SN_FACEBOOK_USER_LABEL = 'facebook.com/'

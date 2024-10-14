@@ -6,51 +6,93 @@ import {
   View,
   RefreshControl,
   ActivityIndicator,
+  Image,
+  Pressable,
+  Linking,
 } from 'react-native'
 import { useQuery } from '@tanstack/react-query'
 import { useLocalSearchParams, Stack } from 'expo-router'
+import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons'
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
+import { isNonEmptyString, isNonEmptyArray, isValidNumber } from 'ramda-adjunct'
 
+import {
+  SN_TIKTOK_USER_LINK,
+  SN_INSTAGRAM_USER_LINK,
+  SN_X_USER_LINK,
+  SN_SNAPCHAT_USER_LINK,
+  SN_YOUTUBE_USER_LINK,
+  SN_FACEBOOK_USER_LINK,
+} from '@/constants/constants'
 import useThemeColor from '@/hooks/useThemeColor'
 import getUserByUid from '@/data/getUserByUid'
+import getAllSkills from '@/data/getAllSkills'
 import { useLoggedUserStore } from '@/hooks/useStore'
 import ThirdButton from '@/ui/ThirdButton'
+import ProgressBar from 'react-native-progress/Bar'
 
 export default function UserDetail() {
   const [refreshing, setRefreshing] = useState(false)
 
   const mainBg2 = useThemeColor('mainBg2')
-  const textColor1 = useThemeColor('color1')
+  const color1 = useThemeColor('color1')
+  const color2 = useThemeColor('color2')
+  const color3 = useThemeColor('color3')
+  const color4 = useThemeColor('color4')
+  const cardBg1 = useThemeColor('cardBg1')
+  const pgColor = useThemeColor('btn1')
+  const pgBgColor = useThemeColor('cardBg2')
 
   const { uid } = useLocalSearchParams()
 
   const loggedUserUid = useLoggedUserStore((s) => s.loggedUserUid)
   const setLoggedUserData = useLoggedUserStore((s) => s.setLoggedUserData)
 
-  const { isFetching, isLoading, error, data, refetch } = useQuery({
+  const {
+    isFetching: userIsFetching,
+    isLoading: userIsLoading,
+    error: userError,
+    data: userData,
+    refetch: userRefetch,
+  } = useQuery({
     queryKey: ['users', uid],
     queryFn: () => getUserByUid(uid),
     enabled: Boolean(uid),
   })
+  const {
+    isLoading: skillsIsLoading,
+    data: skillsData,
+    refetch: skillsRefetch,
+  } = useQuery({
+    queryKey: ['skills'],
+    queryFn: () => getAllSkills(),
+  })
 
   const onRefresh = useCallback(() => {
     setRefreshing(true)
-    refetch()
-  }, [refetch])
+    userRefetch()
+    skillsRefetch()
+  }, [userRefetch, skillsRefetch])
 
   useEffect(() => {
-    if (!isFetching) {
+    if (!userIsFetching) {
       setRefreshing(false)
     }
-  }, [isFetching])
+  }, [userIsFetching])
 
   useEffect(() => {
-    if (loggedUserUid && loggedUserUid === uid && data) {
-      setLoggedUserData(data)
+    if (loggedUserUid && loggedUserUid === uid && userData) {
+      setLoggedUserData(userData)
     }
-  }, [data, loggedUserUid, setLoggedUserData, uid])
+  }, [userData, loggedUserUid, setLoggedUserData, uid])
 
-  console.log(`-----------------------------------------`)
-  console.log(`🚀🚀🚀 >>>`, data)
+  const isThereAnySnLink =
+    isNonEmptyString(userData?.snUserTiktok) ||
+    isNonEmptyString(userData?.snUserInstagram) ||
+    isNonEmptyString(userData?.snUserXcom) ||
+    isNonEmptyString(userData?.snUserSnapchat) ||
+    isNonEmptyString(userData?.snUserYoutube) ||
+    isNonEmptyString(userData?.snUserFacebook)
 
   return (
     <ScrollView
@@ -61,8 +103,8 @@ export default function UserDetail() {
           refreshing={refreshing}
           onRefresh={onRefresh}
           progressBackgroundColor={mainBg2}
-          colors={[textColor1]}
-          tintColor={textColor1}
+          colors={[color1]}
+          tintColor={color1}
         />
       }
     >
@@ -76,26 +118,197 @@ export default function UserDetail() {
           },
         }}
       />
-      {isLoading ? (
+
+      {userIsLoading || skillsIsLoading ? (
         <View style={styles.noContent}>
-          <ActivityIndicator size='large' color={textColor1} />
+          <ActivityIndicator size='large' color={color1} />
         </View>
-      ) : !data || error ? (
+      ) : !userData || userError ? (
         <View style={styles.noContent}>
           <Text
-            style={[styles.errorText, { color: textColor1 }]}
+            style={[styles.errorText, { color: color1 }]}
           >{`Ha ocurrido un error al obtener los datos, o puede ser que no tengas conexión a internet.`}</Text>
           <ThirdButton
-            loading={isFetching}
-            disabled={isFetching}
-            onPress={refetch}
+            loading={userIsFetching}
+            disabled={userIsFetching}
+            onPress={() => {
+              userRefetch()
+              skillsRefetch()
+            }}
           >{`Reintentar`}</ThirdButton>
         </View>
       ) : (
-        <View style={{}}>
-          <Text
-            style={[styles.text, { color: textColor1 }]}
-          >{`User detail: ${uid}`}</Text>
+        <View>
+          <View style={[styles.card, { backgroundColor: cardBg1 }]}>
+            <View style={styles.profilePhotoContainer}>
+              {isNonEmptyString(userData?.photoURL) ? (
+                <Image
+                  source={{ uri: userData?.photoURL }}
+                  style={styles.profilePhoto}
+                />
+              ) : (
+                <SimpleLineIcons name='user' size={96} color={color2} />
+              )}
+            </View>
+
+            <View style={styles.pt2}>
+              <Text style={[styles.cardText2, { color: color4 }]}>
+                {'@' + userData?.username}
+              </Text>
+              <Text style={[styles.cardText1, { color: color1 }]}>
+                {userData?.displayName}
+              </Text>
+            </View>
+
+            {isNonEmptyArray(skillsData) ? (
+              <View style={styles.pt2}>
+                {skillsData.map((skill) => {
+                  const rawValue = userData?.[skill?.key]
+                  const skillValue = isValidNumber(rawValue) ? rawValue : 0
+                  const progressValue = skillValue / 100
+
+                  return (
+                    <View key={skill?.uid} style={styles.skillItemContainer}>
+                      <Text style={[styles.skillLabelText, { color: color2 }]}>
+                        {skill?.name + ': '}
+                        <Text
+                          style={[styles.skillValueText, { color: color1 }]}
+                        >
+                          {skillValue}
+                        </Text>
+                      </Text>
+                      <ProgressBar
+                        width={null}
+                        borderWidth={0}
+                        unfilledColor={pgBgColor}
+                        color={pgColor}
+                        progress={progressValue}
+                      />
+                    </View>
+                  )
+                })}
+              </View>
+            ) : (
+              <Text style={[styles.cardErrorText, { color: color3 }]}>
+                {`No se cargaron las skills.`}
+              </Text>
+            )}
+          </View>
+
+          {isThereAnySnLink && (
+            <View
+              style={[
+                styles.card,
+                styles.mediaCard,
+                { backgroundColor: cardBg1 },
+              ]}
+            >
+              {isNonEmptyString(userData?.snUserTiktok) && (
+                <Pressable style={styles.mediaLinkPressable}>
+                  <View style={styles.mediaLinkIconContainer}>
+                    <FontAwesome6 name='tiktok' size={20} color={color4} />
+                  </View>
+                  <Text
+                    style={[styles.mediaLinkText, { color: color4 }]}
+                    onPress={() => {
+                      const url = SN_TIKTOK_USER_LINK + userData?.snUserTiktok
+                      Linking.openURL(url)
+                    }}
+                  >
+                    {'@' + userData?.snUserTiktok}
+                  </Text>
+                </Pressable>
+              )}
+
+              {isNonEmptyString(userData?.snUserInstagram) && (
+                <Pressable style={styles.mediaLinkPressable}>
+                  <View style={styles.mediaLinkIconContainer}>
+                    <FontAwesome6 name='instagram' size={20} color={color4} />
+                  </View>
+                  <Text
+                    style={[styles.mediaLinkText, { color: color4 }]}
+                    onPress={() => {
+                      const url =
+                        SN_INSTAGRAM_USER_LINK + userData?.snUserInstagram
+                      Linking.openURL(url)
+                    }}
+                  >
+                    {'@' + userData?.snUserInstagram}
+                  </Text>
+                </Pressable>
+              )}
+
+              {isNonEmptyString(userData?.snUserXcom) && (
+                <Pressable style={styles.mediaLinkPressable}>
+                  <View style={styles.mediaLinkIconContainer}>
+                    <FontAwesome6 name='x-twitter' size={20} color={color4} />
+                  </View>
+                  <Text
+                    style={[styles.mediaLinkText, { color: color4 }]}
+                    onPress={() => {
+                      const url = SN_X_USER_LINK + userData?.snUserXcom
+                      Linking.openURL(url)
+                    }}
+                  >
+                    {'@' + userData?.snUserXcom}
+                  </Text>
+                </Pressable>
+              )}
+
+              {isNonEmptyString(userData?.snUserSnapchat) && (
+                <Pressable style={styles.mediaLinkPressable}>
+                  <View style={styles.mediaLinkIconContainer}>
+                    <FontAwesome6 name='snapchat' size={20} color={color4} />
+                  </View>
+                  <Text
+                    style={[styles.mediaLinkText, { color: color4 }]}
+                    onPress={() => {
+                      const url =
+                        SN_SNAPCHAT_USER_LINK + userData?.snUserSnapchat
+                      Linking.openURL(url)
+                    }}
+                  >
+                    {'@' + userData?.snUserSnapchat}
+                  </Text>
+                </Pressable>
+              )}
+
+              {isNonEmptyString(userData?.snUserYoutube) && (
+                <Pressable style={styles.mediaLinkPressable}>
+                  <View style={styles.mediaLinkIconContainer}>
+                    <FontAwesome6 name='youtube' size={20} color={color4} />
+                  </View>
+                  <Text
+                    style={[styles.mediaLinkText, { color: color4 }]}
+                    onPress={() => {
+                      const url = SN_YOUTUBE_USER_LINK + userData?.snUserYoutube
+                      Linking.openURL(url)
+                    }}
+                  >
+                    {'@' + userData?.snUserYoutube}
+                  </Text>
+                </Pressable>
+              )}
+
+              {isNonEmptyString(userData?.snUserFacebook) && (
+                <Pressable style={styles.mediaLinkPressable}>
+                  <View style={styles.mediaLinkIconContainer}>
+                    <FontAwesome6 name='facebook-f' size={20} color={color4} />
+                  </View>
+                  <Text
+                    style={[styles.mediaLinkText, { color: color4 }]}
+                    onPress={() => {
+                      const url =
+                        SN_FACEBOOK_USER_LINK + userData?.snUserFacebook
+                      Linking.openURL(url)
+                    }}
+                  >
+                    {'@' + userData?.snUserFacebook}
+                  </Text>
+                </Pressable>
+              )}
+            </View>
+          )}
         </View>
       )}
     </ScrollView>
@@ -115,7 +328,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  text: {
+  mediaLinkPressable: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  mediaLinkIconContainer: {
+    flexBasis: 24,
+    flexGrow: 0,
+    flexShrink: 0,
+    alignItems: 'center',
+  },
+  mediaLinkText: {
     fontSize: 18,
     fontFamily: 'Ubuntu400',
   },
@@ -124,5 +349,49 @@ const styles = StyleSheet.create({
     fontFamily: 'Ubuntu400',
     textAlign: 'center',
     marginBottom: 20,
+  },
+  card: {
+    padding: 20,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  mediaCard: {
+    gap: 10,
+  },
+  cardErrorText: {
+    fontSize: 16,
+    fontFamily: 'Ubuntu500',
+    textAlign: 'center',
+    marginVertical: 20,
+  },
+  cardText1: {
+    fontSize: 20,
+    fontFamily: 'Ubuntu500',
+  },
+  cardText2: {
+    fontSize: 18,
+    fontFamily: 'Ubuntu400',
+  },
+  profilePhotoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  profilePhoto: {
+    borderRadius: 10,
+    aspectRatio: 1,
+    width: '100%',
+    maxWidth: 400,
+  },
+  skillItemContainer: { paddingVertical: 4 },
+  skillLabelText: {
+    fontSize: 18,
+    fontFamily: 'Ubuntu400',
+  },
+  skillValueText: {
+    fontSize: 18,
+    fontFamily: 'Ubuntu600',
+  },
+  pt2: {
+    paddingTop: 20,
   },
 })
