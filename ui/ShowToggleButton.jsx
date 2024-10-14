@@ -8,8 +8,8 @@ const ShowToggleButton = forwardRef(function ShowPressableButton(
   { disabled, onPress, value, style },
   ref,
 ) {
-  const bgColor = useThemeColor('backgroundColor')
-  const color = useThemeColor('color')
+  const bgColor = useThemeColor('mainBg2')
+  const color = useThemeColor('color1')
 
   return (
     <Pressable

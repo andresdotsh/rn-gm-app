@@ -7,9 +7,9 @@ const MainButton = forwardRef(function MainPressableButton(
   { children, onPress, disabled, loading, style, leftIcon, rightIcon },
   ref,
 ) {
-  const backgroundColor = useThemeColor('btnBg')
-  const btnColor = useThemeColor('btnColor')
-  const borderColor = useThemeColor('btnBg4')
+  const backgroundColor = useThemeColor('btn1')
+  const color1 = useThemeColor('color1')
+  const borderColor = useThemeColor('btn4')
 
   return (
     <Pressable
@@ -18,7 +18,7 @@ const MainButton = forwardRef(function MainPressableButton(
           {
             backgroundColor,
             borderColor: disabled ? backgroundColor : borderColor,
-            opacity: disabled ? 0.6 : pressed ? 0.8 : 1,
+            opacity: disabled || pressed ? 0.8 : 1,
           },
           styles.pressable,
           style,
@@ -28,9 +28,9 @@ const MainButton = forwardRef(function MainPressableButton(
       onPress={onPress}
       ref={ref}
     >
-      {Boolean(loading) && <ActivityIndicator size='small' color={btnColor} />}
+      {Boolean(loading) && <ActivityIndicator size='small' color={color1} />}
       {Boolean(leftIcon) && leftIcon}
-      <Text style={[{ color: btnColor }, styles.text]}>{children}</Text>
+      <Text style={[{ color: color1 }, styles.text]}>{children}</Text>
       {Boolean(rightIcon) && rightIcon}
     </Pressable>
   )

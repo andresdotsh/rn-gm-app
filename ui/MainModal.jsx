@@ -14,8 +14,8 @@ export default function MainModal({
   transparent = true,
   animationType = 'slide',
 }) {
-  const modalBg = useThemeColor('modalBg')
-  const modalTitleColor = useThemeColor('color')
+  const modalBg1 = useThemeColor('modalBg1')
+  const modalTitleColor = useThemeColor('color1')
 
   const insets = useSafeAreaInsets()
 
@@ -35,7 +35,7 @@ export default function MainModal({
           styles.container,
           {
             marginTop: insets.top,
-            backgroundColor: modalBg,
+            backgroundColor: modalBg1,
           },
         ]}
       >

@@ -67,12 +67,12 @@ export default function SignupScreen({
   handleErrorMessage,
   performLogin,
 }) {
-  const bgColor = useThemeColor('btnBg5')
+  const bgColor = useThemeColor('btn5')
   const titleColor = useThemeColor('color4')
-  const color = useThemeColor('color')
+  const color = useThemeColor('color1')
   const placeholderColor = useThemeColor('color3')
-  const textInputBgColor = useThemeColor('backgroundColor')
-  const secondButtonColor = useThemeColor('backgroundColor')
+  const textInputBgColor = useThemeColor('mainBg2')
+  const secondButtonColor = useThemeColor('mainBg2')
 
   const [showPassword, setShowPassword] = useState(true)
 

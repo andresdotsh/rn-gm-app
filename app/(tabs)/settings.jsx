@@ -18,12 +18,14 @@ export default function Settings() {
   const [logoutModal, setLogoutModal] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
 
-  const mainBgColor = useThemeColor('mainBackgroundColor')
-  const textColor = useThemeColor('color')
+  const mainBg = useThemeColor('mainBg1')
+  const textColor = useThemeColor('color1')
   const textColor2 = useThemeColor('color2')
+  const settingsItemBorderColor = useThemeColor('btn5')
   const textColor4 = useThemeColor('color4')
-  const cardBg1 = useThemeColor('cardBg')
-  const btnColor = useThemeColor('btnColor')
+  const cardBg1 = useThemeColor('cardBg1')
+  const cardBg2 = useThemeColor('cardBg2')
+  const color1 = useThemeColor('color1')
   const modalColor = useThemeColor('color2')
 
   const router = useRouter()
@@ -52,11 +54,15 @@ export default function Settings() {
   }, [navigation, actionLogout])
 
   return (
-    <View style={[styles.container, { backgroundColor: mainBgColor }]}>
-      <View style={[styles.card, { backgroundColor: cardBg1 }]}>
+    <View style={[styles.container, { backgroundColor: mainBg }]}>
+      <View style={styles.settingItemsContainer}>
         <Pressable
           style={({ pressed }) => {
-            return { opacity: pressed ? 0.8 : 1 }
+            return [
+              styles.settingsPressable,
+              styles.profilePressable,
+              { backgroundColor: pressed ? cardBg2 : cardBg1 },
+            ]
           }}
           onPress={() => {
             router.push({
@@ -65,58 +71,56 @@ export default function Settings() {
             })
           }}
         >
-          <View style={styles.profileLink}>
-            <View>
-              {isNonEmptyString(loggedUserData?.photoURL) ? (
-                <Image
-                  source={{ uri: loggedUserData?.photoURL }}
-                  style={styles.profileImage}
-                />
-              ) : (
-                <MaterialIcons
-                  name='add-a-photo'
-                  size={40}
-                  color={textColor2}
-                />
-              )}
-            </View>
+          <View>
+            {isNonEmptyString(loggedUserData?.photoURL) ? (
+              <Image
+                source={{ uri: loggedUserData?.photoURL }}
+                style={styles.profileLinkImage}
+              />
+            ) : (
+              <MaterialIcons name='add-a-photo' size={40} color={textColor2} />
+            )}
+          </View>
 
-            <View style={styles.profileTextContainer}>
-              <Text style={[styles.profileLinkTitle, { color: textColor }]}>
-                {`Ver mi perfil`}
+          <View style={styles.profileTextContainer}>
+            <Text style={[styles.profileLinkTitle, { color: textColor }]}>
+              {`Ver mi perfil`}
+            </Text>
+
+            {isNonEmptyString(loggedUserData?.username) && (
+              <Text style={[styles.profileLinkUsername, { color: textColor4 }]}>
+                {'@' + loggedUserData?.username}
               </Text>
+            )}
 
-              {isNonEmptyString(loggedUserData?.username) && (
-                <Text
-                  style={[styles.profileLinkUsername, { color: textColor4 }]}
-                >
-                  {'@' + loggedUserData?.username}
-                </Text>
-              )}
-
-              {isNonEmptyString(loggedUserData?.displayName) && (
-                <Text style={[styles.profileLinkName, { color: textColor }]}>
-                  {loggedUserData?.displayName}
-                </Text>
-              )}
-            </View>
+            {isNonEmptyString(loggedUserData?.displayName) && (
+              <Text style={[styles.profileLinkName, { color: textColor }]}>
+                {loggedUserData?.displayName}
+              </Text>
+            )}
           </View>
         </Pressable>
-      </View>
 
-      <View
-        style={[styles.card, styles.logoutCard, { backgroundColor: cardBg1 }]}
-      >
-        <MainButton
-          leftIcon={
-            <FontAwesome6 name='power-off' size={18} color={btnColor} />
-          }
+        <Pressable
+          style={({ pressed }) => {
+            return [
+              styles.settingsPressable,
+              styles.logoutPressable,
+              {
+                backgroundColor: pressed ? cardBg2 : cardBg1,
+                borderColor: settingsItemBorderColor,
+              },
+            ]
+          }}
           onPress={() => {
             setLogoutModal(true)
           }}
         >
-          {`Cerrar Sesión`}
-        </MainButton>
+          <FontAwesome6 name='power-off' size={18} color={color1} />
+          <Text style={[styles.settingsItemText, { color: textColor }]}>
+            {`Cerrar Sesión`}
+          </Text>
+        </Pressable>
       </View>
 
       <MainModal
@@ -161,13 +165,24 @@ const styles = StyleSheet.create({
     padding: 20,
     flex: 1,
   },
-  profileLink: {
+  settingsPressable: {
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 20,
+    padding: 10,
+    borderTopWidth: 1,
   },
-  profileImage: {
+  settingsItemText: {
+    fontSize: 18,
+    fontFamily: 'Ubuntu400',
+  },
+  profilePressable: {
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    borderTopWidth: 0,
+  },
+  profileLinkImage: {
     width: 60,
     height: 60,
     borderRadius: 30,
@@ -186,13 +201,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Ubuntu400',
     marginTop: 5,
   },
-  card: {
-    padding: 20,
-    borderRadius: 10,
+  settingItemsContainer: {
     marginBottom: 20,
   },
-  logoutCard: {
-    marginTop: 20,
+  logoutPressable: {
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
   },
   logoutModalContainer: {
     flex: 1,

@@ -3,11 +3,11 @@ import { StyleSheet, Text, View } from 'react-native'
 import useThemeColor from '@/hooks/useThemeColor'
 
 export default function Index() {
-  const mainBgColor = useThemeColor('mainBackgroundColor')
-  const textColor = useThemeColor('color')
+  const mainBg = useThemeColor('mainBg1')
+  const textColor = useThemeColor('color1')
 
   return (
-    <View style={[styles.container, { backgroundColor: mainBgColor }]}>
+    <View style={[styles.container, { backgroundColor: mainBg }]}>
       <Text style={[styles.text, { color: textColor }]}>{`Hello World!`}</Text>
     </View>
   )

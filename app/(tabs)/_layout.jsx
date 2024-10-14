@@ -7,7 +7,7 @@ import { useLoggedUserStore } from '@/hooks/useStore'
 
 export default function TabsLayout() {
   const tabsBg = useThemeColor('cardBg2')
-  const tabsBorderColor = useThemeColor('cardBg')
+  const tabsBorderColor = useThemeColor('cardBg1')
   const tabIconColor = useThemeColor('color3')
   const activeTabIconColor = useThemeColor('color4')
 

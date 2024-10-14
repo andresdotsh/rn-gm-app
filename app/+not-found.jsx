@@ -6,13 +6,13 @@ import useThemeColor from '@/hooks/useThemeColor'
 import MainButton from '@/ui/MainButton'
 
 export default function NotFoundScreen() {
-  const mainBgColor = useThemeColor('mainBackgroundColor')
-  const textColor = useThemeColor('color')
+  const mainBg = useThemeColor('mainBg1')
+  const textColor = useThemeColor('color1')
 
   const navigation = useNavigation()
 
   return (
-    <View style={[styles.container, { backgroundColor: mainBgColor }]}>
+    <View style={[styles.container, { backgroundColor: mainBg }]}>
       <Stack.Screen options={{ headerTitle: '404 Not Found' }} />
       <Text
         style={[styles.text, { color: textColor }]}

@@ -57,10 +57,10 @@ export default function LoginScreen({
   const bgColor = useThemeColor('color4')
   const titleColor = useThemeColor('color5')
   const color = useThemeColor('color5')
-  const placeholderColor = useThemeColor('cardBg')
-  const textInputBgColor = useThemeColor('btnBg2')
-  const secondButtonColor = useThemeColor('backgroundColor')
-  const showToggleBgColor = useThemeColor('btnBg4')
+  const placeholderColor = useThemeColor('cardBg1')
+  const textInputBgColor = useThemeColor('btn2')
+  const secondButtonColor = useThemeColor('mainBg2')
+  const showToggleBgColor = useThemeColor('btn4')
 
   const [showPassword, setShowPassword] = useState(false)
 

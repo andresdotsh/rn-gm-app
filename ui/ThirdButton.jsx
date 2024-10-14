@@ -7,8 +7,8 @@ const ThirdButton = forwardRef(function ThirdPressableButton(
   { children, onPress, disabled, loading, style, leftIcon, rightIcon },
   ref,
 ) {
-  const backgroundColor = useThemeColor('btnBg5')
-  const btnColor = useThemeColor('color')
+  const backgroundColor = useThemeColor('btn5')
+  const color1 = useThemeColor('color1')
   const borderColor = useThemeColor('color3')
 
   return (
@@ -18,7 +18,7 @@ const ThirdButton = forwardRef(function ThirdPressableButton(
           {
             backgroundColor,
             borderColor: disabled ? backgroundColor : borderColor,
-            opacity: disabled ? 0.6 : pressed ? 0.8 : 1,
+            opacity: disabled || pressed ? 0.8 : 1,
           },
           styles.pressable,
           style,
@@ -28,9 +28,9 @@ const ThirdButton = forwardRef(function ThirdPressableButton(
       onPress={onPress}
       ref={ref}
     >
-      {Boolean(loading) && <ActivityIndicator size='small' color={btnColor} />}
+      {Boolean(loading) && <ActivityIndicator size='small' color={color1} />}
       {Boolean(leftIcon) && leftIcon}
-      <Text style={[{ color: btnColor }, styles.text]}>{children}</Text>
+      <Text style={[{ color: color1 }, styles.text]}>{children}</Text>
       {Boolean(rightIcon) && rightIcon}
     </Pressable>
   )

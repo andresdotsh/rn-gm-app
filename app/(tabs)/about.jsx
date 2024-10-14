@@ -4,11 +4,11 @@ import useThemeColor from '@/hooks/useThemeColor'
 import BlankSpaceView from '@/ui/BlankSpaceView'
 
 export default function About() {
-  const mainBgColor = useThemeColor('mainBackgroundColor')
-  const textColor = useThemeColor('color')
+  const mainBg = useThemeColor('mainBg1')
+  const textColor = useThemeColor('color1')
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: mainBgColor }]}>
+    <ScrollView style={[styles.container, { backgroundColor: mainBg }]}>
       <Text style={[styles.title, { color: textColor }]}>
         Sobre este proyecto
       </Text>

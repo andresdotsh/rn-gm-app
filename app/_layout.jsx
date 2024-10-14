@@ -149,14 +149,16 @@ export default function RootLayout() {
               headerTransparent: false,
               headerStyle: {
                 backgroundColor: isDark
-                  ? colors.dark.mainBackgroundColor
-                  : colors.light.mainBackgroundColor,
+                  ? colors.dark.mainBg1
+                  : colors.light.mainBg1,
               },
               headerTitleStyle: {
-                color: isDark ? colors.dark.color : colors.light.color,
+                color: isDark ? colors.dark.color1 : colors.light.color1,
                 fontFamily: 'Ubuntu700',
               },
-              headerTintColor: isDark ? colors.dark.color : colors.light.color,
+              headerTintColor: isDark
+                ? colors.dark.color1
+                : colors.light.color1,
               headerShown: isUserLoggedIn,
               headerTitle: '',
             }

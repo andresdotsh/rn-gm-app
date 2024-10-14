@@ -18,8 +18,8 @@ import ThirdButton from '@/ui/ThirdButton'
 export default function UserDetail() {
   const [refreshing, setRefreshing] = useState(false)
 
-  const mainBgColor = useThemeColor('backgroundColor')
-  const textColor = useThemeColor('color')
+  const mainBg = useThemeColor('mainBg2')
+  const textColor = useThemeColor('color1')
 
   const { uid } = useLocalSearchParams()
 
@@ -54,13 +54,13 @@ export default function UserDetail() {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: mainBgColor }]}
+      style={[styles.container, { backgroundColor: mainBg }]}
       contentContainerStyle={styles.contentContainer}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          progressBackgroundColor={mainBgColor}
+          progressBackgroundColor={mainBg}
           colors={[textColor]}
           tintColor={textColor}
         />
@@ -72,7 +72,7 @@ export default function UserDetail() {
           headerLeft: null,
           headerRight: null,
           headerStyle: {
-            backgroundColor: mainBgColor,
+            backgroundColor: mainBg,
           },
         }}
       />

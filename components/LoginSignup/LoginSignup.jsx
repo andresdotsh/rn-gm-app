@@ -59,13 +59,13 @@ export default function LoginSignup() {
   const [isRecovAuthenticating, setIsRecovAuthenticating] = useState(false)
   const [recovSentMode, setRecovSentMode] = useState(false)
 
-  const modalTitleColor = useThemeColor('color')
+  const modalTitleColor = useThemeColor('color1')
   const modalColor = useThemeColor('color2')
   const modalIconColor = useThemeColor('color4')
   const recovTitleColor = useThemeColor('color4')
-  const recovColor = useThemeColor('color')
+  const recovColor = useThemeColor('color1')
   const recovPlaceholderColor = useThemeColor('color3')
-  const recovTextInputBgColor = useThemeColor('backgroundColor')
+  const recovTextInputBgColor = useThemeColor('mainBg2')
 
   const setIsUserLoggedIn = useLoggedUserStore((s) => s.setIsUserLoggedIn)
 
@@ -335,7 +335,7 @@ export default function LoginSignup() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.dark.backgroundColor },
+  container: { flex: 1, backgroundColor: colors.dark.mainBg2 },
   modalInfoContainer: {
     paddingTop: 40,
     paddingHorizontal: 20,
