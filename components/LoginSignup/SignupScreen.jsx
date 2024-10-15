@@ -9,7 +9,6 @@ import {
   Platform,
   KeyboardAvoidingView,
 } from 'react-native'
-import Fontisto from '@expo/vector-icons/Fontisto'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
@@ -20,7 +19,6 @@ import { auth } from '@/data/firebase'
 import useThemeColor from '@/hooks/useThemeColor'
 import BlankSpaceView from '@/ui/BlankSpaceView'
 import MainButton from '@/ui/MainButton'
-import SecondButton from '@/ui/SecondButton'
 import ThirdButton from '@/ui/ThirdButton'
 import ShowToggleButton from '@/ui/ShowToggleButton'
 import {
@@ -72,7 +70,6 @@ export default function SignupScreen({
   const color = useThemeColor('color1')
   const placeholderColor = useThemeColor('color3')
   const textInputBgColor = useThemeColor('mainBg2')
-  const secondButtonColor = useThemeColor('mainBg2')
 
   const [showPassword, setShowPassword] = useState(true)
 
@@ -129,20 +126,14 @@ export default function SignupScreen({
             style={[styles.title, { color: titleColor }]}
           >{`Crear cuenta`}</Text>
 
-          <View style={styles.pt2}>
-            <Text
-              style={[styles.text, { color }]}
-            >{`Puedes crear tu cuenta con:`}</Text>
-          </View>
-
-          <View style={styles.pt1}>
+          {/* <View style={styles.pt1}>
             <SecondButton
               disabled={isAuthenticating}
               leftIcon={
                 <Fontisto name='google' size={16} color={secondButtonColor} />
               }
             >{`Google`}</SecondButton>
-          </View>
+          </View> */}
 
           {/* <View style={styles.pt1}>
           <SecondButton
@@ -152,10 +143,6 @@ export default function SignupScreen({
             }
           >{`Facebook`}</SecondButton>
         </View> */}
-
-          <View style={styles.pt2}>
-            <Text style={[styles.text, { color }]}>{`O continuar con:`}</Text>
-          </View>
 
           <View style={styles.pt2}>
             <Controller
@@ -300,7 +287,6 @@ const styles = StyleSheet.create({
     fontSize: 30,
     textAlign: 'right',
   },
-  text: { fontFamily: 'Ubuntu400', fontSize: 18, textAlign: 'right' },
   error: { fontFamily: 'Ubuntu400', fontSize: 16, textAlign: 'right' },
   input: {
     fontFamily: 'Ubuntu400',
