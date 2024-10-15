@@ -14,6 +14,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useLocalSearchParams, Stack, Link } from 'expo-router'
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons'
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
+import ProgressBar from 'react-native-progress/Bar'
 import { isNonEmptyString, isNonEmptyArray, isValidNumber } from 'ramda-adjunct'
 
 import {
@@ -30,7 +31,7 @@ import getAllSkills from '@/data/getAllSkills'
 import { useLoggedUserStore } from '@/hooks/useStore'
 import MainButton from '@/ui/MainButton'
 import ThirdButton from '@/ui/ThirdButton'
-import ProgressBar from 'react-native-progress/Bar'
+import BlankSpaceView from '@/ui/BlankSpaceView'
 
 export default function UserDetail() {
   const [refreshing, setRefreshing] = useState(false)
@@ -332,6 +333,8 @@ export default function UserDetail() {
               )}
             </View>
           )}
+
+          <BlankSpaceView />
         </View>
       )}
     </ScrollView>
