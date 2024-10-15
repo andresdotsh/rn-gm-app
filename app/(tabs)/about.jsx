@@ -2,13 +2,22 @@ import { StyleSheet, ScrollView, Text } from 'react-native'
 
 import useThemeColor from '@/hooks/useThemeColor'
 import BlankSpaceView from '@/ui/BlankSpaceView'
+import { CC_WIDTH_STYLES } from '@/constants/constants'
 
 export default function About() {
   const mainBg = useThemeColor('mainBg1')
   const textColor = useThemeColor('color1')
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: mainBg }]}>
+    <ScrollView
+      style={[
+        styles.scrollView,
+        {
+          backgroundColor: mainBg,
+        },
+      ]}
+      contentContainerStyle={styles.svContentContainer}
+    >
       <Text style={[styles.title, { color: textColor }]}>
         Sobre este proyecto
       </Text>
@@ -58,8 +67,12 @@ export default function About() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scrollView: {
     padding: 20,
+  },
+  svContentContainer: {
+    flexGrow: 1,
+    ...CC_WIDTH_STYLES,
   },
   title: {
     fontFamily: 'Ubuntu700',

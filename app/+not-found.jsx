@@ -1,9 +1,10 @@
 import { Stack } from 'expo-router'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View, ScrollView } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 
 import useThemeColor from '@/hooks/useThemeColor'
 import MainButton from '@/ui/MainButton'
+import { CC_WIDTH_STYLES } from '@/constants/constants'
 
 export default function NotFoundScreen() {
   const mainBg = useThemeColor('mainBg1')
@@ -12,27 +13,36 @@ export default function NotFoundScreen() {
   const navigation = useNavigation()
 
   return (
-    <View style={[styles.container, { backgroundColor: mainBg }]}>
-      <Stack.Screen options={{ headerTitle: '404 Not Found' }} />
-      <Text
-        style={[styles.text, { color: textColor }]}
-      >{`El recurso que buscas ya no existe o nunca existió.`}</Text>
+    <ScrollView
+      style={{ backgroundColor: mainBg }}
+      contentContainerStyle={styles.svContentContainer}
+    >
+      <View style={styles.container}>
+        <Stack.Screen options={{ headerTitle: '404 Not Found' }} />
+        <Text
+          style={[styles.text, { color: textColor }]}
+        >{`El recurso que buscas ya no existe o nunca existió.`}</Text>
 
-      <MainButton
-        style={styles.link}
-        onPress={() => {
-          if (navigation.canGoBack()) {
-            navigation.goBack()
-          } else {
-            navigation.navigate('(tabs)')
-          }
-        }}
-      >{`Volver`}</MainButton>
-    </View>
+        <MainButton
+          style={styles.link}
+          onPress={() => {
+            if (navigation.canGoBack()) {
+              navigation.goBack()
+            } else {
+              navigation.navigate('(tabs)')
+            }
+          }}
+        >{`Volver`}</MainButton>
+      </View>
+    </ScrollView>
   )
 }
 
 const styles = StyleSheet.create({
+  svContentContainer: {
+    flexGrow: 1,
+    ...CC_WIDTH_STYLES,
+  },
   container: {
     padding: 40,
     flex: 1,

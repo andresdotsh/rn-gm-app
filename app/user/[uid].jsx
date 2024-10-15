@@ -18,6 +18,7 @@ import ProgressBar from 'react-native-progress/Bar'
 import { isNonEmptyString, isNonEmptyArray, isValidNumber } from 'ramda-adjunct'
 
 import {
+  CC_WIDTH_STYLES,
   SN_TIKTOK_USER_LINK,
   SN_INSTAGRAM_USER_LINK,
   SN_X_USER_LINK,
@@ -39,7 +40,6 @@ export default function UserDetail() {
   const mainBg2 = useThemeColor('mainBg2')
   const color1 = useThemeColor('color1')
   const color2 = useThemeColor('color2')
-  const color3 = useThemeColor('color3')
   const color4 = useThemeColor('color4')
   const cardBg1 = useThemeColor('cardBg1')
   const pgColor = useThemeColor('btn1')
@@ -66,6 +66,7 @@ export default function UserDetail() {
   const {
     isLoading: skillsIsLoading,
     data: skillsData,
+    error: skillsError,
     refetch: skillsRefetch,
   } = useQuery({
     queryKey: ['skills'],
@@ -100,8 +101,8 @@ export default function UserDetail() {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: mainBg2 }]}
-      contentContainerStyle={styles.contentContainer}
+      style={[styles.scrollView, { backgroundColor: mainBg2 }]}
+      contentContainerStyle={styles.svContentContainer}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -127,7 +128,7 @@ export default function UserDetail() {
         <View style={styles.noContent}>
           <ActivityIndicator size='large' color={color1} />
         </View>
-      ) : !userData || userError ? (
+      ) : !userData || !skillsData || userError || skillsError ? (
         <View style={styles.noContent}>
           <Text
             style={[styles.errorText, { color: color1 }]}
@@ -172,7 +173,7 @@ export default function UserDetail() {
               </Link>
             )}
 
-            {isNonEmptyArray(skillsData) ? (
+            {isNonEmptyArray(skillsData) && (
               <View>
                 {skillsData.map((skill) => {
                   const rawValue = userData?.[skill?.key]
@@ -200,10 +201,6 @@ export default function UserDetail() {
                   )
                 })}
               </View>
-            ) : (
-              <Text style={[styles.cardErrorText, { color: color3 }]}>
-                {`No se cargaron las skills.`}
-              </Text>
             )}
           </View>
 
@@ -342,12 +339,12 @@ export default function UserDetail() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scrollView: {
     padding: 20,
-    flex: 1,
   },
-  contentContainer: {
+  svContentContainer: {
     flexGrow: 1,
+    ...CC_WIDTH_STYLES,
   },
   noContent: {
     flex: 1,
@@ -384,11 +381,6 @@ const styles = StyleSheet.create({
   },
   mediaCard: {
     gap: 10,
-  },
-  cardErrorText: {
-    fontSize: 16,
-    fontFamily: 'Ubuntu500',
-    textAlign: 'center',
   },
   cardText1: {
     fontSize: 20,

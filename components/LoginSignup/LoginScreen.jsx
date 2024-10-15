@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Dimensions,
   ScrollView,
   TextInput,
   Platform,
@@ -22,6 +21,7 @@ import BlankSpaceView from '@/ui/BlankSpaceView'
 import MainButton from '@/ui/MainButton'
 import ThirdButton from '@/ui/ThirdButton'
 import {
+  CC_WIDTH_STYLES,
   FIELD_EMAIL_MAX_LENGTH,
   FIELD_PASSWORD_MAX_LENGTH,
   FIELD_PASSWORD_MIN_LENGTH,
@@ -51,6 +51,7 @@ export default function LoginScreen({
   handleErrorMessage,
   performLogin,
   openChangePasswdModal,
+  winWidth,
 }) {
   const bgColor = useThemeColor('color4')
   const titleColor = useThemeColor('color5')
@@ -94,42 +95,25 @@ export default function LoginScreen({
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.avoidingView}
+      style={styles.kbAvoidingView}
     >
       <ScrollView
         style={[
-          styles.container,
+          styles.scrollView,
           {
+            width: winWidth,
             backgroundColor: bgColor,
             paddingTop: insets.top,
             paddingBottom: insets.bottom,
           },
         ]}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={styles.svContentContainer}
       >
         <View style={styles.content}>
           <BlankSpaceView />
           <Text
             style={[styles.title, { color: titleColor }]}
           >{`Ingresar`}</Text>
-
-          {/* <View style={styles.pt1}>
-            <SecondButton
-              disabled={isAuthenticating}
-              leftIcon={
-                <Fontisto name='google' size={16} color={secondButtonColor} />
-              }
-            >{`Google`}</SecondButton>
-          </View> */}
-
-          {/* <View style={styles.pt1}>
-          <SecondButton
-            disabled={isAuthenticating}
-            leftIcon={
-              <Fontisto name='facebook' size={16} color={secondButtonColor} />
-            }
-          >{`Facebook`}</SecondButton>
-        </View> */}
 
           <View style={styles.pt2}>
             <Controller
@@ -232,20 +216,18 @@ export default function LoginScreen({
   )
 }
 
-const { width } = Dimensions.get('window')
-
 const styles = StyleSheet.create({
-  avoidingView: {
+  kbAvoidingView: {
     flex: 1,
   },
-  container: {
-    width,
-    padding: 40,
+  scrollView: {
+    paddingHorizontal: 40,
   },
-  contentContainer: {
+  svContentContainer: {
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    ...CC_WIDTH_STYLES,
   },
   content: { width: '100%' },
   showPasswdContainer: {

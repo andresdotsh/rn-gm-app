@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   StyleSheet,
-  Dimensions,
   ScrollView,
   Platform,
   KeyboardAvoidingView,
@@ -22,6 +21,7 @@ import MainButton from '@/ui/MainButton'
 import ThirdButton from '@/ui/ThirdButton'
 import ShowToggleButton from '@/ui/ShowToggleButton'
 import {
+  CC_WIDTH_STYLES,
   FIELD_EMAIL_MAX_LENGTH,
   FIELD_NAME_MAX_LENGTH,
   FIELD_NAME_MIN_LENGTH,
@@ -64,6 +64,7 @@ export default function SignupScreen({
   setIsAuthenticating,
   handleErrorMessage,
   performLogin,
+  winWidth,
 }) {
   const bgColor = useThemeColor('btn5')
   const titleColor = useThemeColor('color4')
@@ -107,42 +108,25 @@ export default function SignupScreen({
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.avoidingView}
+      style={styles.kbAvoidingView}
     >
       <ScrollView
         style={[
-          styles.container,
+          styles.scrollView,
           {
+            width: winWidth,
             backgroundColor: bgColor,
             paddingTop: insets.top,
             paddingBottom: insets.bottom,
           },
         ]}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={styles.svContentContainer}
       >
         <View style={styles.content}>
           <BlankSpaceView />
           <Text
             style={[styles.title, { color: titleColor }]}
           >{`Crear cuenta`}</Text>
-
-          {/* <View style={styles.pt1}>
-            <SecondButton
-              disabled={isAuthenticating}
-              leftIcon={
-                <Fontisto name='google' size={16} color={secondButtonColor} />
-              }
-            >{`Google`}</SecondButton>
-          </View> */}
-
-          {/* <View style={styles.pt1}>
-          <SecondButton
-            disabled={isAuthenticating}
-            leftIcon={
-              <Fontisto name='facebook' size={16} color={secondButtonColor} />
-            }
-          >{`Facebook`}</SecondButton>
-        </View> */}
 
           <View style={styles.pt2}>
             <Controller
@@ -261,20 +245,18 @@ export default function SignupScreen({
   )
 }
 
-const { width } = Dimensions.get('window')
-
 const styles = StyleSheet.create({
-  avoidingView: {
+  kbAvoidingView: {
     flex: 1,
   },
-  container: {
-    width,
+  scrollView: {
     paddingHorizontal: 40,
   },
-  contentContainer: {
+  svContentContainer: {
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    ...CC_WIDTH_STYLES,
   },
   content: { width: '100%' },
   showPasswdContainer: {

@@ -1,5 +1,11 @@
 import { useRef, useCallback, useState } from 'react'
-import { View, StyleSheet, Text, TextInput } from 'react-native'
+import {
+  View,
+  StyleSheet,
+  Text,
+  TextInput,
+  useWindowDimensions,
+} from 'react-native'
 import { SwiperFlatList } from 'react-native-swiper-flatlist'
 import { pick } from 'ramda'
 import { isNonEmptyString, isFunction } from 'ramda-adjunct'
@@ -68,6 +74,7 @@ export default function LoginSignup() {
   const recovTextInputBgColor = useThemeColor('mainBg2')
 
   const setIsUserLoggedIn = useLoggedUserStore((s) => s.setIsUserLoggedIn)
+  const { width: winWidth } = useWindowDimensions()
 
   const {
     control,
@@ -197,7 +204,7 @@ export default function LoginSignup() {
   )
 
   return (
-    <View style={styles.container}>
+    <View style={styles.mainContainer}>
       <SwiperFlatList ref={swiperRef} disableGesture={isAuthenticating}>
         <LoginScreen
           scrollToIndex={scrollToIndex}
@@ -205,6 +212,7 @@ export default function LoginSignup() {
           setIsAuthenticating={setIsAuthenticating}
           handleErrorMessage={handleErrorMessage}
           performLogin={performLogin}
+          winWidth={winWidth}
           openChangePasswdModal={openChangePasswdModal}
         />
 
@@ -214,6 +222,7 @@ export default function LoginSignup() {
           setIsAuthenticating={setIsAuthenticating}
           handleErrorMessage={handleErrorMessage}
           performLogin={performLogin}
+          winWidth={winWidth}
         />
       </SwiperFlatList>
 
@@ -335,7 +344,7 @@ export default function LoginSignup() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.dark.mainBg2 },
+  mainContainer: { flex: 1, backgroundColor: colors.dark.mainBg2 },
   modalInfoContainer: {
     paddingTop: 40,
     paddingHorizontal: 20,

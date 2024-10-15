@@ -1,5 +1,12 @@
 import { useCallback, useState } from 'react'
-import { StyleSheet, Text, View, Image, Pressable } from 'react-native'
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  Image,
+  Pressable,
+} from 'react-native'
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import { signOut } from 'firebase/auth'
@@ -13,6 +20,7 @@ import useThemeColor from '@/hooks/useThemeColor'
 import MainButton from '@/ui/MainButton'
 import ThirdButton from '@/ui/ThirdButton'
 import MainModal from '@/ui/MainModal'
+import { CC_WIDTH_STYLES } from '@/constants/constants'
 
 export default function Settings() {
   const [logoutModal, setLogoutModal] = useState(false)
@@ -54,7 +62,15 @@ export default function Settings() {
   }, [navigation, actionLogout])
 
   return (
-    <View style={[styles.container, { backgroundColor: mainBg2 }]}>
+    <ScrollView
+      style={[
+        styles.scrollView,
+        {
+          backgroundColor: mainBg2,
+        },
+      ]}
+      contentContainerStyle={styles.svContentContainer}
+    >
       <View style={styles.settingItemsContainer}>
         <Pressable
           style={({ pressed }) => {
@@ -156,14 +172,17 @@ export default function Settings() {
           </View>
         </View>
       </MainModal>
-    </View>
+    </ScrollView>
   )
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scrollView: {
     padding: 20,
-    flex: 1,
+  },
+  svContentContainer: {
+    flexGrow: 1,
+    ...CC_WIDTH_STYLES,
   },
   settingsPressable: {
     display: 'flex',

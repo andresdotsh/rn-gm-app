@@ -1,9 +1,25 @@
-import { Modal, View, StyleSheet, Pressable, Text } from 'react-native'
+import {
+  Modal,
+  View,
+  StyleSheet,
+  Pressable,
+  Text,
+  ScrollView,
+} from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isNonEmptyString, isFunction } from 'ramda-adjunct'
 
 import useThemeColor from '@/hooks/useThemeColor'
+import { CC_WIDTH_STYLES } from '@/constants/constants'
+
+const SUPPORTED_ORIENTATIONS = [
+  'portrait',
+  'portrait-upside-down',
+  'landscape',
+  'landscape-left',
+  'landscape-right',
+]
 
 export default function MainModal({
   title,
@@ -24,6 +40,7 @@ export default function MainModal({
       visible={visible}
       animationType={animationType}
       transparent={transparent}
+      supportedOrientations={SUPPORTED_ORIENTATIONS}
       onRequestClose={() => {
         if (!disabled && isFunction(onPressClose)) {
           onPressClose()
@@ -32,7 +49,7 @@ export default function MainModal({
     >
       <View
         style={[
-          styles.container,
+          styles.mainContainer,
           {
             marginTop: insets.top,
             backgroundColor: modalBg1,
@@ -62,21 +79,28 @@ export default function MainModal({
           )}
         </View>
 
-        {children}
+        <ScrollView contentContainerStyle={styles.svContentContainer}>
+          {children}
+        </ScrollView>
       </View>
     </Modal>
   )
 }
 
 const styles = StyleSheet.create({
-  container: {
+  mainContainer: {
     flex: 1,
+  },
+  svContentContainer: {
+    flexGrow: 1,
+    ...CC_WIDTH_STYLES,
   },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 15,
     padding: 10,
+    ...CC_WIDTH_STYLES,
   },
   titleText: {
     fontFamily: 'Ubuntu500',

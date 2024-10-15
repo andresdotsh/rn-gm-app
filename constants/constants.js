@@ -48,3 +48,10 @@ export const SN_YOUTUBE_USER_LABEL = 'youtube.com/@'
 
 export const SN_FACEBOOK_USER_LINK = 'https://www.facebook.com/'
 export const SN_FACEBOOK_USER_LABEL = 'facebook.com/'
+
+export const CC_WIDTH_STYLES = {
+  marginHorizontal: 'auto',
+  minWidth: 300,
+  width: '100%',
+  maxWidth: 500,
+}
