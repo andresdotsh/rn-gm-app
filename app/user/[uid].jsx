@@ -224,6 +224,8 @@ export default function UserDetail() {
                     onPress={() => {
                       const url = SN_TIKTOK_USER_LINK + userData?.snUserTiktok
                       Linking.openURL(url)
+                        .then(() => true)
+                        .catch(console.error)
                     }}
                   >
                     {'@' + userData?.snUserTiktok}
@@ -242,6 +244,8 @@ export default function UserDetail() {
                       const url =
                         SN_INSTAGRAM_USER_LINK + userData?.snUserInstagram
                       Linking.openURL(url)
+                        .then(() => true)
+                        .catch(console.error)
                     }}
                   >
                     {'@' + userData?.snUserInstagram}
@@ -259,6 +263,8 @@ export default function UserDetail() {
                     onPress={() => {
                       const url = SN_X_USER_LINK + userData?.snUserXcom
                       Linking.openURL(url)
+                        .then(() => true)
+                        .catch(console.error)
                     }}
                   >
                     {'@' + userData?.snUserXcom}
@@ -277,6 +283,8 @@ export default function UserDetail() {
                       const url =
                         SN_SNAPCHAT_USER_LINK + userData?.snUserSnapchat
                       Linking.openURL(url)
+                        .then(() => true)
+                        .catch(console.error)
                     }}
                   >
                     {'@' + userData?.snUserSnapchat}
@@ -294,6 +302,8 @@ export default function UserDetail() {
                     onPress={() => {
                       const url = SN_YOUTUBE_USER_LINK + userData?.snUserYoutube
                       Linking.openURL(url)
+                        .then(() => true)
+                        .catch(console.error)
                     }}
                   >
                     {'@' + userData?.snUserYoutube}
@@ -312,6 +322,8 @@ export default function UserDetail() {
                       const url =
                         SN_FACEBOOK_USER_LINK + userData?.snUserFacebook
                       Linking.openURL(url)
+                        .then(() => true)
+                        .catch(console.error)
                     }}
                   >
                     {'@' + userData?.snUserFacebook}
