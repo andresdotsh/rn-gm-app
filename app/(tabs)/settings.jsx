@@ -15,6 +15,7 @@ import { useRouter } from 'expo-router'
 import { isNonEmptyString } from 'ramda-adjunct'
 
 import { auth } from '@/data/firebase'
+import postLogoutAllSessions from '@/rest/postLogoutAllSessions'
 import { useLoggedUserStore } from '@/hooks/useStore'
 import useThemeColor from '@/hooks/useThemeColor'
 import MainButton from '@/ui/MainButton'
@@ -43,23 +44,35 @@ export default function Settings() {
   const loggedUserUid = useLoggedUserStore((s) => s.loggedUserUid)
   const loggedUserData = useLoggedUserStore((s) => s.loggedUserData)
 
-  const logOut = useCallback(async () => {
-    try {
-      setLoggingOut(true)
-      await signOut(auth)
-      setLogoutModal(false)
-      setLoggingOut(false)
-      actionLogout()
+  const logOut = useCallback(
+    async (closeAllSessions) => {
+      try {
+        setLoggingOut(true)
+        await signOut(auth)
 
-      navigation.reset({
-        index: 0,
-        routes: [{ name: '(tabs)' }],
-      })
-    } catch (error) {
-      console.error(error)
-      setLoggingOut(false)
-    }
-  }, [navigation, actionLogout])
+        if (closeAllSessions) {
+          let idToken = ''
+          if (auth?.currentUser) {
+            idToken = await auth?.currentUser?.getIdToken(true)
+          }
+          await postLogoutAllSessions(idToken)
+        }
+
+        setLogoutModal(false)
+        setLoggingOut(false)
+        actionLogout()
+
+        navigation.reset({
+          index: 0,
+          routes: [{ name: '(tabs)' }],
+        })
+      } catch (error) {
+        console.error(error)
+        setLoggingOut(false)
+      }
+    },
+    [actionLogout, navigation],
+  )
 
   return (
     <ScrollView
@@ -149,27 +162,39 @@ export default function Settings() {
       >
         <View style={styles.logoutModalContainer}>
           <Text style={[styles.logoutModalText, { color: modalColor }]}>
-            {`¿Deseas cerrar sesión?`}
+            {`¿Deseas cerrar sesión unicamente en este dispositivo?`}
           </Text>
 
-          <View style={styles.pt2}>
-            <MainButton
-              onPress={logOut}
-              disabled={loggingOut}
-              loading={loggingOut}
-            >
-              {`Cerrar Sesión`}
-            </MainButton>
-          </View>
+          <Text style={[styles.logoutModalText, { color: modalColor }]}>
+            {`¿O deseas cerrar todas las sesiones activas?`}
+          </Text>
 
-          <View style={styles.pt2}>
-            <ThirdButton
-              onPress={() => {
-                setLogoutModal(false)
-              }}
-              disabled={loggingOut}
-            >{`Cancelar`}</ThirdButton>
-          </View>
+          <MainButton
+            onPress={() => {
+              logOut(false)
+            }}
+            disabled={loggingOut}
+            loading={loggingOut}
+          >
+            {`Cerrar Esta Sesión`}
+          </MainButton>
+
+          <MainButton
+            onPress={() => {
+              logOut(true)
+            }}
+            disabled={loggingOut}
+            loading={loggingOut}
+          >
+            {`Cerrar Todas Las Sesiones`}
+          </MainButton>
+
+          <ThirdButton
+            onPress={() => {
+              setLogoutModal(false)
+            }}
+            disabled={loggingOut}
+          >{`Cancelar`}</ThirdButton>
         </View>
       </MainModal>
     </ScrollView>
@@ -231,13 +256,11 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     justifyContent: 'center',
+    gap: 25,
   },
   logoutModalText: {
     fontSize: 18,
     fontFamily: 'Ubuntu400',
     textAlign: 'center',
-  },
-  pt2: {
-    paddingTop: 20,
   },
 })

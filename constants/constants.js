@@ -49,9 +49,11 @@ export const SN_YOUTUBE_USER_LABEL = 'youtube.com/@'
 export const SN_FACEBOOK_USER_LINK = 'https://www.facebook.com/'
 export const SN_FACEBOOK_USER_LABEL = 'facebook.com/'
 
+export const API_BASE_URL = process.env.EXPO_PUBLIC_REST_API_BASE_URL
+
 export const CC_WIDTH_STYLES = {
   marginHorizontal: 'auto',
-  minWidth: 300,
+  minWidth: 320,
   width: '100%',
   maxWidth: 500,
 }
