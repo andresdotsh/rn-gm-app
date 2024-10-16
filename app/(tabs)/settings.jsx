@@ -30,8 +30,8 @@ export default function Settings() {
   const mainBg2 = useThemeColor('mainBg2')
   const textColor = useThemeColor('color1')
   const textColor2 = useThemeColor('color2')
-  const settingsItemBorderColor = useThemeColor('btn5')
   const textColor4 = useThemeColor('color4')
+  const settingsItemBorderColor = useThemeColor('btn5')
   const cardBg1 = useThemeColor('cardBg1')
   const cardBg2 = useThemeColor('cardBg2')
   const color1 = useThemeColor('color1')
@@ -48,7 +48,6 @@ export default function Settings() {
     async (closeAllSessions) => {
       try {
         setLoggingOut(true)
-        await signOut(auth)
 
         if (closeAllSessions) {
           let idToken = ''
@@ -57,6 +56,8 @@ export default function Settings() {
           }
           await postLogoutAllSessions(idToken)
         }
+
+        await signOut(auth)
 
         setLogoutModal(false)
         setLoggingOut(false)
@@ -170,21 +171,21 @@ export default function Settings() {
           </Text>
 
           <MainButton
+            disabled={loggingOut}
+            loading={loggingOut}
             onPress={() => {
               logOut(false)
             }}
-            disabled={loggingOut}
-            loading={loggingOut}
           >
             {`Cerrar Esta Sesión`}
           </MainButton>
 
           <MainButton
+            disabled={loggingOut}
+            loading={loggingOut}
             onPress={() => {
               logOut(true)
             }}
-            disabled={loggingOut}
-            loading={loggingOut}
           >
             {`Cerrar Todas Las Sesiones`}
           </MainButton>
