@@ -10,12 +10,7 @@ export default function About() {
 
   return (
     <ScrollView
-      style={[
-        styles.scrollView,
-        {
-          backgroundColor: mainBg,
-        },
-      ]}
+      style={{ backgroundColor: mainBg }}
       contentContainerStyle={styles.svContentContainer}
     >
       <Text style={[styles.title, { color: textColor }]}>
@@ -67,11 +62,9 @@ export default function About() {
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
-    padding: 20,
-  },
   svContentContainer: {
     flexGrow: 1,
+    padding: 20,
     ...CC_WIDTH_STYLES,
   },
   title: {

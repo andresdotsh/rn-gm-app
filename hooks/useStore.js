@@ -1,5 +1,5 @@
 import { type } from 'ramda'
-import { isString } from 'ramda-adjunct'
+import { isNonEmptyString } from 'ramda-adjunct'
 import { create } from 'zustand'
 
 export const useLoggedUserStore = create((set) => ({
@@ -10,7 +10,7 @@ export const useLoggedUserStore = create((set) => ({
     set({ isUserLoggedIn: Boolean(value) })
   },
   setLoggedUserUid: (value) => {
-    if (isString(value) || value === null) {
+    if (isNonEmptyString(value) || value === null) {
       set({ loggedUserUid: value })
     }
   },

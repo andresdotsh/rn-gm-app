@@ -18,6 +18,7 @@ import { auth } from '@/data/firebase'
 import postLogoutAllSessions from '@/rest/postLogoutAllSessions'
 import { useLoggedUserStore } from '@/hooks/useStore'
 import useThemeColor from '@/hooks/useThemeColor'
+import BlankSpaceView from '@/ui/BlankSpaceView'
 import MainButton from '@/ui/MainButton'
 import ThirdButton from '@/ui/ThirdButton'
 import MainModal from '@/ui/MainModal'
@@ -77,12 +78,7 @@ export default function Settings() {
 
   return (
     <ScrollView
-      style={[
-        styles.scrollView,
-        {
-          backgroundColor: mainBg2,
-        },
-      ]}
+      style={{ backgroundColor: mainBg2 }}
       contentContainerStyle={styles.svContentContainer}
     >
       <View style={styles.settingItemsContainer}>
@@ -153,6 +149,8 @@ export default function Settings() {
         </Pressable>
       </View>
 
+      <BlankSpaceView />
+
       <MainModal
         title={`Confirmar`}
         visible={logoutModal}
@@ -203,11 +201,9 @@ export default function Settings() {
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
-    padding: 20,
-  },
   svContentContainer: {
     flexGrow: 1,
+    padding: 20,
     ...CC_WIDTH_STYLES,
   },
   settingsPressable: {

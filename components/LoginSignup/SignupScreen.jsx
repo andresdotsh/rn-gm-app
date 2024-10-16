@@ -111,18 +111,15 @@ export default function SignupScreen({
       style={styles.kbAvoidingView}
     >
       <ScrollView
-        style={[
-          styles.scrollView,
-          {
-            width: winWidth,
-            backgroundColor: bgColor,
-            paddingTop: insets.top,
-            paddingBottom: insets.bottom,
-          },
-        ]}
+        style={{
+          width: winWidth,
+          backgroundColor: bgColor,
+          paddingTop: insets.top,
+          paddingBottom: insets.bottom,
+        }}
         contentContainerStyle={styles.svContentContainer}
       >
-        <View style={styles.content}>
+        <View>
           <BlankSpaceView />
           <Text
             style={[styles.title, { color: titleColor }]}
@@ -249,16 +246,12 @@ const styles = StyleSheet.create({
   kbAvoidingView: {
     flex: 1,
   },
-  scrollView: {
-    paddingHorizontal: 40,
-  },
   svContentContainer: {
     flexGrow: 1,
     justifyContent: 'center',
-    alignItems: 'center',
+    paddingHorizontal: 40,
     ...CC_WIDTH_STYLES,
   },
-  content: { width: '100%' },
   showPasswdContainer: {
     paddingTop: 10,
     flexDirection: 'row',

@@ -145,8 +145,9 @@ export default function RootLayout() {
         <Stack
           screenOptions={({ route }) => {
             const options = {
-              headerShadowVisible: false,
               headerTransparent: false,
+              headerShadowVisible: false,
+              headerBackTitleVisible: false,
               headerStyle: {
                 backgroundColor: isDark
                   ? colors.dark.mainBg1

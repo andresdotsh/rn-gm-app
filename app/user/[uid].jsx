@@ -101,7 +101,7 @@ export default function UserDetail() {
 
   return (
     <ScrollView
-      style={[styles.scrollView, { backgroundColor: mainBg2 }]}
+      style={{ backgroundColor: mainBg2 }}
       contentContainerStyle={styles.svContentContainer}
       refreshControl={
         <RefreshControl
@@ -339,33 +339,15 @@ export default function UserDetail() {
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
-    padding: 20,
-  },
   svContentContainer: {
     flexGrow: 1,
+    padding: 20,
     ...CC_WIDTH_STYLES,
   },
   noContent: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  mediaLinkPressable: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  mediaLinkIconContainer: {
-    flexBasis: 24,
-    flexGrow: 0,
-    flexShrink: 0,
-    alignItems: 'center',
-  },
-  mediaLinkText: {
-    fontSize: 18,
-    fontFamily: 'Ubuntu400',
   },
   errorText: {
     fontSize: 18,
@@ -387,6 +369,22 @@ const styles = StyleSheet.create({
     fontFamily: 'Ubuntu500',
   },
   cardText2: {
+    fontSize: 18,
+    fontFamily: 'Ubuntu400',
+  },
+  mediaLinkPressable: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  mediaLinkIconContainer: {
+    flexBasis: 24,
+    flexGrow: 0,
+    flexShrink: 0,
+    alignItems: 'center',
+  },
+  mediaLinkText: {
     fontSize: 18,
     fontFamily: 'Ubuntu400',
   },

@@ -41,10 +41,10 @@ export default function NotFoundScreen() {
 const styles = StyleSheet.create({
   svContentContainer: {
     flexGrow: 1,
+    padding: 40,
     ...CC_WIDTH_STYLES,
   },
   container: {
-    padding: 40,
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',

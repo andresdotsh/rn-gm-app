@@ -9,12 +9,7 @@ export default function Index() {
 
   return (
     <ScrollView
-      style={[
-        styles.scrollView,
-        {
-          backgroundColor: mainBg,
-        },
-      ]}
+      style={{ backgroundColor: mainBg }}
       contentContainerStyle={styles.svContentContainer}
     >
       <View>
@@ -27,11 +22,9 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
-    padding: 20,
-  },
   svContentContainer: {
     flexGrow: 1,
+    padding: 20,
     ...CC_WIDTH_STYLES,
   },
   text: {
