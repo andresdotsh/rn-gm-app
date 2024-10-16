@@ -4,11 +4,12 @@ import {
   Text,
   ScrollView,
   View,
-  RefreshControl,
   ActivityIndicator,
   Image,
   Pressable,
   Linking,
+  Platform,
+  KeyboardAvoidingView,
 } from 'react-native'
 import { useQuery } from '@tanstack/react-query'
 import { Stack } from 'expo-router'
@@ -130,7 +131,6 @@ const schema = yup
   .required()
 
 export default function EditProfile() {
-  const [refreshing, setRefreshing] = useState(false)
   const [deletePhotoModal, setDeletePhotoModal] = useState(false)
 
   const mainBg1 = useThemeColor('mainBg1')
@@ -167,19 +167,6 @@ export default function EditProfile() {
     queryFn: () => getAllSkills(),
   })
   console.log(`---------------------------------------------------`)
-
-  const onRefresh = useCallback(() => {
-    // TODO: -> es necesario el pull and refresh?
-    setRefreshing(true)
-    userRefetch()
-    skillsRefetch()
-  }, [userRefetch, skillsRefetch])
-
-  useEffect(() => {
-    if (!userIsFetching) {
-      setRefreshing(false)
-    }
-  }, [userIsFetching])
 
   const skillsDefaultValues = useMemo(() => {
     const res = {}
@@ -238,114 +225,113 @@ export default function EditProfile() {
   const isPhotoInForm = isNonEmptyString(photoURLFieldValue)
 
   return (
-    <ScrollView
-      style={{ backgroundColor: mainBg1 }}
-      contentContainerStyle={styles.svContentContainer}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          progressBackgroundColor={mainBg1}
-          colors={[color1]}
-          tintColor={color1}
-        />
-      }
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.kbAvoidingView}
     >
-      <Stack.Screen
-        options={{
-          headerTitle: 'Editar Perfil',
-          headerLeft: null,
-          headerRight: null,
-          headerStyle: {
-            backgroundColor: mainBg1,
-          },
-        }}
-      />
+      <ScrollView
+        style={{ backgroundColor: mainBg1 }}
+        contentContainerStyle={styles.svContentContainer}
+      >
+        <Stack.Screen
+          options={{
+            headerTitle: 'Editar Perfil',
+            headerLeft: null,
+            headerRight: null,
+            headerStyle: {
+              backgroundColor: mainBg1,
+            },
+          }}
+        />
 
-      {userIsLoading || skillsIsLoading ? (
-        <View style={styles.noContent}>
-          <ActivityIndicator size='large' color={color1} />
-        </View>
-      ) : !userData || !skillsData || userError || skillsError ? (
-        <View style={styles.noContent}>
-          <Text
-            style={[styles.errorText, { color: color1 }]}
-          >{`Ha ocurrido un error al obtener los datos, o puede ser que no tengas conexión a internet.`}</Text>
-          <ThirdButton
-            loading={userIsFetching}
-            disabled={userIsFetching}
-            onPress={() => {
-              userRefetch()
-              skillsRefetch()
-            }}
-          >{`Reintentar`}</ThirdButton>
-        </View>
-      ) : (
-        <View>
-          <View style={[styles.card, { backgroundColor: cardBg1 }]}>
-            <View style={styles.profilePhotoContainer}>
-              {isPhotoInForm ? (
-                <Image
-                  source={{ uri: photoURLFieldValue }}
-                  style={styles.profilePhoto}
-                />
-              ) : (
-                <SimpleLineIcons name='user' size={96} color={color2} />
-              )}
-            </View>
-
-            <View style={styles.photoButtonsContainer}>
-              <ThirdButton
-                style={styles.photoBtn}
-                onPress={() => {
-                  setDeletePhotoModal(true)
-                }}
-              >
-                <Feather name='trash-2' size={24} color={color1} />
-              </ThirdButton>
-
-              <ThirdButton style={styles.photoBtn}>
-                <Feather name='camera' size={24} color={color1} />
-              </ThirdButton>
-            </View>
+        {userIsLoading || skillsIsLoading ? (
+          <View style={styles.noContent}>
+            <ActivityIndicator size='large' color={color1} />
           </View>
-
-          <View style={[styles.card, { backgroundColor: cardBg1 }]}>
+        ) : !userData || !skillsData || userError || skillsError ? (
+          <View style={styles.noContent}>
             <Text
               style={[styles.errorText, { color: color1 }]}
-            >{`hello world`}</Text>
+            >{`Ha ocurrido un error al obtener los datos, o puede ser que no tengas conexión a internet.`}</Text>
+            <ThirdButton
+              loading={userIsFetching}
+              disabled={userIsFetching}
+              onPress={() => {
+                userRefetch()
+                skillsRefetch()
+              }}
+            >{`Reintentar`}</ThirdButton>
           </View>
+        ) : (
+          <View>
+            <View style={[styles.card, { backgroundColor: cardBg1 }]}>
+              <View style={styles.profilePhotoContainer}>
+                {isPhotoInForm ? (
+                  <Image
+                    source={{ uri: photoURLFieldValue }}
+                    style={styles.profilePhoto}
+                  />
+                ) : (
+                  <SimpleLineIcons name='user' size={96} color={color2} />
+                )}
+              </View>
 
-          <BlankSpaceView />
-        </View>
-      )}
+              <View style={styles.photoButtonsContainer}>
+                <ThirdButton
+                  style={styles.photoBtn}
+                  onPress={() => {
+                    setDeletePhotoModal(true)
+                  }}
+                >
+                  <Feather name='trash-2' size={24} color={color1} />
+                </ThirdButton>
 
-      <MainModal
-        title={`Confirmar`}
-        visible={deletePhotoModal}
-        onPressClose={() => {
-          setDeletePhotoModal(false)
-        }}
-      >
-        <View style={styles.deletePhotoModalContainer}>
-          <Text style={[styles.deletePhotoModalText, { color: modalColor }]}>
-            {`¿Deseas eliminar tu foto de perfil?`}
-          </Text>
+                <ThirdButton style={styles.photoBtn}>
+                  <Feather name='camera' size={24} color={color1} />
+                </ThirdButton>
+              </View>
+            </View>
 
-          <MainButton>{`Si, eliminar`}</MainButton>
+            <View style={[styles.card, { backgroundColor: cardBg1 }]}>
+              <Text
+                style={[styles.errorText, { color: color1 }]}
+              >{`hello world`}</Text>
+            </View>
 
-          <ThirdButton
-            onPress={() => {
-              setDeletePhotoModal(false)
-            }}
-          >{`Cancelar`}</ThirdButton>
-        </View>
-      </MainModal>
-    </ScrollView>
+            <BlankSpaceView />
+          </View>
+        )}
+
+        <MainModal
+          title={`Confirmar`}
+          visible={deletePhotoModal}
+          onPressClose={() => {
+            setDeletePhotoModal(false)
+          }}
+        >
+          <View style={styles.deletePhotoModalContainer}>
+            <Text style={[styles.deletePhotoModalText, { color: modalColor }]}>
+              {`¿Deseas eliminar tu foto de perfil?`}
+            </Text>
+
+            <MainButton>{`Si, eliminar`}</MainButton>
+
+            <ThirdButton
+              onPress={() => {
+                setDeletePhotoModal(false)
+              }}
+            >{`Cancelar`}</ThirdButton>
+          </View>
+        </MainModal>
+      </ScrollView>
+    </KeyboardAvoidingView>
   )
 }
 
 const styles = StyleSheet.create({
+  kbAvoidingView: {
+    flex: 1,
+  },
   svContentContainer: {
     padding: 20,
     flexGrow: 1,
