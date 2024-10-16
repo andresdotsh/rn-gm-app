@@ -54,6 +54,7 @@ export const API_BASE_URL = process.env.EXPO_PUBLIC_REST_API_BASE_URL
 export const CC_WIDTH_STYLES = {
   marginHorizontal: 'auto',
   minWidth: 320,
-  width: '100%',
+  // width: '100%', // TODO: -> uncomment
+  width: 320,
   maxWidth: 500,
 }

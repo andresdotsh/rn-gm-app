@@ -1,5 +1,6 @@
 import { forwardRef } from 'react'
 import { Pressable, StyleSheet, Text, ActivityIndicator } from 'react-native'
+import { isNonEmptyString } from 'ramda-adjunct'
 
 import useThemeColor from '@/hooks/useThemeColor'
 
@@ -29,8 +30,15 @@ const ThirdButton = forwardRef(function ThirdPressableButton(
       ref={ref}
     >
       {Boolean(loading) && <ActivityIndicator size='small' color={color1} />}
+
       {Boolean(leftIcon) && leftIcon}
-      <Text style={[{ color: color1 }, styles.text]}>{children}</Text>
+
+      {isNonEmptyString(children) ? (
+        <Text style={[{ color: color1 }, styles.text]}>{children}</Text>
+      ) : (
+        children
+      )}
+
       {Boolean(rightIcon) && rightIcon}
     </Pressable>
   )
