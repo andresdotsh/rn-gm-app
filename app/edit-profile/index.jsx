@@ -8,6 +8,7 @@ import {
   Image,
   Pressable,
   Linking,
+  TextInput,
   Platform,
   KeyboardAvoidingView,
 } from 'react-native'
@@ -24,14 +25,12 @@ import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons'
 import Feather from '@expo/vector-icons/Feather'
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 
 import {
   CC_WIDTH_STYLES,
-  REGEX_USER_PHONE,
   REGEX_USER_USERNAME,
   REGEX_SN_USERNAME,
-  FIELD_PHONE_MAX_LENGTH,
   FIELD_NAME_MIN_LENGTH,
   FIELD_NAME_MAX_LENGTH,
   FIELD_USERNAME_MIN_LENGTH,
@@ -54,6 +53,11 @@ import SecondButton from '@/ui/SecondButton'
 import ThirdButton from '@/ui/ThirdButton'
 import BlankSpaceView from '@/ui/BlankSpaceView'
 import MainModal from '@/ui/MainModal'
+import dispatchRefreshUserData from '@/events/dispatchRefreshUserData'
+
+const safeString = (value) => {
+  return isNonEmptyString(value) ? value : ''
+}
 
 const schema = yup
   .object({
@@ -63,14 +67,6 @@ const schema = yup
       .required('Campo requerido')
       .min(FIELD_NAME_MIN_LENGTH, 'Mínimo ${min} caracteres')
       .max(FIELD_NAME_MAX_LENGTH, 'Máximo ${max} caracteres'),
-    phoneNumber: yup
-      .string()
-      .trim()
-      .max(FIELD_PHONE_MAX_LENGTH, 'Máximo ${max} dígitos')
-      .matches(REGEX_USER_PHONE, {
-        message: 'Ejemplo: +573101234567',
-        excludeEmptyString: true,
-      }),
     username: yup
       .string()
       .trim()
@@ -132,6 +128,7 @@ const schema = yup
 
 export default function EditProfile() {
   const [deletePhotoModal, setDeletePhotoModal] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const mainBg1 = useThemeColor('mainBg1')
   const mainBg2 = useThemeColor('mainBg2')
@@ -143,6 +140,10 @@ export default function EditProfile() {
   const cardBg1 = useThemeColor('cardBg1')
   const cardBg2 = useThemeColor('cardBg2')
   const modalColor = useThemeColor('color2')
+  const textInputBgColor = useThemeColor('mainBg2')
+  const placeholderColor = useThemeColor('color3')
+  const errorColor = useThemeColor('color4')
+  const inputBorderColor = useThemeColor('color3')
 
   const loggedUserUid = useLoggedUserStore((s) => s.loggedUserUid)
 
@@ -191,6 +192,7 @@ export default function EditProfile() {
   }, [skillsData, userData])
 
   const {
+    control,
     register,
     handleSubmit,
     formState: { errors },
@@ -200,16 +202,15 @@ export default function EditProfile() {
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      photoURL: userData?.photoURL ?? '',
-      displayName: userData?.displayName ?? '',
-      phoneNumber: userData?.phoneNumber ?? '',
-      username: userData?.username ?? '',
-      snUserTiktok: userData?.snUserTiktok ?? '',
-      snUserInstagram: userData?.snUserInstagram ?? '',
-      snUserXcom: userData?.snUserXcom ?? '',
-      snUserSnapchat: userData?.snUserSnapchat ?? '',
-      snUserYoutube: userData?.snUserYoutube ?? '',
-      snUserFacebook: userData?.snUserFacebook ?? '',
+      photoURL: safeString(userData?.photoURL),
+      displayName: safeString(userData?.displayName),
+      username: safeString(userData?.username),
+      snUserTiktok: safeString(userData?.snUserTiktok),
+      snUserInstagram: safeString(userData?.snUserInstagram),
+      snUserXcom: safeString(userData?.snUserXcom),
+      snUserSnapchat: safeString(userData?.snUserSnapchat),
+      snUserYoutube: safeString(userData?.snUserYoutube),
+      snUserFacebook: safeString(userData?.snUserFacebook),
       ...skillsDefaultValues,
     },
   })
@@ -221,6 +222,10 @@ export default function EditProfile() {
   const snUserSnapchatFieldValue = watch('snUserSnapchat')
   const snUserYoutubeFieldValue = watch('snUserYoutube')
   const snUserFacebookFieldValue = watch('snUserFacebook')
+
+  const onSubmit = useCallback(async (formData) => {
+    console.log(`formData`, formData)
+  }, [])
 
   const isPhotoInForm = isNonEmptyString(photoURLFieldValue)
 
@@ -279,24 +284,305 @@ export default function EditProfile() {
               <View style={styles.photoButtonsContainer}>
                 <ThirdButton
                   style={styles.photoBtn}
+                  disabled={isSubmitting}
                   onPress={() => {
                     setDeletePhotoModal(true)
                   }}
                 >
-                  <Feather name='trash-2' size={24} color={color1} />
+                  <Feather name='trash-2' size={24} color={color2} />
                 </ThirdButton>
 
-                <ThirdButton style={styles.photoBtn}>
-                  <Feather name='camera' size={24} color={color1} />
+                <ThirdButton style={styles.photoBtn} disabled={isSubmitting}>
+                  <Feather name='image' size={24} color={color2} />
                 </ThirdButton>
               </View>
             </View>
 
             <View style={[styles.card, { backgroundColor: cardBg1 }]}>
-              <Text
-                style={[styles.errorText, { color: color1 }]}
-              >{`hello world`}</Text>
+              <View>
+                <Text style={[styles.formInputLabel, { color: color1 }]}>
+                  {`* Nombre`}
+                </Text>
+                <Controller
+                  control={control}
+                  name='displayName'
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      style={[
+                        styles.formInputField,
+                        {
+                          backgroundColor: textInputBgColor,
+                          color: color1,
+                          borderColor: inputBorderColor,
+                        },
+                      ]}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      placeholder='* Nombre'
+                      placeholderTextColor={placeholderColor}
+                      editable={!isSubmitting}
+                    />
+                  )}
+                />
+                {errors.displayName && (
+                  <Text style={[styles.formInputError, { color: errorColor }]}>
+                    {errors.displayName.message}
+                  </Text>
+                )}
+              </View>
+
+              <View>
+                <Text style={[styles.formInputLabel, { color: color1 }]}>
+                  {`* Username`}
+                </Text>
+                <Text style={[styles.formInputLabel, { color: color3 }]}>
+                  {`@` + usernameFieldValue.toLowerCase()}
+                </Text>
+                <Controller
+                  control={control}
+                  name='username'
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      style={[
+                        styles.formInputField,
+                        {
+                          backgroundColor: textInputBgColor,
+                          color: color1,
+                          borderColor: inputBorderColor,
+                        },
+                      ]}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      placeholder='* Username'
+                      placeholderTextColor={placeholderColor}
+                      editable={!isSubmitting}
+                      autoCapitalize='none'
+                    />
+                  )}
+                />
+                {errors.username && (
+                  <Text style={[styles.formInputError, { color: errorColor }]}>
+                    {errors.username.message}
+                  </Text>
+                )}
+              </View>
             </View>
+
+            <View style={[styles.card, { backgroundColor: cardBg1 }]}>
+              <View>
+                <Text style={[styles.formInputLabel, { color: color1 }]}>
+                  {SN_TIKTOK_USER_LABEL + snUserTiktokFieldValue}
+                </Text>
+                <Controller
+                  control={control}
+                  name='snUserTiktok'
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      style={[
+                        styles.formInputField,
+                        {
+                          backgroundColor: textInputBgColor,
+                          color: color1,
+                          borderColor: inputBorderColor,
+                        },
+                      ]}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      placeholder=''
+                      placeholderTextColor={placeholderColor}
+                      editable={!isSubmitting}
+                      autoCapitalize='none'
+                    />
+                  )}
+                />
+                {errors.snUserTiktok && (
+                  <Text style={[styles.formInputError, { color: errorColor }]}>
+                    {errors.snUserTiktok.message}
+                  </Text>
+                )}
+              </View>
+
+              <View>
+                <Text style={[styles.formInputLabel, { color: color1 }]}>
+                  {SN_INSTAGRAM_USER_LABEL + snUserInstagramFieldValue}
+                </Text>
+                <Controller
+                  control={control}
+                  name='snUserInstagram'
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      style={[
+                        styles.formInputField,
+                        {
+                          backgroundColor: textInputBgColor,
+                          color: color1,
+                          borderColor: inputBorderColor,
+                        },
+                      ]}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      placeholder=''
+                      placeholderTextColor={placeholderColor}
+                      editable={!isSubmitting}
+                      autoCapitalize='none'
+                    />
+                  )}
+                />
+                {errors.snUserInstagram && (
+                  <Text style={[styles.formInputError, { color: errorColor }]}>
+                    {errors.snUserInstagram.message}
+                  </Text>
+                )}
+              </View>
+
+              <View>
+                <Text style={[styles.formInputLabel, { color: color1 }]}>
+                  {SN_X_USER_LABEL + snUserXcomFieldValue}
+                </Text>
+                <Controller
+                  control={control}
+                  name='snUserXcom'
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      style={[
+                        styles.formInputField,
+                        {
+                          backgroundColor: textInputBgColor,
+                          color: color1,
+                          borderColor: inputBorderColor,
+                        },
+                      ]}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      placeholder=''
+                      placeholderTextColor={placeholderColor}
+                      editable={!isSubmitting}
+                      autoCapitalize='none'
+                    />
+                  )}
+                />
+                {errors.snUserXcom && (
+                  <Text style={[styles.formInputError, { color: errorColor }]}>
+                    {errors.snUserXcom.message}
+                  </Text>
+                )}
+              </View>
+
+              <View>
+                <Text style={[styles.formInputLabel, { color: color1 }]}>
+                  {SN_SNAPCHAT_USER_LABEL + snUserSnapchatFieldValue}
+                </Text>
+                <Controller
+                  control={control}
+                  name='snUserSnapchat'
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      style={[
+                        styles.formInputField,
+                        {
+                          backgroundColor: textInputBgColor,
+                          color: color1,
+                          borderColor: inputBorderColor,
+                        },
+                      ]}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      placeholder=''
+                      placeholderTextColor={placeholderColor}
+                      editable={!isSubmitting}
+                      autoCapitalize='none'
+                    />
+                  )}
+                />
+                {errors.snUserSnapchat && (
+                  <Text style={[styles.formInputError, { color: errorColor }]}>
+                    {errors.snUserSnapchat.message}
+                  </Text>
+                )}
+              </View>
+
+              <View>
+                <Text style={[styles.formInputLabel, { color: color1 }]}>
+                  {SN_YOUTUBE_USER_LABEL + snUserYoutubeFieldValue}
+                </Text>
+                <Controller
+                  control={control}
+                  name='snUserYoutube'
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      style={[
+                        styles.formInputField,
+                        {
+                          backgroundColor: textInputBgColor,
+                          color: color1,
+                          borderColor: inputBorderColor,
+                        },
+                      ]}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      placeholder=''
+                      placeholderTextColor={placeholderColor}
+                      editable={!isSubmitting}
+                      autoCapitalize='none'
+                    />
+                  )}
+                />
+                {errors.snUserYoutube && (
+                  <Text style={[styles.formInputError, { color: errorColor }]}>
+                    {errors.snUserYoutube.message}
+                  </Text>
+                )}
+              </View>
+
+              <View>
+                <Text style={[styles.formInputLabel, { color: color1 }]}>
+                  {SN_FACEBOOK_USER_LABEL + snUserFacebookFieldValue}
+                </Text>
+                <Controller
+                  control={control}
+                  name='snUserFacebook'
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      style={[
+                        styles.formInputField,
+                        {
+                          backgroundColor: textInputBgColor,
+                          color: color1,
+                          borderColor: inputBorderColor,
+                        },
+                      ]}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      placeholder=''
+                      placeholderTextColor={placeholderColor}
+                      editable={!isSubmitting}
+                      autoCapitalize='none'
+                    />
+                  )}
+                />
+                {errors.snUserFacebook && (
+                  <Text style={[styles.formInputError, { color: errorColor }]}>
+                    {errors.snUserFacebook.message}
+                  </Text>
+                )}
+              </View>
+            </View>
+
+            <MainButton
+              onPress={handleSubmit(onSubmit)}
+              disabled={isSubmitting}
+              loading={isSubmitting}
+            >
+              {`Guardar`}
+            </MainButton>
 
             <BlankSpaceView />
           </View>
@@ -382,5 +668,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'Ubuntu400',
     textAlign: 'center',
+  },
+  formInputLabel: { fontFamily: 'Ubuntu400', fontSize: 16, marginBottom: 5 },
+  formInputError: { fontFamily: 'Ubuntu400', fontSize: 16, marginTop: 2 },
+  formInputField: {
+    fontFamily: 'Ubuntu400',
+    fontSize: 18,
+    borderRadius: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderWidth: 1,
   },
 })

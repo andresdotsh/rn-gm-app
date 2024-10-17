@@ -138,7 +138,7 @@ export default function SignupScreen({
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value}
-                  placeholder='* Nombre o Alias'
+                  placeholder='* Nombre'
                   placeholderTextColor={placeholderColor}
                   editable={!isAuthenticating}
                 />

@@ -13,10 +13,7 @@ export default function formatUserData(uid, userData) {
     return null
   }
 
-  const cleanData = omit(
-    ['createdAt', 'lastLogin', 'loginCount', 'providerData'],
-    userData,
-  )
+  const cleanData = omit(['createdAt', 'lastLogin', 'loginCount'], userData)
 
   return { ...cleanData, uid }
 }

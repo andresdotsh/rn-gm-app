@@ -136,9 +136,7 @@ export default function LoginSignup() {
         email: result.user.email,
         displayName: result.user.displayName || newUserDisplayname,
         photoURL: result.user.photoURL,
-        phoneNumber: result.user.phoneNumber,
         createdAt: serverTimestamp(),
-        providerData: result.user.providerData,
         lastLogin: serverTimestamp(),
         loginCount: increment(1),
       }
@@ -149,10 +147,7 @@ export default function LoginSignup() {
 
       if (userExists) {
         // if user exists, update only some fields
-        const fieldsToUpdate = pick(
-          ['providerData', 'lastLogin', 'loginCount'],
-          userPayload,
-        )
+        const fieldsToUpdate = pick(['lastLogin', 'loginCount'], userPayload)
         await setDoc(userDocRef, fieldsToUpdate, { merge: true })
       } else {
         // if user doesn't exist, create it with the whole payload
