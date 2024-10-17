@@ -15,7 +15,7 @@ import { useLocalSearchParams, Stack, Link } from 'expo-router'
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons'
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 import ProgressBar from 'react-native-progress/Bar'
-import { isNonEmptyString, isNonEmptyArray, isValidNumber } from 'ramda-adjunct'
+import { isNonEmptyString, isNonEmptyArray } from 'ramda-adjunct'
 
 import {
   CC_WIDTH_STYLES,
@@ -33,6 +33,7 @@ import { useLoggedUserStore } from '@/hooks/useStore'
 import MainButton from '@/ui/MainButton'
 import ThirdButton from '@/ui/ThirdButton'
 import BlankSpaceView from '@/ui/BlankSpaceView'
+import isValidSkill from '@/utils/isValidSkill'
 
 export default function UserDetail() {
   const [refreshing, setRefreshing] = useState(false)
@@ -177,7 +178,7 @@ export default function UserDetail() {
               <View>
                 {skillsData.map((skill) => {
                   const rawValue = userData?.[skill?.key]
-                  const skillValue = isValidNumber(rawValue) ? rawValue : 0
+                  const skillValue = isValidSkill(rawValue) ? rawValue : 0
                   const progressValue = skillValue / 100
 
                   return (

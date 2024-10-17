@@ -14,18 +14,14 @@ import {
 } from 'react-native'
 import { useQuery } from '@tanstack/react-query'
 import { Stack } from 'expo-router'
-import {
-  isValidNumber,
-  isInteger,
-  isNonEmptyArray,
-  isNonEmptyString,
-} from 'ramda-adjunct'
+import { isNonEmptyArray, isNonEmptyString } from 'ramda-adjunct'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons'
 import Feather from '@expo/vector-icons/Feather'
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useForm, Controller } from 'react-hook-form'
+import { Slider } from '@miblanchard/react-native-slider'
 
 import {
   CC_WIDTH_STYLES,
@@ -53,6 +49,7 @@ import SecondButton from '@/ui/SecondButton'
 import ThirdButton from '@/ui/ThirdButton'
 import BlankSpaceView from '@/ui/BlankSpaceView'
 import MainModal from '@/ui/MainModal'
+import isValidSkill from '@/utils/isValidSkill'
 import dispatchRefreshUserData from '@/events/dispatchRefreshUserData'
 
 const safeString = (value) => {
@@ -144,6 +141,8 @@ export default function EditProfile() {
   const placeholderColor = useThemeColor('color3')
   const errorColor = useThemeColor('color4')
   const inputBorderColor = useThemeColor('color3')
+  const pgColor = useThemeColor('btn1')
+  const pgBgColor = useThemeColor('cardBg2')
 
   const loggedUserUid = useLoggedUserStore((s) => s.loggedUserUid)
 
@@ -167,7 +166,6 @@ export default function EditProfile() {
     queryKey: ['skills'],
     queryFn: () => getAllSkills(),
   })
-  console.log(`---------------------------------------------------`)
 
   const skillsDefaultValues = useMemo(() => {
     const res = {}
@@ -176,13 +174,7 @@ export default function EditProfile() {
       skillsData.forEach((skill) => {
         const skillKey = skill?.key
         const rawValue = userData?.[skillKey] ?? 0
-        const skillValue =
-          isValidNumber(rawValue) &&
-          isInteger(rawValue) &&
-          rawValue >= 0 &&
-          rawValue <= 100
-            ? rawValue
-            : 0
+        const skillValue = isValidSkill(rawValue) ? rawValue : 0
 
         res[skillKey] = skillValue
       })
@@ -228,6 +220,8 @@ export default function EditProfile() {
   }, [])
 
   const isPhotoInForm = isNonEmptyString(photoURLFieldValue)
+
+  console.log(`---------------------------------------------------`)
 
   return (
     <KeyboardAvoidingView
@@ -369,6 +363,35 @@ export default function EditProfile() {
                 )}
               </View>
             </View>
+
+            {isNonEmptyArray(skillsData) && (
+              <View style={[styles.card, { backgroundColor: cardBg1 }]}>
+                {skillsData.map((skill) => {
+                  const formSkillValue = watch(skill?.key)
+
+                  return (
+                    <View key={skill?.uid}>
+                      <Text style={[styles.formSliderLabel, { color: color1 }]}>
+                        {`${skill?.name}: ${formSkillValue}`}
+                      </Text>
+                      <Slider
+                        value={formSkillValue}
+                        onValueChange={(value) => {
+                          setValue(skill?.key, value[0])
+                        }}
+                        minimumValue={0}
+                        maximumValue={100}
+                        step={1}
+                        thumbTintColor={pgColor}
+                        minimumTrackTintColor={pgColor}
+                        maximumTrackTintColor={pgBgColor}
+                        containerStyle={styles.formSliderContainer}
+                      />
+                    </View>
+                  )
+                })}
+              </View>
+            )}
 
             <View style={[styles.card, { backgroundColor: cardBg1 }]}>
               <View>
@@ -669,6 +692,8 @@ const styles = StyleSheet.create({
     fontFamily: 'Ubuntu400',
     textAlign: 'center',
   },
+  formSliderLabel: { fontFamily: 'Ubuntu400', fontSize: 16 },
+  formSliderContainer: { height: 22 },
   formInputLabel: { fontFamily: 'Ubuntu400', fontSize: 16, marginBottom: 5 },
   formInputError: { fontFamily: 'Ubuntu400', fontSize: 16, marginTop: 2 },
   formInputField: {
