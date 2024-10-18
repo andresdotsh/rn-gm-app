@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import {
   StyleSheet,
   Text,
@@ -14,6 +14,7 @@ import {
 } from 'react-native'
 import { useQuery } from '@tanstack/react-query'
 import { Stack } from 'expo-router'
+import { keys } from 'ramda'
 import { isNonEmptyArray, isNonEmptyString } from 'ramda-adjunct'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons'
@@ -31,12 +32,6 @@ import {
   FIELD_NAME_MAX_LENGTH,
   FIELD_USERNAME_MIN_LENGTH,
   FIELD_USERNAME_MAX_LENGTH,
-  SN_TIKTOK_USER_LABEL,
-  SN_INSTAGRAM_USER_LABEL,
-  SN_X_USER_LABEL,
-  SN_SNAPCHAT_USER_LABEL,
-  SN_YOUTUBE_USER_LABEL,
-  SN_FACEBOOK_USER_LABEL,
   FIELD_SN_USERNAME_MAX_LENGTH,
 } from '@/constants/constants'
 import { useLoggedUserStore } from '@/hooks/useStore'
@@ -124,6 +119,17 @@ const schema = yup
   .required()
 
 export default function EditProfile() {
+  const scrollViewRef = useRef(null)
+  const contentOffsetYRef = useRef(0)
+  const displayNameFormFieldRef = useRef(null)
+  const usernameFormFieldRef = useRef(null)
+  const snUserTiktokFormFieldRef = useRef(null)
+  const snUserInstagramFormFieldRef = useRef(null)
+  const snUserXcomFormFieldRef = useRef(null)
+  const snUserSnapchatFormFieldRef = useRef(null)
+  const snUserYoutubeFormFieldRef = useRef(null)
+  const snUserFacebookFormFieldRef = useRef(null)
+
   const [deletePhotoModal, setDeletePhotoModal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -219,6 +225,40 @@ export default function EditProfile() {
     console.log(`formData`, formData)
   }, [])
 
+  const onError = useCallback((formErrors) => {
+    function handleMeasure(x, y, width, height, pageX, pageY) {
+      const ADJUSTMENT = 140
+      const errorPosY = contentOffsetYRef.current - ADJUSTMENT + pageY
+
+      scrollViewRef.current?.scrollTo({
+        y: errorPosY,
+        animated: true,
+      })
+    }
+
+    if (formErrors?.displayName) {
+      displayNameFormFieldRef.current?.measure(handleMeasure)
+    } else if (formErrors?.username) {
+      usernameFormFieldRef.current?.measure(handleMeasure)
+    } else if (formErrors?.snUserTiktok) {
+      snUserTiktokFormFieldRef.current?.measure(handleMeasure)
+    } else if (formErrors?.snUserInstagram) {
+      snUserInstagramFormFieldRef.current?.measure(handleMeasure)
+    } else if (formErrors?.snUserXcom) {
+      snUserXcomFormFieldRef.current?.measure(handleMeasure)
+    } else if (formErrors?.snUserSnapchat) {
+      snUserSnapchatFormFieldRef.current?.measure(handleMeasure)
+    } else if (formErrors?.snUserYoutube) {
+      snUserYoutubeFormFieldRef.current?.measure(handleMeasure)
+    } else if (formErrors?.snUserFacebook) {
+      snUserFacebookFormFieldRef.current?.measure(handleMeasure)
+    }
+  }, [])
+
+  const onScrollScrollView = useCallback((e) => {
+    contentOffsetYRef.current = e.nativeEvent.contentOffset.y
+  }, [])
+
   const isPhotoInForm = isNonEmptyString(photoURLFieldValue)
 
   console.log(`---------------------------------------------------`)
@@ -229,8 +269,10 @@ export default function EditProfile() {
       style={styles.kbAvoidingView}
     >
       <ScrollView
+        ref={scrollViewRef}
         style={{ backgroundColor: mainBg1 }}
         contentContainerStyle={styles.svContentContainer}
+        onScroll={onScrollScrollView}
       >
         <Stack.Screen
           options={{
@@ -302,12 +344,15 @@ export default function EditProfile() {
                   name='displayName'
                   render={({ field: { onChange, onBlur, value } }) => (
                     <TextInput
+                      ref={displayNameFormFieldRef}
                       style={[
                         styles.formInputField,
                         {
                           backgroundColor: textInputBgColor,
                           color: color1,
-                          borderColor: inputBorderColor,
+                          borderColor: errors.displayName
+                            ? errorColor
+                            : inputBorderColor,
                         },
                       ]}
                       onBlur={onBlur}
@@ -328,7 +373,7 @@ export default function EditProfile() {
 
               <View>
                 <Text style={[styles.formInputLabel, { color: color1 }]}>
-                  {`* Username`}
+                  {`* Usuario`}
                 </Text>
                 <Text style={[styles.formInputLabel, { color: color3 }]}>
                   {`@` + usernameFieldValue.toLowerCase()}
@@ -338,18 +383,21 @@ export default function EditProfile() {
                   name='username'
                   render={({ field: { onChange, onBlur, value } }) => (
                     <TextInput
+                      ref={usernameFormFieldRef}
                       style={[
                         styles.formInputField,
                         {
                           backgroundColor: textInputBgColor,
                           color: color1,
-                          borderColor: inputBorderColor,
+                          borderColor: errors.username
+                            ? errorColor
+                            : inputBorderColor,
                         },
                       ]}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
-                      placeholder='* Username'
+                      placeholder='* Usuario'
                       placeholderTextColor={placeholderColor}
                       editable={!isSubmitting}
                       autoCapitalize='none'
@@ -396,25 +444,31 @@ export default function EditProfile() {
             <View style={[styles.card, { backgroundColor: cardBg1 }]}>
               <View>
                 <Text style={[styles.formInputLabel, { color: color1 }]}>
-                  {SN_TIKTOK_USER_LABEL + snUserTiktokFieldValue}
+                  {'Usuario de TikTok:'}
+                </Text>
+                <Text style={[styles.formInputLabel, { color: color3 }]}>
+                  {'@' + snUserTiktokFieldValue}
                 </Text>
                 <Controller
                   control={control}
                   name='snUserTiktok'
                   render={({ field: { onChange, onBlur, value } }) => (
                     <TextInput
+                      ref={snUserTiktokFormFieldRef}
                       style={[
                         styles.formInputField,
                         {
                           backgroundColor: textInputBgColor,
                           color: color1,
-                          borderColor: inputBorderColor,
+                          borderColor: errors.snUserTiktok
+                            ? errorColor
+                            : inputBorderColor,
                         },
                       ]}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
-                      placeholder=''
+                      placeholder='...'
                       placeholderTextColor={placeholderColor}
                       editable={!isSubmitting}
                       autoCapitalize='none'
@@ -430,25 +484,31 @@ export default function EditProfile() {
 
               <View>
                 <Text style={[styles.formInputLabel, { color: color1 }]}>
-                  {SN_INSTAGRAM_USER_LABEL + snUserInstagramFieldValue}
+                  {'Usuario de Instagram:'}
+                </Text>
+                <Text style={[styles.formInputLabel, { color: color3 }]}>
+                  {'@' + snUserInstagramFieldValue}
                 </Text>
                 <Controller
                   control={control}
                   name='snUserInstagram'
                   render={({ field: { onChange, onBlur, value } }) => (
                     <TextInput
+                      ref={snUserInstagramFormFieldRef}
                       style={[
                         styles.formInputField,
                         {
                           backgroundColor: textInputBgColor,
                           color: color1,
-                          borderColor: inputBorderColor,
+                          borderColor: errors.snUserInstagram
+                            ? errorColor
+                            : inputBorderColor,
                         },
                       ]}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
-                      placeholder=''
+                      placeholder='...'
                       placeholderTextColor={placeholderColor}
                       editable={!isSubmitting}
                       autoCapitalize='none'
@@ -464,25 +524,31 @@ export default function EditProfile() {
 
               <View>
                 <Text style={[styles.formInputLabel, { color: color1 }]}>
-                  {SN_X_USER_LABEL + snUserXcomFieldValue}
+                  {'Usuario de X (twitter):'}
+                </Text>
+                <Text style={[styles.formInputLabel, { color: color3 }]}>
+                  {'@' + snUserXcomFieldValue}
                 </Text>
                 <Controller
                   control={control}
                   name='snUserXcom'
                   render={({ field: { onChange, onBlur, value } }) => (
                     <TextInput
+                      ref={snUserXcomFormFieldRef}
                       style={[
                         styles.formInputField,
                         {
                           backgroundColor: textInputBgColor,
                           color: color1,
-                          borderColor: inputBorderColor,
+                          borderColor: errors.snUserXcom
+                            ? errorColor
+                            : inputBorderColor,
                         },
                       ]}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
-                      placeholder=''
+                      placeholder='...'
                       placeholderTextColor={placeholderColor}
                       editable={!isSubmitting}
                       autoCapitalize='none'
@@ -498,25 +564,31 @@ export default function EditProfile() {
 
               <View>
                 <Text style={[styles.formInputLabel, { color: color1 }]}>
-                  {SN_SNAPCHAT_USER_LABEL + snUserSnapchatFieldValue}
+                  {'Usuario de Snapchat:'}
+                </Text>
+                <Text style={[styles.formInputLabel, { color: color3 }]}>
+                  {'@' + snUserSnapchatFieldValue}
                 </Text>
                 <Controller
                   control={control}
                   name='snUserSnapchat'
                   render={({ field: { onChange, onBlur, value } }) => (
                     <TextInput
+                      ref={snUserSnapchatFormFieldRef}
                       style={[
                         styles.formInputField,
                         {
                           backgroundColor: textInputBgColor,
                           color: color1,
-                          borderColor: inputBorderColor,
+                          borderColor: errors.snUserSnapchat
+                            ? errorColor
+                            : inputBorderColor,
                         },
                       ]}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
-                      placeholder=''
+                      placeholder='...'
                       placeholderTextColor={placeholderColor}
                       editable={!isSubmitting}
                       autoCapitalize='none'
@@ -532,25 +604,31 @@ export default function EditProfile() {
 
               <View>
                 <Text style={[styles.formInputLabel, { color: color1 }]}>
-                  {SN_YOUTUBE_USER_LABEL + snUserYoutubeFieldValue}
+                  {'Usuario de YouTube:'}
+                </Text>
+                <Text style={[styles.formInputLabel, { color: color3 }]}>
+                  {'@' + snUserYoutubeFieldValue}
                 </Text>
                 <Controller
                   control={control}
                   name='snUserYoutube'
                   render={({ field: { onChange, onBlur, value } }) => (
                     <TextInput
+                      ref={snUserYoutubeFormFieldRef}
                       style={[
                         styles.formInputField,
                         {
                           backgroundColor: textInputBgColor,
                           color: color1,
-                          borderColor: inputBorderColor,
+                          borderColor: errors.snUserYoutube
+                            ? errorColor
+                            : inputBorderColor,
                         },
                       ]}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
-                      placeholder=''
+                      placeholder='...'
                       placeholderTextColor={placeholderColor}
                       editable={!isSubmitting}
                       autoCapitalize='none'
@@ -566,25 +644,31 @@ export default function EditProfile() {
 
               <View>
                 <Text style={[styles.formInputLabel, { color: color1 }]}>
-                  {SN_FACEBOOK_USER_LABEL + snUserFacebookFieldValue}
+                  {'Usuario de Facebook:'}
+                </Text>
+                <Text style={[styles.formInputLabel, { color: color3 }]}>
+                  {'@' + snUserFacebookFieldValue}
                 </Text>
                 <Controller
                   control={control}
                   name='snUserFacebook'
                   render={({ field: { onChange, onBlur, value } }) => (
                     <TextInput
+                      ref={snUserFacebookFormFieldRef}
                       style={[
                         styles.formInputField,
                         {
                           backgroundColor: textInputBgColor,
                           color: color1,
-                          borderColor: inputBorderColor,
+                          borderColor: errors.snUserFacebook
+                            ? errorColor
+                            : inputBorderColor,
                         },
                       ]}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
-                      placeholder=''
+                      placeholder='...'
                       placeholderTextColor={placeholderColor}
                       editable={!isSubmitting}
                       autoCapitalize='none'
@@ -600,7 +684,7 @@ export default function EditProfile() {
             </View>
 
             <MainButton
-              onPress={handleSubmit(onSubmit)}
+              onPress={handleSubmit(onSubmit, onError)}
               disabled={isSubmitting}
               loading={isSubmitting}
             >
@@ -701,7 +785,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     borderRadius: 5,
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     borderWidth: 1,
   },
 })
