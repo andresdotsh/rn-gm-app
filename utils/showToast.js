@@ -27,6 +27,8 @@ export default function showToast(message) {
       maxWidth: CC_WIDTH_STYLES.minWidth,
       borderWidth: 1,
       borderColor: colors.dark.color5,
+      paddingVertical: 10,
+      paddingHorizontal: 20,
     },
     shadowColor: colors.dark.color5,
   })
