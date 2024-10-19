@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
+import { useState, useCallback, useMemo, useRef } from 'react'
 import {
   StyleSheet,
   Text,
@@ -6,23 +6,41 @@ import {
   View,
   ActivityIndicator,
   Image,
-  Pressable,
-  Linking,
   TextInput,
   Platform,
   KeyboardAvoidingView,
 } from 'react-native'
-import { useQuery } from '@tanstack/react-query'
+import {
+  addDoc,
+  doc,
+  getDoc,
+  updateDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  serverTimestamp,
+} from 'firebase/firestore'
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from 'firebase/storage'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Stack } from 'expo-router'
-import { keys } from 'ramda'
+import { startsWith, not, keys, pick, identity } from 'ramda'
 import { isNonEmptyArray, isNonEmptyString } from 'ramda-adjunct'
-import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons'
 import Feather from '@expo/vector-icons/Feather'
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useForm, Controller } from 'react-hook-form'
 import { Slider } from '@miblanchard/react-native-slider'
+import { launchImageLibraryAsync, MediaTypeOptions } from 'expo-image-picker'
+import { manipulateAsync, SaveFormat } from 'expo-image-manipulator'
+import { useNavigation } from '@react-navigation/native'
 
 import {
   CC_WIDTH_STYLES,
@@ -36,16 +54,14 @@ import {
 } from '@/constants/constants'
 import { useLoggedUserStore } from '@/hooks/useStore'
 import useThemeColor from '@/hooks/useThemeColor'
-import { storage } from '@/data/firebase'
+import { db, storage } from '@/data/firebase'
 import getUserByUid from '@/data/getUserByUid'
 import getAllSkills from '@/data/getAllSkills'
 import MainButton from '@/ui/MainButton'
-import SecondButton from '@/ui/SecondButton'
 import ThirdButton from '@/ui/ThirdButton'
 import BlankSpaceView from '@/ui/BlankSpaceView'
 import MainModal from '@/ui/MainModal'
 import isValidSkill from '@/utils/isValidSkill'
-import dispatchRefreshUserData from '@/events/dispatchRefreshUserData'
 
 const safeString = (value) => {
   return isNonEmptyString(value) ? value : ''
@@ -130,18 +146,17 @@ export default function EditProfile() {
   const snUserYoutubeFormFieldRef = useRef(null)
   const snUserFacebookFormFieldRef = useRef(null)
 
-  const [deletePhotoModal, setDeletePhotoModal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showErrorModal, setShowErrorModal] = useState(false)
+  const [deletePhotoModal, setDeletePhotoModal] = useState(false)
+  const [settingProfilePhoto, setSettingProfilePhoto] = useState(false)
 
   const mainBg1 = useThemeColor('mainBg1')
-  const mainBg2 = useThemeColor('mainBg2')
   const color1 = useThemeColor('color1')
   const color2 = useThemeColor('color2')
   const color3 = useThemeColor('color3')
   const color4 = useThemeColor('color4')
-  const color5 = useThemeColor('color5')
   const cardBg1 = useThemeColor('cardBg1')
-  const cardBg2 = useThemeColor('cardBg2')
   const modalColor = useThemeColor('color2')
   const textInputBgColor = useThemeColor('mainBg2')
   const placeholderColor = useThemeColor('color3')
@@ -173,6 +188,9 @@ export default function EditProfile() {
     queryFn: () => getAllSkills(),
   })
 
+  const queryClient = useQueryClient()
+  const navigation = useNavigation()
+
   const skillsDefaultValues = useMemo(() => {
     const res = {}
 
@@ -191,7 +209,6 @@ export default function EditProfile() {
 
   const {
     control,
-    register,
     handleSubmit,
     formState: { errors },
     setValue,
@@ -200,7 +217,7 @@ export default function EditProfile() {
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      photoURL: safeString(userData?.photoURL),
+      photoURL: userData?.photoURL,
       displayName: safeString(userData?.displayName),
       username: safeString(userData?.username),
       snUserTiktok: safeString(userData?.snUserTiktok),
@@ -221,47 +238,197 @@ export default function EditProfile() {
   const snUserYoutubeFieldValue = watch('snUserYoutube')
   const snUserFacebookFieldValue = watch('snUserFacebook')
 
-  const onSubmit = useCallback(async (formData) => {
-    console.log(`formData`, formData)
+  const isPhotoInForm = isNonEmptyString(photoURLFieldValue)
+
+  const wip = isSubmitting || settingProfilePhoto
+
+  const handleMeasure = useCallback((x, y, width, height, pageX, pageY) => {
+    const ADJUSTMENT = 140
+    const errorPosY = contentOffsetYRef.current - ADJUSTMENT + pageY
+
+    scrollViewRef.current?.scrollTo({
+      y: errorPosY,
+      animated: true,
+    })
   }, [])
 
-  const onError = useCallback((formErrors) => {
-    function handleMeasure(x, y, width, height, pageX, pageY) {
-      const ADJUSTMENT = 140
-      const errorPosY = contentOffsetYRef.current - ADJUSTMENT + pageY
+  const onSubmit = useCallback(
+    async (formData) => {
+      try {
+        setIsSubmitting(true)
+        const shouldUploadNewProfilePhoto =
+          isNonEmptyString(formData.photoURL) &&
+          not(startsWith('https://', formData.photoURL))
 
-      scrollViewRef.current?.scrollTo({
-        y: errorPosY,
-        animated: true,
-      })
-    }
+        const q = query(
+          collection(db, 'users'),
+          where('username', '==', formData.username),
+        )
+        const querySnap = await getDocs(q)
 
-    if (formErrors?.displayName) {
-      displayNameFormFieldRef.current?.measure(handleMeasure)
-    } else if (formErrors?.username) {
-      usernameFormFieldRef.current?.measure(handleMeasure)
-    } else if (formErrors?.snUserTiktok) {
-      snUserTiktokFormFieldRef.current?.measure(handleMeasure)
-    } else if (formErrors?.snUserInstagram) {
-      snUserInstagramFormFieldRef.current?.measure(handleMeasure)
-    } else if (formErrors?.snUserXcom) {
-      snUserXcomFormFieldRef.current?.measure(handleMeasure)
-    } else if (formErrors?.snUserSnapchat) {
-      snUserSnapchatFormFieldRef.current?.measure(handleMeasure)
-    } else if (formErrors?.snUserYoutube) {
-      snUserYoutubeFormFieldRef.current?.measure(handleMeasure)
-    } else if (formErrors?.snUserFacebook) {
-      snUserFacebookFormFieldRef.current?.measure(handleMeasure)
-    }
-  }, [])
+        const logUserArr = []
+        const foundUids = querySnap.docs.map((doc) => {
+          logUserArr.push({
+            ...doc.data(),
+            _uid: doc.id,
+            _loggedAt: serverTimestamp(),
+          })
+
+          return doc.id
+        })
+
+        if (
+          foundUids.length === 0 ||
+          (foundUids.length === 1 && foundUids[0] === loggedUserUid)
+        ) {
+          let newPhotoURL = formData.photoURL
+
+          const profilePhotoRef = ref(
+            storage,
+            'user/' + loggedUserUid + '/profile/photo.jpg',
+          )
+
+          if (shouldUploadNewProfilePhoto) {
+            const fileRes = await fetch(formData.photoURL)
+            const fileBlob = await fileRes.blob()
+
+            await uploadBytes(profilePhotoRef, fileBlob)
+            newPhotoURL = await getDownloadURL(profilePhotoRef)
+          } else if (!newPhotoURL) {
+            deleteObject(profilePhotoRef).then(identity).catch(identity)
+          }
+
+          const skillsKeys = keys(skillsDefaultValues)
+          const formValues = pick(
+            [
+              'displayName',
+              'username',
+              'snUserTiktok',
+              'snUserInstagram',
+              'snUserXcom',
+              'snUserSnapchat',
+              'snUserYoutube',
+              'snUserFacebook',
+              ...skillsKeys,
+            ],
+            formData,
+          )
+          const userPayload = {
+            ...formValues,
+            photoURL: newPhotoURL,
+          }
+
+          const userDocRef = doc(db, 'users', loggedUserUid)
+
+          let logPayload = null
+          if (foundUids.length === 1) {
+            logPayload = logUserArr[0]
+          } else {
+            const currentUserDocSnap = await getDoc(userDocRef)
+            logPayload = {
+              ...currentUserDocSnap.data(),
+              _uid: currentUserDocSnap.id,
+              _loggedAt: serverTimestamp(),
+            }
+          }
+          addDoc(collection(db, 'log_users'), logPayload)
+            .then(identity)
+            .catch(identity)
+
+          await updateDoc(userDocRef, userPayload)
+          await queryClient.invalidateQueries(['users', loggedUserUid])
+
+          setIsSubmitting(false)
+
+          if (navigation.canGoBack()) {
+            navigation.goBack()
+          } else {
+            navigation.navigate('(tabs)')
+          }
+        } else {
+          setIsSubmitting(false)
+          setError(
+            'username',
+            {
+              type: 'custom',
+              message: 'Usuario no disponible',
+            },
+            {
+              shouldFocus: false,
+            },
+          )
+          usernameFormFieldRef.current?.measure(handleMeasure)
+        }
+      } catch (error) {
+        console.error(error)
+
+        setIsSubmitting(false)
+        setShowErrorModal(true)
+      }
+    },
+    [
+      handleMeasure,
+      loggedUserUid,
+      navigation,
+      queryClient,
+      setError,
+      skillsDefaultValues,
+    ],
+  )
+
+  const onError = useCallback(
+    (formErrors) => {
+      if (formErrors?.displayName) {
+        displayNameFormFieldRef.current?.measure(handleMeasure)
+      } else if (formErrors?.username) {
+        usernameFormFieldRef.current?.measure(handleMeasure)
+      } else if (formErrors?.snUserTiktok) {
+        snUserTiktokFormFieldRef.current?.measure(handleMeasure)
+      } else if (formErrors?.snUserInstagram) {
+        snUserInstagramFormFieldRef.current?.measure(handleMeasure)
+      } else if (formErrors?.snUserXcom) {
+        snUserXcomFormFieldRef.current?.measure(handleMeasure)
+      } else if (formErrors?.snUserSnapchat) {
+        snUserSnapchatFormFieldRef.current?.measure(handleMeasure)
+      } else if (formErrors?.snUserYoutube) {
+        snUserYoutubeFormFieldRef.current?.measure(handleMeasure)
+      } else if (formErrors?.snUserFacebook) {
+        snUserFacebookFormFieldRef.current?.measure(handleMeasure)
+      }
+    },
+    [handleMeasure],
+  )
 
   const onScrollScrollView = useCallback((e) => {
     contentOffsetYRef.current = e.nativeEvent.contentOffset.y
   }, [])
 
-  const isPhotoInForm = isNonEmptyString(photoURLFieldValue)
+  const pickImage = useCallback(async () => {
+    try {
+      setSettingProfilePhoto(true)
+      const result = await launchImageLibraryAsync({
+        mediaTypes: MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      })
+      const pickedImageUri = result.assets?.[0]?.uri
 
-  console.log(`---------------------------------------------------`)
+      if (!result.canceled && isNonEmptyString(pickedImageUri)) {
+        const croppedImage = await manipulateAsync(
+          pickedImageUri,
+          [{ resize: { width: 400, height: 400 } }],
+          { compress: 0.7, format: SaveFormat.PNG },
+        )
+        setValue('photoURL', croppedImage.uri)
+      }
+    } catch (error) {
+      console.error(error)
+      setShowErrorModal(true)
+    } finally {
+      setSettingProfilePhoto(false)
+    }
+  }, [setValue])
 
   return (
     <KeyboardAvoidingView
@@ -320,7 +487,7 @@ export default function EditProfile() {
               <View style={styles.photoButtonsContainer}>
                 <ThirdButton
                   style={styles.photoBtn}
-                  disabled={isSubmitting}
+                  disabled={!isPhotoInForm || wip}
                   onPress={() => {
                     setDeletePhotoModal(true)
                   }}
@@ -328,7 +495,13 @@ export default function EditProfile() {
                   <Feather name='trash-2' size={24} color={color2} />
                 </ThirdButton>
 
-                <ThirdButton style={styles.photoBtn} disabled={isSubmitting}>
+                <ThirdButton
+                  style={styles.photoBtn}
+                  disabled={wip}
+                  onPress={() => {
+                    pickImage()
+                  }}
+                >
                   <Feather name='image' size={24} color={color2} />
                 </ThirdButton>
               </View>
@@ -360,7 +533,7 @@ export default function EditProfile() {
                       value={value}
                       placeholder='* Nombre'
                       placeholderTextColor={placeholderColor}
-                      editable={!isSubmitting}
+                      editable={!wip}
                     />
                   )}
                 />
@@ -399,7 +572,7 @@ export default function EditProfile() {
                       value={value}
                       placeholder='* Usuario'
                       placeholderTextColor={placeholderColor}
-                      editable={!isSubmitting}
+                      editable={!wip}
                       autoCapitalize='none'
                     />
                   )}
@@ -434,6 +607,7 @@ export default function EditProfile() {
                         minimumTrackTintColor={pgColor}
                         maximumTrackTintColor={pgBgColor}
                         containerStyle={styles.formSliderContainer}
+                        disabled={wip}
                       />
                     </View>
                   )
@@ -470,7 +644,7 @@ export default function EditProfile() {
                       value={value}
                       placeholder='...'
                       placeholderTextColor={placeholderColor}
-                      editable={!isSubmitting}
+                      editable={!wip}
                       autoCapitalize='none'
                     />
                   )}
@@ -510,7 +684,7 @@ export default function EditProfile() {
                       value={value}
                       placeholder='...'
                       placeholderTextColor={placeholderColor}
-                      editable={!isSubmitting}
+                      editable={!wip}
                       autoCapitalize='none'
                     />
                   )}
@@ -550,7 +724,7 @@ export default function EditProfile() {
                       value={value}
                       placeholder='...'
                       placeholderTextColor={placeholderColor}
-                      editable={!isSubmitting}
+                      editable={!wip}
                       autoCapitalize='none'
                     />
                   )}
@@ -590,7 +764,7 @@ export default function EditProfile() {
                       value={value}
                       placeholder='...'
                       placeholderTextColor={placeholderColor}
-                      editable={!isSubmitting}
+                      editable={!wip}
                       autoCapitalize='none'
                     />
                   )}
@@ -630,7 +804,7 @@ export default function EditProfile() {
                       value={value}
                       placeholder='...'
                       placeholderTextColor={placeholderColor}
-                      editable={!isSubmitting}
+                      editable={!wip}
                       autoCapitalize='none'
                     />
                   )}
@@ -670,7 +844,7 @@ export default function EditProfile() {
                       value={value}
                       placeholder='...'
                       placeholderTextColor={placeholderColor}
-                      editable={!isSubmitting}
+                      editable={!wip}
                       autoCapitalize='none'
                     />
                   )}
@@ -685,7 +859,7 @@ export default function EditProfile() {
 
             <MainButton
               onPress={handleSubmit(onSubmit, onError)}
-              disabled={isSubmitting}
+              disabled={wip}
               loading={isSubmitting}
             >
               {`Guardar`}
@@ -702,18 +876,51 @@ export default function EditProfile() {
             setDeletePhotoModal(false)
           }}
         >
-          <View style={styles.deletePhotoModalContainer}>
-            <Text style={[styles.deletePhotoModalText, { color: modalColor }]}>
+          <View style={styles.modalContainer}>
+            <Text style={[styles.modalText, { color: modalColor }]}>
               {`¿Deseas eliminar tu foto de perfil?`}
             </Text>
 
-            <MainButton>{`Si, eliminar`}</MainButton>
+            <MainButton
+              onPress={() => {
+                setValue('photoURL', null)
+                setDeletePhotoModal(false)
+              }}
+            >{`Si, eliminar`}</MainButton>
 
             <ThirdButton
               onPress={() => {
                 setDeletePhotoModal(false)
               }}
             >{`Cancelar`}</ThirdButton>
+          </View>
+        </MainModal>
+
+        <MainModal
+          title={`Error`}
+          visible={showErrorModal}
+          onPressClose={() => {
+            setShowErrorModal(false)
+          }}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalIconContainer}>
+              <MaterialCommunityIcons
+                name='ghost-outline'
+                size={96}
+                color={color4}
+              />
+            </View>
+
+            <Text style={[styles.modalText, { color: modalColor }]}>
+              {`Oops! Ha ocurrido un error inesperado. Por favor, intenta de nuevo.`}
+            </Text>
+
+            <MainButton
+              onPress={() => {
+                setShowErrorModal(false)
+              }}
+            >{`Ok`}</MainButton>
           </View>
         </MainModal>
       </ScrollView>
@@ -749,7 +956,9 @@ const styles = StyleSheet.create({
   },
   profilePhotoContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
+    minHeight: 200,
   },
   profilePhoto: {
     borderRadius: 10,
@@ -765,16 +974,19 @@ const styles = StyleSheet.create({
   photoBtn: {
     flex: 1,
   },
-  deletePhotoModalContainer: {
+  modalContainer: {
     flex: 1,
     padding: 20,
     justifyContent: 'center',
     gap: 25,
   },
-  deletePhotoModalText: {
+  modalText: {
     fontSize: 18,
     fontFamily: 'Ubuntu400',
     textAlign: 'center',
+  },
+  modalIconContainer: {
+    alignItems: 'center',
   },
   formSliderLabel: { fontFamily: 'Ubuntu400', fontSize: 16 },
   formSliderContainer: { height: 22 },
