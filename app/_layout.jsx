@@ -11,6 +11,7 @@ import * as SplashScreen from 'expo-splash-screen'
 import { onAuthStateChanged } from 'firebase/auth'
 import { useNavigationState } from '@react-navigation/native'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { RootSiblingParent } from 'react-native-root-siblings'
 
 import { auth } from '@/data/firebase'
 import colors from '@/constants/colors'
@@ -141,47 +142,49 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
       <QueryClientProvider client={queryClient}>
-        <StatusBar style='light' />
-        <Stack
-          screenOptions={({ route }) => {
-            const options = {
-              headerTransparent: false,
-              headerShadowVisible: false,
-              headerBackTitleVisible: false,
-              headerStyle: {
-                backgroundColor: isDark
-                  ? colors.dark.mainBg1
-                  : colors.light.mainBg1,
-              },
-              headerTitleStyle: {
-                color: isDark ? colors.dark.color1 : colors.light.color1,
-                fontFamily: 'Ubuntu700',
-              },
-              headerTintColor: isDark
-                ? colors.dark.color1
-                : colors.light.color1,
-              headerShown: isUserLoggedIn,
-              headerTitle: '',
-            }
+        <RootSiblingParent>
+          <StatusBar style='light' />
+          <Stack
+            screenOptions={({ route }) => {
+              const options = {
+                headerTransparent: false,
+                headerShadowVisible: false,
+                headerBackTitleVisible: false,
+                headerStyle: {
+                  backgroundColor: isDark
+                    ? colors.dark.mainBg1
+                    : colors.light.mainBg1,
+                },
+                headerTitleStyle: {
+                  color: isDark ? colors.dark.color1 : colors.light.color1,
+                  fontFamily: 'Ubuntu700',
+                },
+                headerTintColor: isDark
+                  ? colors.dark.color1
+                  : colors.light.color1,
+                headerShown: isUserLoggedIn,
+                headerTitle: '',
+              }
 
-            if (route.name === '(tabs)') {
-              if (activeTabName === 'index') {
-                options.headerTitle = ''
+              if (route.name === '(tabs)') {
+                if (activeTabName === 'index') {
+                  options.headerTitle = ''
+                }
+                if (activeTabName === 'about') {
+                  options.headerTitle = 'About'
+                }
+                if (activeTabName === 'settings') {
+                  options.headerTitle = 'Ajustes'
+                  options.headerStyle.backgroundColor = isDark
+                    ? colors.dark.mainBg2
+                    : colors.light.mainBg2
+                }
               }
-              if (activeTabName === 'about') {
-                options.headerTitle = 'About'
-              }
-              if (activeTabName === 'settings') {
-                options.headerTitle = 'Ajustes'
-                options.headerStyle.backgroundColor = isDark
-                  ? colors.dark.mainBg2
-                  : colors.light.mainBg2
-              }
-            }
 
-            return options
-          }}
-        />
+              return options
+            }}
+          />
+        </RootSiblingParent>
       </QueryClientProvider>
     </ThemeProvider>
   )

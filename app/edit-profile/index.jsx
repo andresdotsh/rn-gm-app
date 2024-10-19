@@ -62,6 +62,7 @@ import ThirdButton from '@/ui/ThirdButton'
 import BlankSpaceView from '@/ui/BlankSpaceView'
 import MainModal from '@/ui/MainModal'
 import isValidSkill from '@/utils/isValidSkill'
+import showToast from '@/utils/showToast'
 
 const safeString = (value) => {
   return isNonEmptyString(value) ? value : ''
@@ -339,6 +340,8 @@ export default function EditProfile() {
           await queryClient.invalidateQueries(['users', loggedUserUid])
 
           setIsSubmitting(false)
+
+          showToast('Cambios guardados')
 
           if (navigation.canGoBack()) {
             navigation.goBack()
