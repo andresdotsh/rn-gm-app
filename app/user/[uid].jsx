@@ -168,9 +168,7 @@ export default function UserDetail() {
 
             {isTheLoggedUserProfile && (
               <Link asChild href={'/edit-profile'}>
-                <MainButton
-                  disabled={userIsFetching}
-                >{`Editar Perfil`}</MainButton>
+                <MainButton>{`Editar Perfil`}</MainButton>
               </Link>
             )}
 
