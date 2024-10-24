@@ -29,7 +29,7 @@ export default function Settings() {
   const [loggingOut, setLoggingOut] = useState(false)
 
   const mainBg2 = useThemeColor('mainBg2')
-  const textColor = useThemeColor('color1')
+  const textColor1 = useThemeColor('color1')
   const textColor2 = useThemeColor('color2')
   const textColor4 = useThemeColor('color4')
   const settingsItemBorderColor = useThemeColor('btn5')
@@ -109,7 +109,7 @@ export default function Settings() {
           </View>
 
           <View style={styles.profileTextContainer}>
-            <Text style={[styles.profileLinkTitle, { color: textColor }]}>
+            <Text style={[styles.profileLinkTitle, { color: textColor1 }]}>
               {`Ver mi perfil`}
             </Text>
 
@@ -120,7 +120,7 @@ export default function Settings() {
             )}
 
             {isNonEmptyString(loggedUserData?.displayName) && (
-              <Text style={[styles.profileLinkName, { color: textColor }]}>
+              <Text style={[styles.profileLinkName, { color: textColor2 }]}>
                 {loggedUserData?.displayName}
               </Text>
             )}
@@ -143,7 +143,7 @@ export default function Settings() {
           }}
         >
           <FontAwesome6 name='power-off' size={18} color={color1} />
-          <Text style={[styles.settingsItemText, { color: textColor }]}>
+          <Text style={[styles.settingsItemText, { color: textColor1 }]}>
             {`Cerrar Sesión`}
           </Text>
         </Pressable>
