@@ -1,3 +1,9 @@
+// event roles
+export const EVENT_ROLE_JUDGE = 'judge'
+export const EVENT_ROLE_PARTICIPANT = 'participant'
+export const EVENT_ROLE_OWNER = 'owner'
+export const EVENT_ROLE_ASSISTANT = 'assistant'
+
 // form fields
 export const FIELD_EMAIL_MAX_LENGTH = 254
 export const FIELD_NAME_MIN_LENGTH = 2
@@ -54,6 +60,7 @@ export const API_BASE_URL = process.env.EXPO_PUBLIC_REST_API_BASE_URL
 export const CC_WIDTH_STYLES = {
   marginHorizontal: 'auto',
   minWidth: 320,
+  // width: 320, // TODO: -> ltd
   width: '100%',
   maxWidth: 500,
 }

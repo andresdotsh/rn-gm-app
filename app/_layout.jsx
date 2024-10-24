@@ -170,9 +170,14 @@ export default function RootLayout() {
                 if (activeTabName === 'index') {
                   options.headerTitle = ''
                 }
-                if (activeTabName === 'about') {
-                  options.headerTitle = 'About'
+
+                if (activeTabName === 'my-calendar') {
+                  options.headerTitle = 'Mi Calendario'
+                  options.headerStyle.backgroundColor = isDark
+                    ? colors.dark.mainBg2
+                    : colors.light.mainBg2
                 }
+
                 if (activeTabName === 'settings') {
                   options.headerTitle = 'Ajustes'
                   options.headerStyle.backgroundColor = isDark

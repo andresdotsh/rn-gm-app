@@ -45,12 +45,12 @@ export default function TabsLayout() {
       />
 
       <Tabs.Screen
-        name='about'
+        name='my-calendar'
         options={{
           tabBarIcon: ({ focused, size }) => {
             return (
               <FontAwesome
-                name='info'
+                name='calendar'
                 size={size}
                 color={focused ? activeTabIconColor : tabIconColor}
               />

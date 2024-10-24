@@ -131,9 +131,10 @@ export default function UserDetail() {
         </View>
       ) : !userData || !skillsData || userError || skillsError ? (
         <View style={styles.noContent}>
-          <Text
-            style={[styles.errorText, { color: color1 }]}
-          >{`Ha ocurrido un error al obtener los datos, o puede ser que no tengas conexión a internet.`}</Text>
+          <Text style={[styles.errorText, { color: color1 }]}>
+            {`Ha ocurrido un error al obtener los datos. Puede ser que no tengas conexión a internet, o que el usuario no exista.`}
+          </Text>
+
           <ThirdButton
             loading={userIsFetching}
             disabled={userIsFetching}
@@ -347,12 +348,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    gap: 25,
   },
   errorText: {
     fontSize: 18,
     fontFamily: 'Ubuntu400',
     textAlign: 'center',
-    marginBottom: 20,
   },
   card: {
     padding: 20,
