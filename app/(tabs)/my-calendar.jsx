@@ -210,18 +210,18 @@ export default function MyCalendar() {
                       {userEvent?._eventType?.name || '---'}
                     </Text>
                   </View>
-
-                  {isNonEmptyString(userEvent?.description) && (
-                    <Text
-                      style={[
-                        styles.eventDescription,
-                        { color: isPublished ? color2 : color3 },
-                      ]}
-                    >
-                      {userEvent?.description}
-                    </Text>
-                  )}
                 </View>
+
+                {isNonEmptyString(userEvent?.description) && (
+                  <Text
+                    style={[
+                      styles.eventDescription,
+                      { color: isPublished ? color2 : color3 },
+                    ]}
+                  >
+                    {userEvent?.description}
+                  </Text>
+                )}
 
                 <View style={styles.buttonContainer}>
                   {isPublished ? (
@@ -317,7 +317,6 @@ const styles = StyleSheet.create({
   eventDescription: {
     fontSize: 18,
     fontFamily: 'Ubuntu400',
-    marginTop: 8,
   },
   buttonContainer: {
     flexDirection: 'row',

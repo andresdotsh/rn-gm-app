@@ -234,18 +234,18 @@ export default function EventDetail() {
                   {eventType?.name || '---'}
                 </Text>
               </View>
-
-              {isNonEmptyString(eventData?.description) && (
-                <Text
-                  style={[
-                    styles.eventDescription,
-                    { color: isPublished ? color1 : color3 },
-                  ]}
-                >
-                  {eventData?.description}
-                </Text>
-              )}
             </View>
+
+            {isNonEmptyString(eventData?.description) && (
+              <Text
+                style={[
+                  styles.eventDescription,
+                  { color: isPublished ? color1 : color3 },
+                ]}
+              >
+                {eventData?.description}
+              </Text>
+            )}
 
             <View>
               <Text
@@ -317,7 +317,7 @@ export default function EventDetail() {
                           style={styles.userItemPhoto}
                         />
                       ) : (
-                        <SimpleLineIcons name='user' size={30} color={color2} />
+                        <SimpleLineIcons name='user' size={48} color={color2} />
                       )}
 
                       <View style={styles.userItemTextContainer}>
@@ -402,7 +402,7 @@ export default function EventDetail() {
                           style={styles.userItemPhoto}
                         />
                       ) : (
-                        <SimpleLineIcons name='user' size={30} color={color2} />
+                        <SimpleLineIcons name='user' size={48} color={color2} />
                       )}
 
                       <View style={styles.userItemTextContainer}>
@@ -522,7 +522,6 @@ const styles = StyleSheet.create({
   eventDescription: {
     fontSize: 18,
     fontFamily: 'Ubuntu400',
-    marginTop: 8,
   },
   eventAuhtor: {
     fontSize: 16,
@@ -536,6 +535,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: 'Ubuntu500',
     textAlign: 'center',
+    marginTop: 10,
   },
   userTypeDescription: {
     fontSize: 16,

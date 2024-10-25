@@ -59,9 +59,9 @@ async function cmGetUserEventsCalendar(userUid) {
   const minDateTime = subHours(new Date(), 25) // 25 hours ago
 
   const recentEvents = eventsData
-    // .filter((event) => {
-    //   return new Date(event?.startDateIsoString) >= minDateTime
-    // }) // TODO: -> uncomment
+    .filter((event) => {
+      return new Date(event?.startDateIsoString) >= minDateTime
+    })
     .map((event) => {
       const _eventType = eventTypes.find(
         (type) => type.key === event?.eventType,
