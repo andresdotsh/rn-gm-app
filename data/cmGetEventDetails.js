@@ -20,16 +20,16 @@ async function cmGetEventDetails(eventUid) {
     (eventType) => eventType?.key === eventData?.eventType,
   )
 
-  const eventJudgesUids = eventUsers
+  const judgesUids = eventUsers
     .filter((eventUser) => eventUser?.role === EVENT_ROLE_JUDGE)
     .map((eventUser) => eventUser?.userUid)
 
-  const eventParticipantsUids = eventUsers
+  const participantsUids = eventUsers
     .filter((eventUser) => eventUser?.role === EVENT_ROLE_PARTICIPANT)
     .map((eventUser) => eventUser?.userUid)
 
-  const judgesUsers = await getUsersByUids(eventJudgesUids)
-  const participantsUsers = await getUsersByUids(eventParticipantsUids)
+  const judgesUsers = await getUsersByUids(judgesUids)
+  const participantsUsers = await getUsersByUids(participantsUids)
 
   return {
     eventData,
@@ -37,6 +37,8 @@ async function cmGetEventDetails(eventUid) {
     eventType,
     judgesUsers,
     participantsUsers,
+    judgesUids,
+    participantsUids,
   }
 }
 

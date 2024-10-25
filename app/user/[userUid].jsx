@@ -152,6 +152,7 @@ export default function UserDetail() {
                 <Image
                   source={{ uri: userData?.photoURL }}
                   style={styles.profilePhoto}
+                  resizeMode='contain'
                 />
               ) : (
                 <SimpleLineIcons name='user' size={96} color={color2} />
@@ -169,7 +170,7 @@ export default function UserDetail() {
 
             {isTheLoggedUserProfile && (
               <Link asChild href={'/edit-profile'}>
-                <MainButton>{`Editar Perfil`}</MainButton>
+                <MainButton>{`Editar`}</MainButton>
               </Link>
             )}
 
@@ -359,7 +360,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     gap: 25,
-    marginBottom: 20,
+    marginBottom: 30,
   },
   mediaCard: {
     gap: 10,

@@ -11,6 +11,7 @@ import {
 import Feather from '@expo/vector-icons/Feather'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useRouter } from 'expo-router'
+import { not } from 'ramda'
 import { isNonEmptyArray, isNonEmptyString } from 'ramda-adjunct'
 import { useQuery } from '@tanstack/react-query'
 
@@ -104,7 +105,7 @@ export default function MyCalendar() {
       ) : isNonEmptyArray(cmUserEventsData) ? (
         <>
           {cmUserEventsData.map((userEvent) => {
-            const isPublished = userEvent?.isPublished
+            const isPublished = not(userEvent?.isPublished === false)
             const bannerOpacity = isPublished ? 1 : 0.5
             const userEventRoleText =
               userEvent?._role === EVENT_ROLE_OWNER
@@ -113,7 +114,7 @@ export default function MyCalendar() {
                   ? 'ERES JUEZ'
                   : userEvent?._role === EVENT_ROLE_PARTICIPANT
                     ? 'ERES PARTICIPANTE'
-                    : '---'
+                    : 'NO TIENES ROL'
 
             const goToEventDetail = () => {
               router.push({
@@ -141,6 +142,7 @@ export default function MyCalendar() {
                     <Image
                       source={{ uri: userEvent?.bannerUrl }}
                       style={[styles.eventBanner, { opacity: bannerOpacity }]}
+                      resizeMode='contain'
                     />
                   </View>
                 )}
@@ -194,8 +196,17 @@ export default function MyCalendar() {
                   </View>
 
                   <View style={styles.eventSubtitleContainer}>
-                    <Ionicons name='medal-outline' size={16} color={color3} />
-                    <Text style={[styles.eventSubtitle, { color: color3 }]}>
+                    <Ionicons
+                      name='medal-outline'
+                      size={16}
+                      color={isPublished ? color3 : color3}
+                    />
+                    <Text
+                      style={[
+                        styles.eventSubtitle,
+                        { color: isPublished ? color3 : color3 },
+                      ]}
+                    >
                       {userEvent?._eventType?.name || '---'}
                     </Text>
                   </View>
@@ -259,7 +270,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   createEventBtn: {
-    marginBottom: 25,
+    marginBottom: 30,
   },
   card: {
     padding: 20,

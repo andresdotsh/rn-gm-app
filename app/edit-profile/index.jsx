@@ -481,6 +481,7 @@ export default function EditProfile() {
                   <Image
                     source={{ uri: photoURLFieldValue }}
                     style={styles.profilePhoto}
+                    resizeMode='contain'
                   />
                 ) : (
                   <SimpleLineIcons name='user' size={96} color={color2} />
