@@ -51,7 +51,7 @@ export default function MyCalendar() {
     error: cmUserEventsError,
     refetch: cmUserEventsRefetch,
   } = useQuery({
-    queryKey: ['cm_user_events', loggedUserUid],
+    queryKey: ['cm_user_events_calendar', loggedUserUid],
     queryFn: () => cmGetUserEventsCalendar(loggedUserUid),
     enabled: Boolean(loggedUserUid),
   })

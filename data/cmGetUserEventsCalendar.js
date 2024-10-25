@@ -10,18 +10,16 @@ import { subHours } from 'date-fns'
 import { EVENT_ROLE_OWNER } from '@/constants/constants'
 import { db } from '@/data/firebase'
 import getAllEventTypes from '@/data/getAllEventTypes'
+import getEventsUsersByUserUid from '@/data/getEventsUsersByUserUid'
 
 async function cmGetUserEventsCalendar(userUid) {
   const eventTypes = await getAllEventTypes()
 
-  const eventsUsersQuerySnap = await getDocs(
-    query(collection(db, 'events_users'), where('userUid', '==', userUid)),
-  )
+  const eventsUsers = await getEventsUsersByUserUid(userUid)
   const eventRoleObj = {}
-  const eventsUids = eventsUsersQuerySnap.docs.map((doc) => {
-    const data = doc.data()
-    const eventUid = data?.eventUid
-    eventRoleObj[eventUid] = data?.role
+  const eventsUids = eventsUsers.map((eu) => {
+    const eventUid = eu?.eventUid
+    eventRoleObj[eventUid] = eu?.role
     return eventUid
   })
 

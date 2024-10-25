@@ -46,12 +46,12 @@ export default function UserDetail() {
   const pgColor = useThemeColor('btn1')
   const pgBgColor = useThemeColor('cardBg2')
 
-  const { uid } = useLocalSearchParams()
+  const { userUid } = useLocalSearchParams()
 
   const loggedUserUid = useLoggedUserStore((s) => s.loggedUserUid)
   const setLoggedUserData = useLoggedUserStore((s) => s.setLoggedUserData)
 
-  const isTheLoggedUserProfile = uid === loggedUserUid
+  const isTheLoggedUserProfile = userUid === loggedUserUid
 
   const {
     isFetching: userIsFetching,
@@ -60,9 +60,9 @@ export default function UserDetail() {
     data: userData,
     refetch: userRefetch,
   } = useQuery({
-    queryKey: ['users', uid],
-    queryFn: () => getUserByUid(uid),
-    enabled: Boolean(uid),
+    queryKey: ['users', userUid],
+    queryFn: () => getUserByUid(userUid),
+    enabled: Boolean(userUid),
   })
   const {
     isLoading: skillsIsLoading,

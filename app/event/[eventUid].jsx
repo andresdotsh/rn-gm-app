@@ -27,7 +27,7 @@ import {
   SN_FACEBOOK_USER_LINK,
 } from '@/constants/constants'
 import useThemeColor from '@/hooks/useThemeColor'
-import getEventByUid from '@/data/getEventByUid'
+import cmGetEventDetails from '@/data/cmGetEventDetails'
 import { useLoggedUserStore } from '@/hooks/useStore'
 import MainButton from '@/ui/MainButton'
 import ThirdButton from '@/ui/ThirdButton'
@@ -45,32 +45,38 @@ export default function EventDetail() {
   const pgColor = useThemeColor('btn1')
   const pgBgColor = useThemeColor('cardBg2')
 
-  const { uid } = useLocalSearchParams()
+  const { eventUid } = useLocalSearchParams()
 
   const loggedUserUid = useLoggedUserStore((s) => s.loggedUserUid)
 
   const {
-    isFetching: eventIsFetching,
-    isLoading: eventIsLoading,
-    error: eventError,
-    data: eventData,
-    refetch: eventRefetch,
+    isFetching: detailsIsFetching,
+    isLoading: detailsIsLoading,
+    error: detailsError,
+    data: detailsData,
+    refetch: detailsRefetch,
   } = useQuery({
-    queryKey: ['events', uid],
-    queryFn: () => getEventByUid(uid),
-    enabled: Boolean(uid),
+    queryKey: ['cm_event_details', eventUid],
+    queryFn: () => cmGetEventDetails(eventUid),
+    enabled: Boolean(eventUid),
   })
+
+  const eventData = detailsData?.eventData
+  const ownerData = detailsData?.ownerData
+  const eventType = detailsData?.eventType
+  const judgesUsers = detailsData?.judgesUsers
+  const participantsUsers = detailsData?.participantsUsers
 
   const onRefresh = useCallback(() => {
     setRefreshing(true)
-    eventRefetch()
-  }, [eventRefetch])
+    detailsRefetch()
+  }, [detailsRefetch])
 
   useEffect(() => {
-    if (!eventIsFetching) {
+    if (!detailsIsFetching) {
       setRefreshing(false)
     }
-  }, [eventIsFetching])
+  }, [detailsIsFetching])
 
   return (
     <ScrollView
@@ -97,21 +103,21 @@ export default function EventDetail() {
         }}
       />
 
-      {eventIsLoading ? (
+      {detailsIsLoading ? (
         <View style={styles.noContent}>
           <ActivityIndicator size='large' color={color1} />
         </View>
-      ) : !eventData || eventError ? (
+      ) : !detailsData || detailsError ? (
         <View style={styles.noContent}>
           <Text style={[styles.errorText, { color: color1 }]}>
             {`Ha ocurrido un error al obtener los datos. Puede ser que no tengas conexión a internet, o que el evento no exista.`}
           </Text>
 
           <ThirdButton
-            loading={eventIsFetching}
-            disabled={eventIsFetching}
+            loading={detailsIsFetching}
+            disabled={detailsIsFetching}
             onPress={() => {
-              eventRefetch()
+              detailsRefetch()
             }}
           >{`Reintentar`}</ThirdButton>
         </View>
@@ -119,7 +125,7 @@ export default function EventDetail() {
         <View>
           <View style={[styles.card, { backgroundColor: cardBg1 }]}>
             <Text style={[styles.errorText, { color: color1 }]}>
-              {`Hello world ` + uid}
+              {`Hello world ` + eventUid}
             </Text>
           </View>
         </View>
