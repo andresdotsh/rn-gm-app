@@ -358,8 +358,8 @@ const styles = StyleSheet.create({
   card: {
     padding: 20,
     borderRadius: 10,
-    marginBottom: 20,
     gap: 25,
+    marginBottom: 20,
   },
   mediaCard: {
     gap: 10,

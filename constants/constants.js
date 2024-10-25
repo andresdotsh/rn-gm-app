@@ -1,8 +1,8 @@
 // event roles
+export const EVENT_ROLE_OWNER = 'owner'
 export const EVENT_ROLE_JUDGE = 'judge'
 export const EVENT_ROLE_PARTICIPANT = 'participant'
-export const EVENT_ROLE_OWNER = 'owner'
-export const EVENT_ROLE_ASSISTANT = 'assistant'
+export const EVENT_ROLE_ATTENDEE = 'attendee'
 
 // form fields
 export const FIELD_EMAIL_MAX_LENGTH = 254
@@ -63,4 +63,13 @@ export const CC_WIDTH_STYLES = {
   // width: 320, // TODO: -> ltd
   width: '100%',
   maxWidth: 500,
+}
+
+// date picker
+export const DATEPICKER_DEFAULT_PROPS = {
+  showTimeSelect: true,
+  timeIntervals: 30,
+  timeCaption: 'Hora',
+  timeFormat: 'hh:mm aa',
+  dateFormat: 'dd/MMM/yyyy hh:mm aa',
 }

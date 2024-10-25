@@ -13,6 +13,7 @@ import getAllEventTypes from '@/data/getAllEventTypes'
 
 async function cmGetUserEventsCalendar(userUid) {
   const eventTypes = await getAllEventTypes()
+
   const eventsUsersQuerySnap = await getDocs(
     query(collection(db, 'events_users'), where('userUid', '==', userUid)),
   )
