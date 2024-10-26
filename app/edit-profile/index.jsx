@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef } from 'react'
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import {
   StyleSheet,
   Text,
@@ -63,10 +63,7 @@ import BlankSpaceView from '@/ui/BlankSpaceView'
 import MainModal from '@/ui/MainModal'
 import isValidSkill from '@/utils/isValidSkill'
 import showToast from '@/utils/showToast'
-
-const safeString = (value) => {
-  return isNonEmptyString(value) ? value : ''
-}
+import safeString from '@/utils/safeString'
 
 const schema = yup
   .object({
@@ -138,6 +135,7 @@ const schema = yup
 export default function EditProfile() {
   const scrollViewRef = useRef(null)
   const contentOffsetYRef = useRef(0)
+  const initializedFormRef = useRef(false)
   const displayNameFormFieldRef = useRef(null)
   const usernameFormFieldRef = useRef(null)
   const snUserTiktokFormFieldRef = useRef(null)
@@ -215,21 +213,47 @@ export default function EditProfile() {
     setValue,
     setError,
     watch,
+    reset,
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      photoURL: userData?.photoURL,
-      displayName: safeString(userData?.displayName),
-      username: safeString(userData?.username),
-      snUserTiktok: safeString(userData?.snUserTiktok),
-      snUserInstagram: safeString(userData?.snUserInstagram),
-      snUserXcom: safeString(userData?.snUserXcom),
-      snUserSnapchat: safeString(userData?.snUserSnapchat),
-      snUserYoutube: safeString(userData?.snUserYoutube),
-      snUserFacebook: safeString(userData?.snUserFacebook),
-      ...skillsDefaultValues,
+      photoURL: '',
+      displayName: '',
+      username: '',
+      snUserTiktok: '',
+      snUserInstagram: '',
+      snUserXcom: '',
+      snUserSnapchat: '',
+      snUserYoutube: '',
+      snUserFacebook: '',
     },
   })
+
+  useEffect(() => {
+    const skillsKeys = keys(skillsDefaultValues)
+
+    if (
+      userData &&
+      isNonEmptyArray(skillsKeys) &&
+      !initializedFormRef.current
+    ) {
+      initializedFormRef.current = true
+
+      reset({
+        photoURL: safeString(userData?.photoURL),
+        displayName: safeString(userData?.displayName),
+        username: safeString(userData?.username),
+        snUserTiktok: safeString(userData?.snUserTiktok),
+        snUserInstagram: safeString(userData?.snUserInstagram),
+        snUserXcom: safeString(userData?.snUserXcom),
+        snUserSnapchat: safeString(userData?.snUserSnapchat),
+        snUserYoutube: safeString(userData?.snUserYoutube),
+        snUserFacebook: safeString(userData?.snUserFacebook),
+        ...skillsDefaultValues,
+      })
+    }
+  }, [reset, skillsDefaultValues, userData])
+
   const usernameFieldValue = watch('username')
   const photoURLFieldValue = watch('photoURL')
   const snUserTiktokFieldValue = watch('snUserTiktok')

@@ -7,30 +7,17 @@ import {
   RefreshControl,
   ActivityIndicator,
   Image,
-  Pressable,
-  Linking,
 } from 'react-native'
 import { useQuery } from '@tanstack/react-query'
-import { useLocalSearchParams, Stack, Link } from 'expo-router'
+import { useLocalSearchParams, Stack, useRouter } from 'expo-router'
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons'
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 import Feather from '@expo/vector-icons/Feather'
 import Ionicons from '@expo/vector-icons/Ionicons'
-import ProgressBar from 'react-native-progress/Bar'
 import { not } from 'ramda'
 import { isNonEmptyString, isNonEmptyArray } from 'ramda-adjunct'
 
 import {
   CC_WIDTH_STYLES,
-  SN_TIKTOK_USER_LINK,
-  SN_INSTAGRAM_USER_LINK,
-  SN_X_USER_LINK,
-  SN_SNAPCHAT_USER_LINK,
-  SN_YOUTUBE_USER_LINK,
-  SN_FACEBOOK_USER_LINK,
-  EVENT_ROLE_JUDGE,
-  EVENT_ROLE_PARTICIPANT,
-  EVENT_ROLE_OWNER,
   DATEPICKER_DEFAULT_PROPS,
 } from '@/constants/constants'
 import useThemeColor from '@/hooks/useThemeColor'
@@ -39,7 +26,6 @@ import { useLoggedUserStore } from '@/hooks/useStore'
 import MainButton from '@/ui/MainButton'
 import ThirdButton from '@/ui/ThirdButton'
 import BlankSpaceView from '@/ui/BlankSpaceView'
-import isValidSkill from '@/utils/isValidSkill'
 import dateFnsFormat from '@/utils/dateFnsFormat'
 
 export default function EventDetail() {
@@ -52,8 +38,8 @@ export default function EventDetail() {
   const color4 = useThemeColor('color4')
   const cardBg1 = useThemeColor('cardBg1')
   const cardBg2 = useThemeColor('cardBg2')
-  const pgColor = useThemeColor('btn1')
-  const pgBgColor = useThemeColor('cardBg2')
+
+  const router = useRouter()
 
   const { eventUid } = useLocalSearchParams()
 
@@ -81,6 +67,13 @@ export default function EventDetail() {
       setRefreshing(false)
     }
   }, [detailsIsFetching])
+
+  const goToEditEvent = useCallback(() => {
+    router.push({
+      pathname: '/edit-event/[eventUid]',
+      params: { eventUid },
+    })
+  }, [eventUid, router])
 
   const eventData = detailsData?.eventData
   const ownerData = detailsData?.ownerData
@@ -276,9 +269,9 @@ export default function EventDetail() {
 
             {loggedUserIsOwner &&
               (isPublished ? (
-                <MainButton>{`Editar`}</MainButton>
+                <MainButton onPress={goToEditEvent}>{`Editar`}</MainButton>
               ) : (
-                <ThirdButton>{`Editar`}</ThirdButton>
+                <ThirdButton onPress={goToEditEvent}>{`Editar`}</ThirdButton>
               ))}
           </View>
 

@@ -82,7 +82,14 @@ export default function MyCalendar() {
         />
       }
     >
-      <ThirdButton style={styles.createEventBtn}>{`Crear Evento`}</ThirdButton>
+      <ThirdButton
+        style={styles.createEventBtn}
+        onPress={() => {
+          router.push({
+            pathname: '/create-event',
+          })
+        }}
+      >{`Crear Evento`}</ThirdButton>
 
       {cmUserEventsIsLoading ? (
         <View style={styles.noContent}>

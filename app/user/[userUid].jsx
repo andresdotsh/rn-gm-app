@@ -11,7 +11,7 @@ import {
   Linking,
 } from 'react-native'
 import { useQuery } from '@tanstack/react-query'
-import { useLocalSearchParams, Stack, Link } from 'expo-router'
+import { useLocalSearchParams, Stack, useRouter } from 'expo-router'
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons'
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 import ProgressBar from 'react-native-progress/Bar'
@@ -45,6 +45,8 @@ export default function UserDetail() {
   const cardBg1 = useThemeColor('cardBg1')
   const pgColor = useThemeColor('btn1')
   const pgBgColor = useThemeColor('cardBg2')
+
+  const router = useRouter()
 
   const { userUid } = useLocalSearchParams()
 
@@ -169,9 +171,11 @@ export default function UserDetail() {
             </View>
 
             {isTheLoggedUserProfile && (
-              <Link asChild href={'/edit-profile'}>
-                <MainButton>{`Editar`}</MainButton>
-              </Link>
+              <MainButton
+                onPress={() => {
+                  router.push({ pathname: '/edit-profile' })
+                }}
+              >{`Editar`}</MainButton>
             )}
 
             {isNonEmptyArray(skillsData) && (
