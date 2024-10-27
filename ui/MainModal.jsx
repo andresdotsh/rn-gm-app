@@ -27,6 +27,7 @@ export default function MainModal({
   onPressClose,
   disabled,
   children,
+  regularView = false,
   transparent = true,
   animationType = 'slide',
 }) {
@@ -79,9 +80,13 @@ export default function MainModal({
           )}
         </View>
 
-        <ScrollView contentContainerStyle={styles.svContentContainer}>
-          {children}
-        </ScrollView>
+        {regularView ? (
+          <View style={styles.regularContainer}>{children}</View>
+        ) : (
+          <ScrollView contentContainerStyle={styles.svContentContainer}>
+            {children}
+          </ScrollView>
+        )}
       </View>
     </Modal>
   )
@@ -93,6 +98,10 @@ const styles = StyleSheet.create({
   },
   svContentContainer: {
     flexGrow: 1,
+    ...CC_WIDTH_STYLES,
+  },
+  regularContainer: {
+    flex: 1,
     ...CC_WIDTH_STYLES,
   },
   topBar: {

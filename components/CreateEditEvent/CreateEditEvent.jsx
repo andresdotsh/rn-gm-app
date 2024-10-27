@@ -54,6 +54,7 @@ import {
   FIELD_EVENT_NAME_MIN_LENGTH,
   FIELD_EVENT_NAME_MAX_LENGTH,
   FIELD_EVENT_DESCRIPTION_MAX_LENGTH,
+  EVENTS_MIN_DATE_ISO_STRING,
 } from '@/constants/constants'
 import { useLoggedUserStore } from '@/hooks/useStore'
 import useThemeColor from '@/hooks/useThemeColor'
@@ -100,13 +101,17 @@ export default function CreateEditEvent({ eventUid }) {
   const [showErrorModal, setShowErrorModal] = useState(false)
   const [deletePhotoModal, setDeletePhotoModal] = useState(false)
   const [settingBannerPhoto, setSettingBannerPhoto] = useState(false)
+  const [showStartDateModal, setShowStartDateModal] = useState(false)
+  const [localStartDate, setLocalStartDate] = useState(new Date())
 
   const mainBg1 = useThemeColor('mainBg1')
   const color1 = useThemeColor('color1')
   const color2 = useThemeColor('color2')
   const color3 = useThemeColor('color3')
   const color4 = useThemeColor('color4')
+  const color5 = useThemeColor('color5')
   const cardBg1 = useThemeColor('cardBg1')
+  const cardBg2 = useThemeColor('cardBg2')
   const modalColor = useThemeColor('color2')
   const textInputBgColor = useThemeColor('mainBg2')
   const placeholderColor = useThemeColor('color3')
@@ -158,11 +163,17 @@ export default function CreateEditEvent({ eventUid }) {
     if (eventData && !initializedFormRef.current) {
       initializedFormRef.current = true
 
+      const startDate = isNonEmptyString(eventData?.startDateIsoString)
+        ? new Date(eventData?.startDateIsoString)
+        : null
+
+      if (startDate) {
+        setLocalStartDate(startDate)
+      }
+
       reset({
         name: safeString(eventData?.name),
-        startDate: isNonEmptyString(eventData?.startDateIsoString)
-          ? new Date(eventData?.startDateIsoString)
-          : null,
+        startDate,
         description: safeString(eventData?.description),
         eventType: safeString(eventData?.eventType),
         bannerUrl: safeString(eventData?.bannerUrl),
@@ -253,6 +264,22 @@ export default function CreateEditEvent({ eventUid }) {
       setSettingBannerPhoto(false)
     }
   }, [setValue])
+
+  const DATEPICKER_MIN_DATE = useMemo(() => {
+    return new Date(EVENTS_MIN_DATE_ISO_STRING)
+  }, [])
+
+  console.log(`🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢`)
+  console.log(
+    `🚀🚀🚀 -> startDateFieldValue:`,
+    typeof startDateFieldValue,
+    startDateFieldValue,
+  )
+  console.log(
+    `🚀🚀🚀 -> localStartDate:`,
+    typeof localStartDate,
+    localStartDate,
+  )
 
   return (
     <KeyboardAvoidingView
@@ -364,6 +391,26 @@ export default function CreateEditEvent({ eventUid }) {
                 {errors.name && (
                   <Text style={[styles.formInputError, { color: errorColor }]}>
                     {errors.name.message}
+                  </Text>
+                )}
+              </View>
+
+              <View>
+                <Text style={[styles.formInputLabel, { color: color1 }]}>
+                  {`* Fecha y hora`}
+                </Text>
+                <ThirdButton
+                  ref={startDateFormFieldRef}
+                  disabled={wip}
+                  onPress={() => {
+                    setShowStartDateModal(true)
+                  }}
+                >
+                  {`Fecha y hora`}
+                </ThirdButton>
+                {errors.startDate && (
+                  <Text style={[styles.formInputError, { color: errorColor }]}>
+                    {errors.startDate.message}
                   </Text>
                 )}
               </View>

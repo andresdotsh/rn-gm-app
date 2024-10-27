@@ -65,6 +65,7 @@ export const CC_WIDTH_STYLES = {
 }
 
 // date picker
+export const EVENTS_MIN_DATE_ISO_STRING = '2024-10-20T05:00:00Z'
 export const DATEPICKER_DEFAULT_PROPS = {
   showTimeSelect: true,
   timeIntervals: 30,
