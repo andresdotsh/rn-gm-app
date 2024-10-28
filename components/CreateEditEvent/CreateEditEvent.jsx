@@ -10,6 +10,7 @@ import {
   Platform,
   KeyboardAvoidingView,
   Pressable,
+  Switch,
 } from 'react-native'
 import {
   addDoc,
@@ -291,7 +292,11 @@ export default function CreateEditEvent({ eventUid }) {
   }, [eventTypeFieldValue, eventTypes])
 
   console.log(`🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢`)
-  console.log(`🚀🚀🚀 -> eventData:`, eventData)
+  console.log(
+    `🚀🚀🚀 -> isPublishedFieldValue:`,
+    typeof isPublishedFieldValue,
+    isPublishedFieldValue,
+  )
 
   return (
     <KeyboardAvoidingView
@@ -584,6 +589,29 @@ export default function CreateEditEvent({ eventUid }) {
                   </Text>
                 )}
               </View>
+
+              {isEditMode && (
+                <View style={styles.switchFieldContainer}>
+                  <Text
+                    style={[
+                      styles.formSwitchLabel,
+                      { color: isPublishedFieldValue ? color1 : color3 },
+                    ]}
+                  >
+                    {`Evento Activo`}
+                  </Text>
+                  <Switch
+                    value={isPublishedFieldValue}
+                    onValueChange={(newValue) => {
+                      setValue('isPublished', newValue)
+                    }}
+                    thumbColor={isPublishedFieldValue ? color1 : color3}
+                    trackColor={{ false: textInputBgColor, true: color4 }}
+                    ios_backgroundColor={textInputBgColor}
+                    disabled={wip}
+                  />
+                </View>
+              )}
             </View>
 
             <MainButton
@@ -591,11 +619,7 @@ export default function CreateEditEvent({ eventUid }) {
               disabled={wip}
               loading={isSubmitting}
             >
-              {isEditMode
-                ? isPublishedFieldValue
-                  ? `Guardar`
-                  : `Guardar Pausado`
-                : `Publicar`}
+              {isPublishedFieldValue ? `Guardar` : `Guardar Pausado`}
             </MainButton>
 
             <BlankSpaceView />
@@ -821,6 +845,7 @@ const styles = StyleSheet.create({
   modalIconContainer: {
     alignItems: 'center',
   },
+  formSwitchLabel: { fontFamily: 'Ubuntu400', fontSize: 16 },
   formInputLabel: { fontFamily: 'Ubuntu400', fontSize: 16, marginBottom: 5 },
   formInputError: { fontFamily: 'Ubuntu400', fontSize: 16, marginTop: 2 },
   formInputField: {
@@ -866,5 +891,11 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     fontSize: 18,
     fontFamily: 'Ubuntu400',
+  },
+  switchFieldContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 10,
   },
 })
