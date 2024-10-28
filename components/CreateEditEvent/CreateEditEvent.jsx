@@ -35,6 +35,7 @@ import { isNonEmptyArray, isNonEmptyString, isBoolean } from 'ramda-adjunct'
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons'
 import Feather from '@expo/vector-icons/Feather'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import Fontisto from '@expo/vector-icons/Fontisto'
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useForm, Controller } from 'react-hook-form'
@@ -62,7 +63,7 @@ import {
 import { useLoggedUserStore } from '@/hooks/useStore'
 import useThemeColor from '@/hooks/useThemeColor'
 import { db, storage } from '@/data/firebase'
-import getEventByUid from '@/data/getEventByUid'
+import cmGetEventEdit from '@/data/cmGetEventEdit'
 import MainButton from '@/ui/MainButton'
 import ThirdButton from '@/ui/ThirdButton'
 import BlankSpaceView from '@/ui/BlankSpaceView'
@@ -74,19 +75,19 @@ import dateFnsFormat from '@/utils/dateFnsFormat'
 
 const schema = yup
   .object({
+    bannerUrl: yup.string().trim().required('Campo requerido'),
     name: yup
       .string()
       .trim()
       .required('Campo requerido')
       .min(FIELD_EVENT_NAME_MIN_LENGTH, 'Mínimo ${min} caracteres')
       .max(FIELD_EVENT_NAME_MAX_LENGTH, 'Máximo ${max} caracteres'),
+    eventType: yup.string().trim().required('Campo requerido'),
     startDate: yup.date().required('Campo requerido'),
     description: yup
       .string()
       .trim()
       .max(FIELD_EVENT_DESCRIPTION_MAX_LENGTH, 'Máximo ${max} caracteres'),
-    eventType: yup.string().trim().required('Campo requerido'),
-    bannerUrl: yup.string().trim().required('Campo requerido'),
     isPublished: yup.bool(),
   })
   .required()
@@ -95,18 +96,20 @@ export default function CreateEditEvent({ eventUid }) {
   const scrollViewRef = useRef(null)
   const contentOffsetYRef = useRef(0)
   const initializedFormRef = useRef(false)
+  const bannerUrlFormFieldRef = useRef(null)
   const nameFormFieldRef = useRef(null)
+  const eventTypeFormFieldRef = useRef(null)
   const startDateFormFieldRef = useRef(null)
   const descriptionFormFieldRef = useRef(null)
-  const eventTypeFormFieldRef = useRef(null)
-  const bannerUrlFormFieldRef = useRef(null)
+  // TODO: -> checkear que todos los fieldRef esten usados y bien usados
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [settingBannerPhoto, setSettingBannerPhoto] = useState(false)
   const [showErrorModal, setShowErrorModal] = useState(false)
   const [deletePhotoModal, setDeletePhotoModal] = useState(false)
-  const [settingBannerPhoto, setSettingBannerPhoto] = useState(false)
   const [showEventDateModal, setShowEventDateModal] = useState(false)
   const [showEventTimeModal, setShowEventTimeModal] = useState(false)
+  const [showEventTypeModal, setShowEventTypeModal] = useState(false)
 
   const mainBg1 = useThemeColor('mainBg1')
   const color1 = useThemeColor('color1')
@@ -123,25 +126,25 @@ export default function CreateEditEvent({ eventUid }) {
   const inputBorderColor = useThemeColor('color3')
   const pgColor = useThemeColor('btn1')
   const pgBgColor = useThemeColor('cardBg2')
+  const selectItemBorderColor = useThemeColor('btn5')
 
   const loggedUserUid = useLoggedUserStore((s) => s.loggedUserUid)
 
   const isEditMode = Boolean(eventUid)
 
-  const {
-    isFetching: eventIsFetching,
-    isLoading: eventIsLoading,
-    error: eventError,
-    data: eventData,
-    refetch: eventRefetch,
-  } = useQuery({
-    queryKey: ['events', eventUid],
-    queryFn: () => getEventByUid(eventUid),
-    enabled: Boolean(eventUid),
-  })
-
   const queryClient = useQueryClient()
   const navigation = useNavigation()
+
+  const { isFetching, isLoading, error, data, refetch } = useQuery({
+    queryKey: ['cm_event_edit', eventUid],
+    queryFn: () => cmGetEventEdit(eventUid),
+    gcTime: 100 * 60000, // 1, // TODO: -> uncomment to one 1
+  })
+  const eventData = data?.eventData
+  const eventTypes = data?.eventTypes
+  const usersToSearch = data?.usersToSearch
+  const judgesUids = data?.judgesUids
+  const participantsUids = data?.participantsUids
 
   const {
     control,
@@ -220,16 +223,16 @@ export default function CreateEditEvent({ eventUid }) {
   const onError = useCallback(
     (formErrors) => {
       console.log(`🔴🔴🔴🔴🔴🔴 formErrors:`, keys(formErrors))
-      if (formErrors?.name) {
+      if (formErrors?.bannerUrl) {
+        bannerUrlFormFieldRef.current?.measure(handleMeasure)
+      } else if (formErrors?.name) {
         nameFormFieldRef.current?.measure(handleMeasure)
+      } else if (formErrors?.eventType) {
+        eventTypeFormFieldRef.current?.measure(handleMeasure)
       } else if (formErrors?.startDate) {
         startDateFormFieldRef.current?.measure(handleMeasure)
       } else if (formErrors?.description) {
         descriptionFormFieldRef.current?.measure(handleMeasure)
-      } else if (formErrors?.eventType) {
-        eventTypeFormFieldRef.current?.measure(handleMeasure)
-      } else if (formErrors?.bannerUrl) {
-        bannerUrlFormFieldRef.current?.measure(handleMeasure)
       }
     },
     [handleMeasure],
@@ -276,12 +279,19 @@ export default function CreateEditEvent({ eventUid }) {
       : initialDate
   }, [eventData?.startDateIsoString])
 
+  const selectedEventTypeName = useMemo(() => {
+    const res = '---'
+    if (isNonEmptyString(eventTypeFieldValue) && isNonEmptyArray(eventTypes)) {
+      const eventType = eventTypes.find(
+        (eventType) => eventType?.key === eventTypeFieldValue,
+      )
+      return eventType?.name ?? res
+    }
+    return res
+  }, [eventTypeFieldValue, eventTypes])
+
   console.log(`🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢`)
-  console.log(
-    `🚀🚀🚀 -> startDateFieldValue:`,
-    typeof startDateFieldValue,
-    startDateFieldValue,
-  )
+  console.log(`🚀🚀🚀 -> eventData:`, eventData)
 
   return (
     <KeyboardAvoidingView
@@ -305,20 +315,20 @@ export default function CreateEditEvent({ eventUid }) {
           }}
         />
 
-        {isEditMode && eventIsLoading ? (
+        {isLoading ? (
           <View style={styles.noContent}>
             <ActivityIndicator size='large' color={color1} />
           </View>
-        ) : isEditMode && (!eventData || eventError) ? (
+        ) : error || (isEditMode && !eventData) ? (
           <View style={styles.noContent}>
             <Text style={[styles.errorText, { color: color1 }]}>
               {`Ha ocurrido un error al obtener los datos. Puede ser que no tengas conexión a internet, o que el evento no exista.`}
             </Text>
             <ThirdButton
-              loading={eventIsFetching}
-              disabled={eventIsFetching}
+              loading={isFetching}
+              disabled={isFetching}
               onPress={() => {
-                eventRefetch()
+                refetch()
               }}
             >{`Reintentar`}</ThirdButton>
           </View>
@@ -408,6 +418,47 @@ export default function CreateEditEvent({ eventUid }) {
 
               <View>
                 <Text style={[styles.formInputLabel, { color: color1 }]}>
+                  {`* Tipo de evento`}
+                </Text>
+                <Pressable
+                  ref={eventTypeFormFieldRef}
+                  disabled={wip}
+                  onPress={() => {
+                    setShowEventTypeModal(true)
+                  }}
+                  style={({ pressed }) => {
+                    return [
+                      styles.formButtonField,
+                      {
+                        backgroundColor: textInputBgColor,
+                        borderColor: errors.eventType
+                          ? errorColor
+                          : inputBorderColor,
+                        opacity: pressed ? 0.8 : 1,
+                      },
+                    ]
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.formButtonTextField,
+                      {
+                        color: eventTypeFieldValue ? color1 : placeholderColor,
+                      },
+                    ]}
+                  >
+                    {selectedEventTypeName}
+                  </Text>
+                </Pressable>
+                {errors.eventType && (
+                  <Text style={[styles.formInputError, { color: errorColor }]}>
+                    {errors.eventType.message}
+                  </Text>
+                )}
+              </View>
+
+              <View>
+                <Text style={[styles.formInputLabel, { color: color1 }]}>
                   {`* Fecha y hora`}
                 </Text>
                 <View style={styles.dateButtonsFieldsContainer}>
@@ -422,7 +473,6 @@ export default function CreateEditEvent({ eventUid }) {
                         styles.formButtonField,
                         {
                           backgroundColor: textInputBgColor,
-                          color: color1,
                           borderColor: errors.startDate
                             ? errorColor
                             : inputBorderColor,
@@ -432,7 +482,15 @@ export default function CreateEditEvent({ eventUid }) {
                     }}
                   >
                     <Text
-                      style={[styles.formButtonTextField, { color: color1 }]}
+                      style={[
+                        styles.formButtonTextField,
+                        styles.dateButtonTextField,
+                        {
+                          color: startDateFieldValue
+                            ? color1
+                            : placeholderColor,
+                        },
+                      ]}
                     >
                       {startDateFieldValue
                         ? dateFnsFormat(
@@ -453,7 +511,6 @@ export default function CreateEditEvent({ eventUid }) {
                         styles.formButtonField,
                         {
                           backgroundColor: textInputBgColor,
-                          color: color1,
                           borderColor: errors.startDate
                             ? errorColor
                             : inputBorderColor,
@@ -463,7 +520,15 @@ export default function CreateEditEvent({ eventUid }) {
                     }}
                   >
                     <Text
-                      style={[styles.formButtonTextField, { color: color1 }]}
+                      style={[
+                        styles.formButtonTextField,
+                        styles.dateButtonTextField,
+                        {
+                          color: startDateFieldValue
+                            ? color1
+                            : placeholderColor,
+                        },
+                      ]}
                     >
                       {startDateFieldValue
                         ? dateFnsFormat(
@@ -508,6 +573,8 @@ export default function CreateEditEvent({ eventUid }) {
                       placeholderTextColor={placeholderColor}
                       editable={!wip}
                       autoCapitalize='none'
+                      multiline
+                      textAlignVertical='top'
                     />
                   )}
                 />
@@ -527,7 +594,7 @@ export default function CreateEditEvent({ eventUid }) {
               {isEditMode
                 ? isPublishedFieldValue
                   ? `Guardar`
-                  : `Pausar Evento`
+                  : `Guardar Pausado`
                 : `Publicar`}
             </MainButton>
 
@@ -566,6 +633,74 @@ export default function CreateEditEvent({ eventUid }) {
           confirmTextIOS='Aceptar'
           cancelTextIOS='Cancelar'
         />
+
+        <MainModal
+          title={`Seleccionar`}
+          visible={showEventTypeModal}
+          onPressClose={() => {
+            setShowEventTypeModal(false)
+          }}
+        >
+          {isNonEmptyArray(eventTypes) ? (
+            eventTypes.map((eventType) => {
+              const isSelected = eventType?.key === eventTypeFieldValue
+
+              return (
+                <Pressable
+                  key={eventType?.uid}
+                  style={({ pressed }) => {
+                    return [
+                      styles.selectItemPressable,
+                      {
+                        borderColor: selectItemBorderColor,
+                        backgroundColor:
+                          isSelected || pressed ? cardBg2 : cardBg1,
+                      },
+                    ]
+                  }}
+                  onPress={() => {
+                    setValue('eventType', eventType?.key, {
+                      shouldValidate: true,
+                    })
+                    setShowEventTypeModal(false)
+                  }}
+                >
+                  {isSelected ? (
+                    <Fontisto
+                      name='radio-btn-active'
+                      size={16}
+                      color={color4}
+                    />
+                  ) : (
+                    <Fontisto
+                      name='radio-btn-passive'
+                      size={16}
+                      color={color2}
+                    />
+                  )}
+                  <Text
+                    style={[
+                      styles.selectItemText,
+                      {
+                        color: isSelected ? color4 : color1,
+                      },
+                    ]}
+                  >
+                    {eventType?.name}
+                  </Text>
+                </Pressable>
+              )
+            })
+          ) : (
+            <View style={styles.modalContainer}>
+              <Text style={[styles.modalText, { color: modalColor }]}>
+                {`No hay tipos de eventos.`}
+              </Text>
+            </View>
+          )}
+
+          <BlankSpaceView />
+        </MainModal>
 
         <MainModal
           title={`Confirmar`}
@@ -695,6 +830,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 10,
     borderWidth: 1,
+    textAlign: 'left',
   },
   dateButtonsFieldsContainer: {
     flexDirection: 'row',
@@ -712,7 +848,23 @@ const styles = StyleSheet.create({
   formButtonTextField: {
     fontFamily: 'Ubuntu400',
     fontSize: 18,
+  },
+  dateButtonTextField: {
     textAlign: 'center',
     textTransform: 'uppercase',
+  },
+  selectItemPressable: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+  },
+  selectItemText: {
+    flexShrink: 1,
+    fontSize: 18,
+    fontFamily: 'Ubuntu400',
   },
 })

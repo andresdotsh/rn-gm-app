@@ -27,6 +27,7 @@ export default function MainModal({
   onPressClose,
   disabled,
   children,
+  topContent,
   regularView = false,
   transparent = true,
   animationType = 'slide',
@@ -80,6 +81,10 @@ export default function MainModal({
           )}
         </View>
 
+        {Boolean(topContent) && (
+          <View style={styles.topContentContainer}>{topContent}</View>
+        )}
+
         {regularView ? (
           <View style={styles.regularContainer}>{children}</View>
         ) : (
@@ -102,6 +107,9 @@ const styles = StyleSheet.create({
   },
   regularContainer: {
     flex: 1,
+    ...CC_WIDTH_STYLES,
+  },
+  topContentContainer: {
     ...CC_WIDTH_STYLES,
   },
   topBar: {
