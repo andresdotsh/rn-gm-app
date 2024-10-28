@@ -206,7 +206,7 @@ export default function EventDetail() {
                   {isNonEmptyString(eventData?.startDateIsoString)
                     ? dateFnsFormat(
                         new Date(eventData?.startDateIsoString),
-                        DATEPICKER_DEFAULT_PROPS.dateFormat,
+                        DATEPICKER_DEFAULT_PROPS.dateTimeFormat,
                       )
                     : '---'}
                 </Text>

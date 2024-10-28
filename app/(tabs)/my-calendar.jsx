@@ -196,7 +196,7 @@ export default function MyCalendar() {
                       {isNonEmptyString(userEvent?.startDateIsoString)
                         ? dateFnsFormat(
                             new Date(userEvent?.startDateIsoString),
-                            DATEPICKER_DEFAULT_PROPS.dateFormat,
+                            DATEPICKER_DEFAULT_PROPS.dateTimeFormat,
                           )
                         : '---'}
                     </Text>

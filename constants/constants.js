@@ -70,6 +70,7 @@ export const DATEPICKER_DEFAULT_PROPS = {
   showTimeSelect: true,
   timeIntervals: 30,
   timeCaption: 'Hora',
+  dateFormat: 'dd/MMM/yyyy',
   timeFormat: 'hh:mm aa',
-  dateFormat: 'dd/MMM/yyyy hh:mm aa',
+  dateTimeFormat: 'dd/MMM/yyyy hh:mm aa',
 }

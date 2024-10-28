@@ -9,6 +9,7 @@ import {
   TextInput,
   Platform,
   KeyboardAvoidingView,
+  Pressable,
 } from 'react-native'
 import {
   addDoc,
@@ -41,6 +42,7 @@ import { Slider } from '@miblanchard/react-native-slider'
 import { launchImageLibraryAsync, MediaTypeOptions } from 'expo-image-picker'
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator'
 import { useNavigation } from '@react-navigation/native'
+import DateTimePickerModal from 'react-native-modal-datetime-picker'
 
 import {
   CC_WIDTH_STYLES,
@@ -55,6 +57,7 @@ import {
   FIELD_EVENT_NAME_MAX_LENGTH,
   FIELD_EVENT_DESCRIPTION_MAX_LENGTH,
   EVENTS_MIN_DATE_ISO_STRING,
+  DATEPICKER_DEFAULT_PROPS,
 } from '@/constants/constants'
 import { useLoggedUserStore } from '@/hooks/useStore'
 import useThemeColor from '@/hooks/useThemeColor'
@@ -67,6 +70,7 @@ import MainModal from '@/ui/MainModal'
 import isValidSkill from '@/utils/isValidSkill'
 import showToast from '@/utils/showToast'
 import safeString from '@/utils/safeString'
+import dateFnsFormat from '@/utils/dateFnsFormat'
 
 const schema = yup
   .object({
@@ -101,8 +105,8 @@ export default function CreateEditEvent({ eventUid }) {
   const [showErrorModal, setShowErrorModal] = useState(false)
   const [deletePhotoModal, setDeletePhotoModal] = useState(false)
   const [settingBannerPhoto, setSettingBannerPhoto] = useState(false)
-  const [showStartDateModal, setShowStartDateModal] = useState(false)
-  const [localStartDate, setLocalStartDate] = useState(new Date())
+  const [showEventDateModal, setShowEventDateModal] = useState(false)
+  const [showEventTimeModal, setShowEventTimeModal] = useState(false)
 
   const mainBg1 = useThemeColor('mainBg1')
   const color1 = useThemeColor('color1')
@@ -167,10 +171,6 @@ export default function CreateEditEvent({ eventUid }) {
         ? new Date(eventData?.startDateIsoString)
         : null
 
-      if (startDate) {
-        setLocalStartDate(startDate)
-      }
-
       reset({
         name: safeString(eventData?.name),
         startDate,
@@ -219,6 +219,7 @@ export default function CreateEditEvent({ eventUid }) {
 
   const onError = useCallback(
     (formErrors) => {
+      console.log(`🔴🔴🔴🔴🔴🔴 formErrors:`, keys(formErrors))
       if (formErrors?.name) {
         nameFormFieldRef.current?.measure(handleMeasure)
       } else if (formErrors?.startDate) {
@@ -255,7 +256,7 @@ export default function CreateEditEvent({ eventUid }) {
           [{ resize: { width: 400, height: 400 } }],
           { compress: 0.7, format: SaveFormat.PNG },
         )
-        setValue('bannerUrl', croppedImage.uri)
+        setValue('bannerUrl', croppedImage.uri, { shouldValidate: true })
       }
     } catch (error) {
       console.error(error)
@@ -265,20 +266,21 @@ export default function CreateEditEvent({ eventUid }) {
     }
   }, [setValue])
 
-  const DATEPICKER_MIN_DATE = useMemo(() => {
-    return new Date(EVENTS_MIN_DATE_ISO_STRING)
-  }, [])
+  const EVENT_INITAL_DATE = useMemo(() => {
+    const initialDate = new Date()
+    initialDate.setDate(initialDate.getDate() + 1)
+    initialDate.setHours(14, 0, 0, 0)
+
+    return isNonEmptyString(eventData?.startDateIsoString)
+      ? new Date(eventData?.startDateIsoString)
+      : initialDate
+  }, [eventData?.startDateIsoString])
 
   console.log(`🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢`)
   console.log(
     `🚀🚀🚀 -> startDateFieldValue:`,
     typeof startDateFieldValue,
     startDateFieldValue,
-  )
-  console.log(
-    `🚀🚀🚀 -> localStartDate:`,
-    typeof localStartDate,
-    localStartDate,
   )
 
   return (
@@ -335,7 +337,10 @@ export default function CreateEditEvent({ eventUid }) {
                 )}
               </View>
 
-              <View style={styles.photoButtonsContainer}>
+              <View
+                ref={bannerUrlFormFieldRef}
+                style={styles.photoButtonsContainer}
+              >
                 <ThirdButton
                   style={styles.photoBtn}
                   disabled={!isBannerInForm || wip}
@@ -356,6 +361,12 @@ export default function CreateEditEvent({ eventUid }) {
                   <Feather name='image' size={24} color={color2} />
                 </ThirdButton>
               </View>
+
+              {errors?.bannerUrl && (
+                <Text style={[styles.formInputError, { color: errorColor }]}>
+                  {errors.bannerUrl.message}
+                </Text>
+              )}
             </View>
 
             <View style={[styles.card, { backgroundColor: cardBg1 }]}>
@@ -399,15 +410,70 @@ export default function CreateEditEvent({ eventUid }) {
                 <Text style={[styles.formInputLabel, { color: color1 }]}>
                   {`* Fecha y hora`}
                 </Text>
-                <ThirdButton
-                  ref={startDateFormFieldRef}
-                  disabled={wip}
-                  onPress={() => {
-                    setShowStartDateModal(true)
-                  }}
-                >
-                  {`Fecha y hora`}
-                </ThirdButton>
+                <View style={styles.dateButtonsFieldsContainer}>
+                  <Pressable
+                    ref={startDateFormFieldRef}
+                    disabled={wip}
+                    onPress={() => {
+                      setShowEventDateModal(true)
+                    }}
+                    style={({ pressed }) => {
+                      return [
+                        styles.formButtonField,
+                        {
+                          backgroundColor: textInputBgColor,
+                          color: color1,
+                          borderColor: errors.startDate
+                            ? errorColor
+                            : inputBorderColor,
+                          opacity: pressed ? 0.8 : 1,
+                        },
+                      ]
+                    }}
+                  >
+                    <Text
+                      style={[styles.formButtonTextField, { color: color1 }]}
+                    >
+                      {startDateFieldValue
+                        ? dateFnsFormat(
+                            startDateFieldValue,
+                            DATEPICKER_DEFAULT_PROPS.dateFormat,
+                          )
+                        : '--/--/----'}
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    disabled={wip}
+                    onPress={() => {
+                      setShowEventTimeModal(true)
+                    }}
+                    style={({ pressed }) => {
+                      return [
+                        styles.formButtonField,
+                        {
+                          backgroundColor: textInputBgColor,
+                          color: color1,
+                          borderColor: errors.startDate
+                            ? errorColor
+                            : inputBorderColor,
+                          opacity: pressed ? 0.8 : 1,
+                        },
+                      ]
+                    }}
+                  >
+                    <Text
+                      style={[styles.formButtonTextField, { color: color1 }]}
+                    >
+                      {startDateFieldValue
+                        ? dateFnsFormat(
+                            startDateFieldValue,
+                            DATEPICKER_DEFAULT_PROPS.timeFormat,
+                          )
+                        : '--:-- --'}
+                    </Text>
+                  </Pressable>
+                </View>
                 {errors.startDate && (
                   <Text style={[styles.formInputError, { color: errorColor }]}>
                     {errors.startDate.message}
@@ -468,6 +534,38 @@ export default function CreateEditEvent({ eventUid }) {
             <BlankSpaceView />
           </View>
         )}
+
+        <DateTimePickerModal
+          isVisible={showEventDateModal}
+          onConfirm={(date) => {
+            setValue('startDate', date, { shouldValidate: true })
+            setShowEventDateModal(false)
+          }}
+          onCancel={() => {
+            setShowEventDateModal(false)
+          }}
+          mode='date'
+          date={startDateFieldValue ?? EVENT_INITAL_DATE}
+          minuteInterval={5}
+          confirmTextIOS='Aceptar'
+          cancelTextIOS='Cancelar'
+        />
+
+        <DateTimePickerModal
+          isVisible={showEventTimeModal}
+          onConfirm={(date) => {
+            setValue('startDate', date, { shouldValidate: true })
+            setShowEventTimeModal(false)
+          }}
+          onCancel={() => {
+            setShowEventTimeModal(false)
+          }}
+          mode='time'
+          date={startDateFieldValue ?? EVENT_INITAL_DATE}
+          minuteInterval={5}
+          confirmTextIOS='Aceptar'
+          cancelTextIOS='Cancelar'
+        />
 
         <MainModal
           title={`Confirmar`}
@@ -597,5 +695,24 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 10,
     borderWidth: 1,
+  },
+  dateButtonsFieldsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 20,
+  },
+  formButtonField: {
+    borderRadius: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    flexGrow: 1,
+    flexShrink: 1,
+  },
+  formButtonTextField: {
+    fontFamily: 'Ubuntu400',
+    fontSize: 18,
+    textAlign: 'center',
+    textTransform: 'uppercase',
   },
 })
