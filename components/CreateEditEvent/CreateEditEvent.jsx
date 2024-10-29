@@ -31,12 +31,14 @@ import {
 } from 'firebase/storage'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Stack } from 'expo-router'
-import { startsWith, not, keys, pick, identity } from 'ramda'
+import { startsWith, not, keys, omit, pick, identity } from 'ramda'
 import { isNonEmptyArray, isNonEmptyString, isBoolean } from 'ramda-adjunct'
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons'
 import Feather from '@expo/vector-icons/Feather'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import Fontisto from '@expo/vector-icons/Fontisto'
+import EvilIcons from '@expo/vector-icons/EvilIcons'
+import Ionicons from '@expo/vector-icons/Ionicons'
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useForm, Controller } from 'react-hook-form'
@@ -60,6 +62,8 @@ import {
   FIELD_EVENT_DESCRIPTION_MAX_LENGTH,
   EVENTS_MIN_DATE_ISO_STRING,
   DATEPICKER_DEFAULT_PROPS,
+  EVENT_ROLE_JUDGE,
+  EVENT_ROLE_PARTICIPANT,
 } from '@/constants/constants'
 import { useLoggedUserStore } from '@/hooks/useStore'
 import useThemeColor from '@/hooks/useThemeColor'
@@ -73,6 +77,8 @@ import isValidSkill from '@/utils/isValidSkill'
 import showToast from '@/utils/showToast'
 import safeString from '@/utils/safeString'
 import dateFnsFormat from '@/utils/dateFnsFormat'
+import normalizeForSearch from '@/utils/normalizeForSearch'
+import getUsernameFromEmail from '@/utils/getUsernameFromEmail'
 
 const schema = yup
   .object({
@@ -111,6 +117,11 @@ export default function CreateEditEvent({ eventUid }) {
   const [showEventDateModal, setShowEventDateModal] = useState(false)
   const [showEventTimeModal, setShowEventTimeModal] = useState(false)
   const [showEventTypeModal, setShowEventTypeModal] = useState(false)
+  const [addUsersModalType, setAddUsersModalType] = useState(null)
+  const [eventJudgesUids, setEventJudgesUids] = useState([])
+  const [eventParticipantsUids, setEventParticipantsUids] = useState([])
+  const [uidsToAddObj, setUidsToAddObj] = useState({})
+  const [searchUserText, setSearchUserText] = useState('')
 
   const mainBg1 = useThemeColor('mainBg1')
   const color1 = useThemeColor('color1')
@@ -128,10 +139,15 @@ export default function CreateEditEvent({ eventUid }) {
   const pgColor = useThemeColor('btn1')
   const pgBgColor = useThemeColor('cardBg2')
   const selectItemBorderColor = useThemeColor('btn5')
+  const mbtnBgColor = useThemeColor('btn1')
+  const mbtnColor = useThemeColor('color1')
+  const mbtnBorderColor = useThemeColor('btn4')
 
   const loggedUserUid = useLoggedUserStore((s) => s.loggedUserUid)
 
   const isEditMode = Boolean(eventUid)
+  const uidsToAddArr = keys(uidsToAddObj)
+  const isAddingJudges = addUsersModalType === EVENT_ROLE_JUDGE
 
   const queryClient = useQueryClient()
   const navigation = useNavigation()
@@ -139,13 +155,11 @@ export default function CreateEditEvent({ eventUid }) {
   const { isFetching, isLoading, error, data, refetch } = useQuery({
     queryKey: ['cm_event_edit', eventUid],
     queryFn: () => cmGetEventEdit(eventUid),
-    gcTime: 100 * 60000, // 1, // TODO: -> uncomment to one 1
+    gcTime: 100 * 60000, // 1000, // TODO: -> uncomment to one 1000
   })
   const eventData = data?.eventData
   const eventTypes = data?.eventTypes
   const usersToSearch = data?.usersToSearch
-  const judgesUids = data?.judgesUids
-  const participantsUids = data?.participantsUids
 
   const {
     control,
@@ -175,6 +189,13 @@ export default function CreateEditEvent({ eventUid }) {
         ? new Date(eventData?.startDateIsoString)
         : null
 
+      if (isNonEmptyArray(data?.judgesUids)) {
+        setEventJudgesUids(data?.judgesUids)
+      }
+      if (isNonEmptyArray(data?.participantsUids)) {
+        setEventParticipantsUids(data?.participantsUids)
+      }
+
       reset({
         name: safeString(eventData?.name),
         startDate,
@@ -186,7 +207,7 @@ export default function CreateEditEvent({ eventUid }) {
           : true,
       })
     }
-  }, [eventData, reset])
+  }, [data?.judgesUids, data?.participantsUids, eventData, reset])
 
   const nameFieldValue = watch('name')
   const startDateFieldValue = watch('startDate')
@@ -291,12 +312,41 @@ export default function CreateEditEvent({ eventUid }) {
     return res
   }, [eventTypeFieldValue, eventTypes])
 
+  const filteredUsersToAdd = useMemo(() => {
+    let res = []
+
+    if (isNonEmptyArray(usersToSearch)) {
+      const cleanSearchText = normalizeForSearch(
+        getUsernameFromEmail(searchUserText),
+      )
+
+      res = usersToSearch.filter((user) => {
+        const searchCondition = cleanSearchText
+          ? user?._s?.includes(cleanSearchText)
+          : true
+
+        return (
+          !eventJudgesUids.includes(user?.uid) &&
+          !eventParticipantsUids.includes(user?.uid) &&
+          user?.uid !== loggedUserUid &&
+          searchCondition
+        )
+      })
+    }
+
+    return res
+  }, [
+    eventJudgesUids,
+    eventParticipantsUids,
+    loggedUserUid,
+    searchUserText,
+    usersToSearch,
+  ])
+
   console.log(`🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢`)
-  console.log(
-    `🚀🚀🚀 -> isPublishedFieldValue:`,
-    typeof isPublishedFieldValue,
-    isPublishedFieldValue,
-  )
+  console.log(`🚀🚀🚀 -> eventJudgesUids:`, eventJudgesUids)
+  console.log(`🚀🚀🚀 -> eventParticipantsUids:`, eventParticipantsUids)
+  console.log(`🚀🚀🚀 -> uidsToAddObj:`, uidsToAddObj)
 
   return (
     <KeyboardAvoidingView
@@ -615,6 +665,25 @@ export default function CreateEditEvent({ eventUid }) {
             </View>
 
             <MainButton
+              onPress={() => {
+                setAddUsersModalType(EVENT_ROLE_JUDGE)
+              }}
+              disabled={wip}
+              loading={isSubmitting}
+            >
+              {`add jueces`}
+            </MainButton>
+            <MainButton
+              onPress={() => {
+                setAddUsersModalType(EVENT_ROLE_PARTICIPANT)
+              }}
+              disabled={wip}
+              loading={isSubmitting}
+            >
+              {`add participantes`}
+            </MainButton>
+
+            <MainButton
               onPress={handleSubmit(onSubmit, onError)}
               disabled={wip}
               loading={isSubmitting}
@@ -657,6 +726,176 @@ export default function CreateEditEvent({ eventUid }) {
           confirmTextIOS='Aceptar'
           cancelTextIOS='Cancelar'
         />
+
+        <MainModal
+          title={
+            `Agregar ${addUsersModalType ? (isAddingJudges ? 'Jueces' : 'Participantes') : ''}` +
+            (uidsToAddArr.length > 0 ? ` (${uidsToAddArr.length})` : '')
+          }
+          visible={Boolean(addUsersModalType)}
+          onPressClose={() => {
+            setAddUsersModalType(null)
+            setUidsToAddObj({})
+            setSearchUserText('')
+          }}
+          topContent={
+            <View style={styles.topContentContainer}>
+              <View
+                style={[
+                  styles.searchTextWrapper,
+                  {
+                    backgroundColor: textInputBgColor,
+                  },
+                ]}
+              >
+                <TextInput
+                  style={[
+                    styles.searchTextInput,
+                    { backgroundColor: textInputBgColor, color: color1 },
+                  ]}
+                  autoCapitalize='none'
+                  placeholder='Buscar...'
+                  placeholderTextColor={placeholderColor}
+                  onChangeText={setSearchUserText}
+                  value={searchUserText}
+                />
+
+                <Pressable
+                  onPress={() => {
+                    setSearchUserText('')
+                  }}
+                >
+                  <EvilIcons
+                    name='close'
+                    size={24}
+                    color={searchUserText ? color3 : textInputBgColor}
+                  />
+                </Pressable>
+              </View>
+
+              <View style={styles.searchIconContainer}>
+                {uidsToAddArr.length > 0 && (
+                  <Pressable
+                    style={[
+                      styles.searchIconButton,
+                      {
+                        backgroundColor: mbtnBgColor,
+                        borderColor: mbtnBorderColor,
+                      },
+                    ]}
+                    onPress={() => {
+                      if (isAddingJudges) {
+                        setEventJudgesUids((prevState) => {
+                          return [...prevState, ...uidsToAddArr]
+                        })
+                      } else {
+                        setEventParticipantsUids((prevState) => {
+                          return [...prevState, ...uidsToAddArr]
+                        })
+                      }
+                      setAddUsersModalType(null)
+                      setUidsToAddObj({})
+                      setSearchUserText('')
+                    }}
+                  >
+                    <MaterialCommunityIcons
+                      name='check'
+                      size={24}
+                      color={mbtnColor}
+                    />
+                  </Pressable>
+                )}
+              </View>
+            </View>
+          }
+        >
+          {isNonEmptyArray(usersToSearch) &&
+          isNonEmptyArray(filteredUsersToAdd) ? (
+            filteredUsersToAdd.map((userToSearch) => {
+              const isSelected = Boolean(uidsToAddObj?.[userToSearch?.uid])
+
+              return (
+                <Pressable
+                  key={userToSearch?.uid}
+                  style={({ pressed }) => {
+                    return [
+                      styles.selectItemPressable,
+                      {
+                        borderColor: selectItemBorderColor,
+                        backgroundColor:
+                          isSelected || pressed ? cardBg2 : cardBg1,
+                      },
+                    ]
+                  }}
+                  onPress={() => {
+                    const newValue = !isSelected
+
+                    setUidsToAddObj((prevState) => {
+                      if (newValue) {
+                        return {
+                          ...prevState,
+                          [userToSearch?.uid]: true,
+                        }
+                      } else {
+                        return omit([userToSearch?.uid], prevState)
+                      }
+                    })
+                  }}
+                >
+                  {isSelected ? (
+                    <MaterialCommunityIcons
+                      name='checkbox-marked'
+                      size={24}
+                      color={color4}
+                    />
+                  ) : (
+                    <MaterialCommunityIcons
+                      name='checkbox-blank-outline'
+                      size={24}
+                      color={color2}
+                    />
+                  )}
+                  <View style={styles.selectItemTextContainer}>
+                    <Text
+                      style={[
+                        styles.selectItemText,
+                        {
+                          color: isSelected ? color1 : color1,
+                        },
+                      ]}
+                    >
+                      {userToSearch?.displayName}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.selectItemText,
+                        {
+                          color: isSelected ? color4 : color4,
+                        },
+                      ]}
+                    >
+                      {userToSearch?.username}
+                    </Text>
+                  </View>
+                </Pressable>
+              )
+            })
+          ) : isNonEmptyArray(usersToSearch) ? (
+            <View style={styles.emptyResultsContainer}>
+              <Text style={[styles.modalText, { color: modalColor }]}>
+                {searchUserText ? `No hay resultados` : `No hay usuarios`}
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.emptyResultsContainer}>
+              <Text style={[styles.modalText, { color: modalColor }]}>
+                {`ERROR: No hay datos de usuarios.`}
+              </Text>
+            </View>
+          )}
+
+          <BlankSpaceView />
+        </MainModal>
 
         <MainModal
           title={`Seleccionar`}
@@ -887,6 +1126,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderBottomWidth: 1,
   },
+  selectItemTextContainer: { flexShrink: 1 },
   selectItemText: {
     flexShrink: 1,
     fontSize: 18,
@@ -898,4 +1138,43 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     gap: 10,
   },
+  topContentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 10,
+    paddingBottom: 10,
+  },
+  searchTextWrapper: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 5,
+    paddingRight: 6,
+  },
+  searchTextInput: {
+    flexGrow: 1,
+    flexShrink: 1,
+    fontFamily: 'Ubuntu400',
+    fontSize: 16,
+    borderRadius: 5,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
+  searchIconContainer: {
+    flexShrink: 0,
+    flexGrow: 0,
+    flexBasis: 50,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  searchIconButton: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 5,
+    borderWidth: 1,
+  },
+  emptyResultsContainer: { padding: 20 },
 })
