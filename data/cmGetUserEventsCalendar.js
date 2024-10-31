@@ -1,51 +1,44 @@
-import {
-  getDocs,
-  query,
-  collection,
-  where,
-  documentId,
-} from 'firebase/firestore'
 import { subHours } from 'date-fns'
+import { not } from 'ramda'
 
 import { EVENT_ROLE_OWNER } from '@/constants/constants'
-import { db } from '@/data/firebase'
 import getAllEventTypes from '@/data/getAllEventTypes'
 import getEventsUsersByUserUid from '@/data/getEventsUsersByUserUid'
+import getEventsByUids from '@/data/getEventsByUids'
+import getEventsByOwnerUid from '@/data/getEventsByOwnerUid'
 
 async function cmGetUserEventsCalendar(userUid) {
   const eventTypes = await getAllEventTypes()
 
   const eventsUsers = await getEventsUsersByUserUid(userUid)
   const eventRoleObj = {}
-  const eventsUids = eventsUsers.map((eu) => {
-    const eventUid = eu?.eventUid
-    eventRoleObj[eventUid] = eu?.role
+  const eventsUids = eventsUsers.map((eventUser) => {
+    const eventUid = eventUser?.eventUid
+    eventRoleObj[eventUid] = eventUser?.role
     return eventUid
   })
 
-  const eventsInvolvedQuerySnap = await getDocs(
-    query(collection(db, 'events'), where(documentId(), 'in', eventsUids)),
-  )
-  const eventsInvolvedData = eventsInvolvedQuerySnap.docs.map((doc) => {
-    const data = doc.data()
-    const role = eventRoleObj[doc.id]
+  const eventsInvolvedArr = await getEventsByUids(eventsUids)
+  const eventsInvolvedData = eventsInvolvedArr.map((eventData) => {
+    const role = eventRoleObj[eventData?.uid]
     return {
-      ...data,
-      uid: doc.id,
+      ...eventData,
       _role: role,
     }
   })
 
-  const eventsAsOwnerQuerySnap = await getDocs(
-    query(collection(db, 'events'), where('ownerUid', '==', userUid)),
-  )
-  const eventsAsOwnerData = eventsAsOwnerQuerySnap.docs
-    .filter((doc) => !eventsInvolvedData.some((e) => e.uid === doc.id))
-    .map((doc) => {
-      const eventData = doc.data()
+  const eventsAsOwnerArr = await getEventsByOwnerUid(userUid)
+  const eventsAsOwnerData = eventsAsOwnerArr
+    .filter((eventAsOwner) => {
+      return not(
+        eventsInvolvedData.some((eventInvolved) => {
+          return eventInvolved.uid === eventAsOwner.uid
+        }),
+      )
+    })
+    .map((eventAsOwner) => {
       return {
-        ...eventData,
-        uid: doc.id,
+        ...eventAsOwner,
         _role: EVENT_ROLE_OWNER,
       }
     })
