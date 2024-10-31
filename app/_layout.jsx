@@ -6,10 +6,10 @@ import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
+  useNavigationState,
 } from '@react-navigation/native'
 import * as SplashScreen from 'expo-splash-screen'
 import { onAuthStateChanged } from 'firebase/auth'
-import { useNavigationState } from '@react-navigation/native'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RootSiblingParent } from 'react-native-root-siblings'
 

@@ -10,8 +10,7 @@ import {
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import { signOut } from 'firebase/auth'
-import { useNavigation } from '@react-navigation/native'
-import { useRouter } from 'expo-router'
+import { useRouter, useNavigation } from 'expo-router'
 import { isNonEmptyString } from 'ramda-adjunct'
 
 import { auth } from '@/data/firebase'

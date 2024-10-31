@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router'
-import FontAwesome from '@expo/vector-icons/FontAwesome'
+import Feather from '@expo/vector-icons/Feather'
 
 import LoginSignup from '@/components/LoginSignup/LoginSignup'
 import useThemeColor from '@/hooks/useThemeColor'
@@ -34,7 +34,7 @@ export default function TabsLayout() {
         options={{
           tabBarIcon: ({ focused, size }) => {
             return (
-              <FontAwesome
+              <Feather
                 name='home'
                 size={size}
                 color={focused ? activeTabIconColor : tabIconColor}
@@ -49,7 +49,7 @@ export default function TabsLayout() {
         options={{
           tabBarIcon: ({ focused, size }) => {
             return (
-              <FontAwesome
+              <Feather
                 name='calendar'
                 size={size}
                 color={focused ? activeTabIconColor : tabIconColor}
@@ -64,8 +64,8 @@ export default function TabsLayout() {
         options={{
           tabBarIcon: ({ focused, size }) => {
             return (
-              <FontAwesome
-                name='gear'
+              <Feather
+                name='settings'
                 size={size}
                 color={focused ? activeTabIconColor : tabIconColor}
               />

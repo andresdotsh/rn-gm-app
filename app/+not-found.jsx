@@ -1,6 +1,5 @@
-import { Stack } from 'expo-router'
+import { Stack, useNavigation } from 'expo-router'
 import { StyleSheet, Text, View, ScrollView } from 'react-native'
-import { useNavigation } from '@react-navigation/native'
 
 import useThemeColor from '@/hooks/useThemeColor'
 import MainButton from '@/ui/MainButton'

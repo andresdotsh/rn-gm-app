@@ -4,6 +4,7 @@ import {
   collection,
   query,
   where,
+  orderBy,
 } from 'firebase/firestore'
 import { isNonEmptyArray } from 'ramda-adjunct'
 
@@ -13,7 +14,11 @@ import formatUserData from '@/utils/formatUserData'
 async function getUsersByUids(usersUids) {
   if (isNonEmptyArray(usersUids)) {
     const querySnap = await getDocs(
-      query(collection(db, 'users'), where(documentId(), 'in', usersUids)),
+      query(
+        collection(db, 'users'),
+        where(documentId(), 'in', usersUids),
+        orderBy('displayName'),
+      ),
     )
     const dataArr = querySnap.docs.map((doc) => {
       const data = doc.data()

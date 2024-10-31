@@ -28,8 +28,8 @@ import {
   deleteObject,
 } from 'firebase/storage'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Stack } from 'expo-router'
-import { startsWith, not, keys, pick, identity } from 'ramda'
+import { Stack, useNavigation } from 'expo-router'
+import { keys, pick, identity } from 'ramda'
 import { isNonEmptyArray, isNonEmptyString } from 'ramda-adjunct'
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons'
 import Feather from '@expo/vector-icons/Feather'
@@ -40,7 +40,6 @@ import { useForm, Controller } from 'react-hook-form'
 import { Slider } from '@miblanchard/react-native-slider'
 import { launchImageLibraryAsync, MediaTypeOptions } from 'expo-image-picker'
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator'
-import { useNavigation } from '@react-navigation/native'
 
 import {
   CC_WIDTH_STYLES,
@@ -64,6 +63,7 @@ import MainModal from '@/ui/MainModal'
 import isValidSkill from '@/utils/isValidSkill'
 import showToast from '@/utils/showToast'
 import safeString from '@/utils/safeString'
+import isLocalImageFileUri from '@/utils/isLocalImageFileUri'
 
 const schema = yup
   .object({
@@ -165,6 +165,7 @@ export default function EditProfile() {
   const pgBgColor = useThemeColor('cardBg2')
 
   const loggedUserUid = useLoggedUserStore((s) => s.loggedUserUid)
+  const wip = isSubmitting || settingProfilePhoto
 
   const {
     isFetching: userIsFetching,
@@ -228,6 +229,16 @@ export default function EditProfile() {
       snUserFacebook: '',
     },
   })
+  const usernameFieldValue = watch('username')
+  const photoURLFieldValue = watch('photoURL')
+  const snUserTiktokFieldValue = watch('snUserTiktok')
+  const snUserInstagramFieldValue = watch('snUserInstagram')
+  const snUserXcomFieldValue = watch('snUserXcom')
+  const snUserSnapchatFieldValue = watch('snUserSnapchat')
+  const snUserYoutubeFieldValue = watch('snUserYoutube')
+  const snUserFacebookFieldValue = watch('snUserFacebook')
+
+  const isPhotoInForm = isNonEmptyString(photoURLFieldValue)
 
   useEffect(() => {
     const skillsKeys = keys(skillsDefaultValues)
@@ -254,19 +265,6 @@ export default function EditProfile() {
     }
   }, [reset, skillsDefaultValues, userData])
 
-  const usernameFieldValue = watch('username')
-  const photoURLFieldValue = watch('photoURL')
-  const snUserTiktokFieldValue = watch('snUserTiktok')
-  const snUserInstagramFieldValue = watch('snUserInstagram')
-  const snUserXcomFieldValue = watch('snUserXcom')
-  const snUserSnapchatFieldValue = watch('snUserSnapchat')
-  const snUserYoutubeFieldValue = watch('snUserYoutube')
-  const snUserFacebookFieldValue = watch('snUserFacebook')
-
-  const isPhotoInForm = isNonEmptyString(photoURLFieldValue)
-
-  const wip = isSubmitting || settingProfilePhoto
-
   const handleMeasure = useCallback((x, y, width, height, pageX, pageY) => {
     const ADJUSTMENT = 140
     const errorPosY = contentOffsetYRef.current - ADJUSTMENT + pageY
@@ -281,9 +279,9 @@ export default function EditProfile() {
     async (formData) => {
       try {
         setIsSubmitting(true)
-        const shouldUploadNewProfilePhoto =
-          isNonEmptyString(formData.photoURL) &&
-          not(startsWith('https://', formData.photoURL))
+        const shouldUploadNewProfilePhoto = isLocalImageFileUri(
+          formData.photoURL,
+        )
 
         const q = query(
           collection(db, 'users'),
@@ -361,7 +359,9 @@ export default function EditProfile() {
             .catch(identity)
 
           await updateDoc(userDocRef, userPayload)
-          await queryClient.invalidateQueries(['users', loggedUserUid])
+          await queryClient.invalidateQueries({
+            queryKey: ['users', loggedUserUid],
+          })
 
           setIsSubmitting(false)
 
@@ -979,7 +979,7 @@ const styles = StyleSheet.create({
   card: {
     padding: 20,
     borderRadius: 10,
-    marginBottom: 20,
+    marginBottom: 30,
     gap: 25,
   },
   profilePhotoContainer: {

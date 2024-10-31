@@ -1,5 +1,5 @@
 import Toast from 'react-native-root-toast'
-import { isNonEmptyString } from 'ramda-adjunct'
+import { isNonEmptyString, isValidNumber, isInteger } from 'ramda-adjunct'
 
 import colors from '@/constants/colors'
 import { CC_WIDTH_STYLES } from '@/constants/constants'
@@ -10,13 +10,17 @@ import { CC_WIDTH_STYLES } from '@/constants/constants'
  * @param {string} [message='...'] The message to show on the toast.
  * @returns {void}
  */
-export default function showToast(message) {
-  const msg = isNonEmptyString(message) ? message : '...'
+export default function showToast(message, duration) {
+  const validMessage = isNonEmptyString(message) ? message : '...'
+  const validDuration =
+    isValidNumber(duration) && isInteger(duration) && duration > 0
+      ? duration
+      : 5000
 
-  Toast.show(msg, {
+  Toast.show(validMessage, {
     backgroundColor: colors.dark.color4,
     textColor: colors.dark.color5,
-    duration: 4000,
+    duration: validDuration,
     position: 120,
     opacity: 1,
     textStyle: {

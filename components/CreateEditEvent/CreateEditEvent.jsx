@@ -15,13 +15,11 @@ import {
 import {
   addDoc,
   doc,
-  getDoc,
   updateDoc,
   collection,
-  query,
-  where,
-  getDocs,
   serverTimestamp,
+  Timestamp,
+  writeBatch,
 } from 'firebase/firestore'
 import {
   ref,
@@ -30,37 +28,28 @@ import {
   deleteObject,
 } from 'firebase/storage'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Stack } from 'expo-router'
-import { startsWith, not, keys, omit, pick, identity } from 'ramda'
+import { Stack, useNavigation } from 'expo-router'
+import { not, keys, omit, identity, clone } from 'ramda'
 import { isNonEmptyArray, isNonEmptyString, isBoolean } from 'ramda-adjunct'
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons'
 import Feather from '@expo/vector-icons/Feather'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import Fontisto from '@expo/vector-icons/Fontisto'
 import EvilIcons from '@expo/vector-icons/EvilIcons'
-import Ionicons from '@expo/vector-icons/Ionicons'
+import FontAwesome from '@expo/vector-icons/FontAwesome'
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useForm, Controller } from 'react-hook-form'
-import { Slider } from '@miblanchard/react-native-slider'
 import { launchImageLibraryAsync, MediaTypeOptions } from 'expo-image-picker'
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator'
-import { useNavigation } from '@react-navigation/native'
 import DateTimePickerModal from 'react-native-modal-datetime-picker'
+import { isValid } from 'date-fns'
 
 import {
   CC_WIDTH_STYLES,
-  REGEX_USER_USERNAME,
-  REGEX_SN_USERNAME,
-  FIELD_NAME_MIN_LENGTH,
-  FIELD_NAME_MAX_LENGTH,
-  FIELD_USERNAME_MIN_LENGTH,
-  FIELD_USERNAME_MAX_LENGTH,
-  FIELD_SN_USERNAME_MAX_LENGTH,
   FIELD_EVENT_NAME_MIN_LENGTH,
   FIELD_EVENT_NAME_MAX_LENGTH,
   FIELD_EVENT_DESCRIPTION_MAX_LENGTH,
-  EVENTS_MIN_DATE_ISO_STRING,
   DATEPICKER_DEFAULT_PROPS,
   EVENT_ROLE_JUDGE,
   EVENT_ROLE_PARTICIPANT,
@@ -73,12 +62,13 @@ import MainButton from '@/ui/MainButton'
 import ThirdButton from '@/ui/ThirdButton'
 import BlankSpaceView from '@/ui/BlankSpaceView'
 import MainModal from '@/ui/MainModal'
-import isValidSkill from '@/utils/isValidSkill'
 import showToast from '@/utils/showToast'
 import safeString from '@/utils/safeString'
 import dateFnsFormat from '@/utils/dateFnsFormat'
 import normalizeForSearch from '@/utils/normalizeForSearch'
 import getUsernameFromEmail from '@/utils/getUsernameFromEmail'
+import isLocalImageFileUri from '@/utils/isLocalImageFileUri'
+import normalizeSpaces from '@/utils/normalizeSpaces'
 
 const schema = yup
   .object({
@@ -99,6 +89,10 @@ const schema = yup
   })
   .required()
 
+const getBannerPath = (uid) => {
+  return 'event/' + uid + '/page/banner.jpg'
+}
+
 export default function CreateEditEvent({ eventUid }) {
   const scrollViewRef = useRef(null)
   const contentOffsetYRef = useRef(0)
@@ -108,7 +102,6 @@ export default function CreateEditEvent({ eventUid }) {
   const eventTypeFormFieldRef = useRef(null)
   const startDateFormFieldRef = useRef(null)
   const descriptionFormFieldRef = useRef(null)
-  // TODO: -> checkear que todos los fieldRef esten usados y bien usados
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [settingBannerPhoto, setSettingBannerPhoto] = useState(false)
@@ -118,17 +111,19 @@ export default function CreateEditEvent({ eventUid }) {
   const [showEventTimeModal, setShowEventTimeModal] = useState(false)
   const [showEventTypeModal, setShowEventTypeModal] = useState(false)
   const [addUsersModalType, setAddUsersModalType] = useState(null)
+  const [initialJudgesUids, setInitialJudgesUids] = useState([])
+  const [initialParticipantsUids, setInitialParticipantsUids] = useState([])
   const [eventJudgesUids, setEventJudgesUids] = useState([])
   const [eventParticipantsUids, setEventParticipantsUids] = useState([])
   const [uidsToAddObj, setUidsToAddObj] = useState({})
   const [searchUserText, setSearchUserText] = useState('')
+  const [userToRemoveObj, setUserToRemoveObj] = useState({})
 
   const mainBg1 = useThemeColor('mainBg1')
   const color1 = useThemeColor('color1')
   const color2 = useThemeColor('color2')
   const color3 = useThemeColor('color3')
   const color4 = useThemeColor('color4')
-  const color5 = useThemeColor('color5')
   const cardBg1 = useThemeColor('cardBg1')
   const cardBg2 = useThemeColor('cardBg2')
   const modalColor = useThemeColor('color2')
@@ -136,8 +131,6 @@ export default function CreateEditEvent({ eventUid }) {
   const placeholderColor = useThemeColor('color3')
   const errorColor = useThemeColor('color4')
   const inputBorderColor = useThemeColor('color3')
-  const pgColor = useThemeColor('btn1')
-  const pgBgColor = useThemeColor('cardBg2')
   const selectItemBorderColor = useThemeColor('btn5')
   const mbtnBgColor = useThemeColor('btn1')
   const mbtnColor = useThemeColor('color1')
@@ -148,6 +141,7 @@ export default function CreateEditEvent({ eventUid }) {
   const isEditMode = Boolean(eventUid)
   const uidsToAddArr = keys(uidsToAddObj)
   const isAddingJudges = addUsersModalType === EVENT_ROLE_JUDGE
+  const wip = isSubmitting || settingBannerPhoto
 
   const queryClient = useQueryClient()
   const navigation = useNavigation()
@@ -155,7 +149,7 @@ export default function CreateEditEvent({ eventUid }) {
   const { isFetching, isLoading, error, data, refetch } = useQuery({
     queryKey: ['cm_event_edit', eventUid],
     queryFn: () => cmGetEventEdit(eventUid),
-    gcTime: 100 * 60000, // 1000, // TODO: -> uncomment to one 1000
+    gcTime: 1000,
   })
   const eventData = data?.eventData
   const eventTypes = data?.eventTypes
@@ -166,7 +160,6 @@ export default function CreateEditEvent({ eventUid }) {
     handleSubmit,
     formState: { errors },
     setValue,
-    setError,
     watch,
     reset,
   } = useForm({
@@ -180,6 +173,12 @@ export default function CreateEditEvent({ eventUid }) {
       isPublished: true,
     },
   })
+  const startDateFieldValue = watch('startDate')
+  const eventTypeFieldValue = watch('eventType')
+  const bannerUrlFieldValue = watch('bannerUrl')
+  const isPublishedFieldValue = watch('isPublished')
+
+  const isBannerInForm = isNonEmptyString(bannerUrlFieldValue)
 
   useEffect(() => {
     if (eventData && !initializedFormRef.current) {
@@ -191,9 +190,11 @@ export default function CreateEditEvent({ eventUid }) {
 
       if (isNonEmptyArray(data?.judgesUids)) {
         setEventJudgesUids(data?.judgesUids)
+        setInitialJudgesUids(clone(data?.judgesUids))
       }
       if (isNonEmptyArray(data?.participantsUids)) {
         setEventParticipantsUids(data?.participantsUids)
+        setInitialParticipantsUids(clone(data?.participantsUids))
       }
 
       reset({
@@ -209,17 +210,6 @@ export default function CreateEditEvent({ eventUid }) {
     }
   }, [data?.judgesUids, data?.participantsUids, eventData, reset])
 
-  const nameFieldValue = watch('name')
-  const startDateFieldValue = watch('startDate')
-  const descriptionFieldValue = watch('description')
-  const eventTypeFieldValue = watch('eventType')
-  const bannerUrlFieldValue = watch('bannerUrl')
-  const isPublishedFieldValue = watch('isPublished')
-
-  const isBannerInForm = isNonEmptyString(bannerUrlFieldValue)
-
-  const wip = isSubmitting || settingBannerPhoto
-
   const handleMeasure = useCallback((x, y, width, height, pageX, pageY) => {
     const ADJUSTMENT = 140
     const errorPosY = contentOffsetYRef.current - ADJUSTMENT + pageY
@@ -230,21 +220,8 @@ export default function CreateEditEvent({ eventUid }) {
     })
   }, [])
 
-  const onSubmit = useCallback(async (formData) => {
-    try {
-      // setIsSubmitting(true)
-      console.log(`🚀🚀🚀 -> formData:`, formData)
-    } catch (error) {
-      console.error(error)
-
-      setIsSubmitting(false)
-      setShowErrorModal(true)
-    }
-  }, [])
-
   const onError = useCallback(
     (formErrors) => {
-      console.log(`🔴🔴🔴🔴🔴🔴 formErrors:`, keys(formErrors))
       if (formErrors?.bannerUrl) {
         bannerUrlFormFieldRef.current?.measure(handleMeasure)
       } else if (formErrors?.name) {
@@ -291,6 +268,171 @@ export default function CreateEditEvent({ eventUid }) {
     }
   }, [setValue])
 
+  const onSubmit = async (formData) => {
+    try {
+      setIsSubmitting(true)
+      let finalEventId = ''
+      const isValidStartDate =
+        Boolean(formData.startDate) && isValid(formData.startDate)
+      const startDate = isValidStartDate
+        ? Timestamp.fromDate(formData.startDate)
+        : null
+      const startDateIsoString = isValidStartDate
+        ? formData.startDate.toISOString()
+        : null
+
+      if (isEditMode) {
+        finalEventId = eventUid
+        let bannerUrl = formData.bannerUrl
+
+        const shouldUploadNewBannerPhoto = isLocalImageFileUri(
+          formData.bannerUrl,
+        )
+        const bannerPhotoRef = ref(storage, getBannerPath(eventUid))
+
+        if (shouldUploadNewBannerPhoto) {
+          const fileRes = await fetch(formData.bannerUrl)
+          const fileBlob = await fileRes.blob()
+
+          await uploadBytes(bannerPhotoRef, fileBlob)
+          bannerUrl = await getDownloadURL(bannerPhotoRef)
+        } else if (!formData.bannerUrl) {
+          deleteObject(bannerPhotoRef).then(identity).catch(identity)
+        }
+
+        const logPayload = {
+          ...omit(['uid'], eventData),
+          _uid: eventUid,
+          _loggedAt: serverTimestamp(),
+        }
+        await addDoc(collection(db, 'log_events'), logPayload)
+
+        const eventDocRef = doc(db, 'events', eventUid)
+        const eventPayload = {
+          name: normalizeSpaces(formData.name),
+          description: normalizeSpaces(formData.description),
+          startDate,
+          startDateIsoString,
+          eventType: formData.eventType,
+          isPublished: formData.isPublished,
+          bannerUrl,
+        }
+        await updateDoc(eventDocRef, eventPayload)
+      } else {
+        const eventPayload = {
+          name: normalizeSpaces(formData.name),
+          description: normalizeSpaces(formData.description),
+          startDate,
+          startDateIsoString,
+          eventType: formData.eventType,
+          isPublished: formData.isPublished,
+          bannerUrl: '',
+          ownerUid: loggedUserUid,
+        }
+
+        const newEventDocRef = await addDoc(
+          collection(db, 'events'),
+          eventPayload,
+        )
+        const newEventUid = newEventDocRef.id
+        finalEventId = newEventUid
+        let bannerUrl = ''
+
+        const bannerPhotoRef = ref(storage, getBannerPath(newEventUid))
+        const fileRes = await fetch(formData.bannerUrl)
+        const fileBlob = await fileRes.blob()
+
+        await uploadBytes(bannerPhotoRef, fileBlob)
+        bannerUrl = await getDownloadURL(bannerPhotoRef)
+
+        await updateDoc(newEventDocRef, { bannerUrl })
+      }
+
+      if (
+        isNonEmptyArray(eventJudgesUids) ||
+        isNonEmptyArray(eventParticipantsUids)
+      ) {
+        const eventsUsersBatch = writeBatch(db)
+
+        eventJudgesUids.forEach((userUid) => {
+          const eventUserUid = finalEventId + '___' + userUid
+          const eventUserDocRef = doc(db, 'events_users', eventUserUid)
+          const eventUserPayload = {
+            eventUid: finalEventId,
+            userUid: userUid,
+            role: EVENT_ROLE_JUDGE,
+          }
+          eventsUsersBatch.set(eventUserDocRef, eventUserPayload, {
+            merge: true,
+          })
+        })
+
+        eventParticipantsUids.forEach((userUid) => {
+          const eventUserUid = finalEventId + '___' + userUid
+          const eventUserDocRef = doc(db, 'events_users', eventUserUid)
+          const eventUserPayload = {
+            eventUid: finalEventId,
+            userUid: userUid,
+            role: EVENT_ROLE_PARTICIPANT,
+          }
+          eventsUsersBatch.set(eventUserDocRef, eventUserPayload, {
+            merge: true,
+          })
+        })
+
+        await eventsUsersBatch.commit()
+      }
+
+      const initialUsersUids = []
+      if (isNonEmptyArray(initialJudgesUids)) {
+        initialUsersUids.push(...initialJudgesUids)
+      }
+      if (isNonEmptyArray(initialParticipantsUids)) {
+        initialUsersUids.push(...initialParticipantsUids)
+      }
+      const eventUsersUidsToDelete = initialUsersUids.filter((userUid) => {
+        return (
+          not(eventJudgesUids.includes(userUid)) &&
+          not(eventParticipantsUids.includes(userUid))
+        )
+      })
+
+      if (isNonEmptyArray(eventUsersUidsToDelete)) {
+        const eventsUsersToDeleteBatch = writeBatch(db)
+        eventUsersUidsToDelete.forEach((userUid) => {
+          const eventUserUid = finalEventId + '___' + userUid
+          const eventUserDocRef = doc(db, 'events_users', eventUserUid)
+          eventsUsersToDeleteBatch.delete(eventUserDocRef)
+        })
+        await eventsUsersToDeleteBatch.commit()
+      }
+
+      if (isEditMode) {
+        await queryClient.invalidateQueries({
+          queryKey: ['cm_event_details', eventUid],
+        })
+      }
+
+      await queryClient.invalidateQueries({
+        queryKey: ['cm_user_events_calendar', loggedUserUid],
+      })
+
+      setIsSubmitting(false)
+      showToast('Cambios guardados')
+
+      if (navigation.canGoBack()) {
+        navigation.goBack()
+      } else {
+        navigation.navigate('(tabs)')
+      }
+    } catch (error) {
+      console.error(error)
+
+      setIsSubmitting(false)
+      setShowErrorModal(true)
+    }
+  }
+
   const EVENT_INITAL_DATE = useMemo(() => {
     const initialDate = new Date()
     initialDate.setDate(initialDate.getDate() + 1)
@@ -312,29 +454,47 @@ export default function CreateEditEvent({ eventUid }) {
     return res
   }, [eventTypeFieldValue, eventTypes])
 
-  const filteredUsersToAdd = useMemo(() => {
-    let res = []
+  const { filteredUsersToAdd, judgesUsers, participantsUsers } = useMemo(() => {
+    const filUsers = []
+    const judUsers = []
+    const parUsers = []
 
     if (isNonEmptyArray(usersToSearch)) {
       const cleanSearchText = normalizeForSearch(
         getUsernameFromEmail(searchUserText),
       )
 
-      res = usersToSearch.filter((user) => {
+      usersToSearch.forEach((user) => {
         const searchCondition = cleanSearchText
           ? user?._s?.includes(cleanSearchText)
           : true
+        const isJudge = eventJudgesUids.includes(user?.uid)
+        const isParticipant = eventParticipantsUids.includes(user?.uid)
+        const isLoggedUser = user?.uid === loggedUserUid
 
-        return (
-          !eventJudgesUids.includes(user?.uid) &&
-          !eventParticipantsUids.includes(user?.uid) &&
-          user?.uid !== loggedUserUid &&
+        if (isJudge) {
+          judUsers.push(user)
+        }
+        if (isParticipant) {
+          parUsers.push(user)
+        }
+
+        if (
+          not(isJudge) &&
+          not(isParticipant) &&
+          not(isLoggedUser) &&
           searchCondition
-        )
+        ) {
+          filUsers.push(user)
+        }
       })
     }
 
-    return res
+    return {
+      filteredUsersToAdd: filUsers,
+      judgesUsers: judUsers,
+      participantsUsers: parUsers,
+    }
   }, [
     eventJudgesUids,
     eventParticipantsUids,
@@ -342,11 +502,6 @@ export default function CreateEditEvent({ eventUid }) {
     searchUserText,
     usersToSearch,
   ])
-
-  console.log(`🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢`)
-  console.log(`🚀🚀🚀 -> eventJudgesUids:`, eventJudgesUids)
-  console.log(`🚀🚀🚀 -> eventParticipantsUids:`, eventParticipantsUids)
-  console.log(`🚀🚀🚀 -> uidsToAddObj:`, uidsToAddObj)
 
   return (
     <KeyboardAvoidingView
@@ -664,24 +819,211 @@ export default function CreateEditEvent({ eventUid }) {
               )}
             </View>
 
-            <MainButton
-              onPress={() => {
-                setAddUsersModalType(EVENT_ROLE_JUDGE)
-              }}
-              disabled={wip}
-              loading={isSubmitting}
+            <View
+              style={[
+                styles.card,
+                styles.userTypeContainerCard,
+                { backgroundColor: cardBg1 },
+              ]}
             >
-              {`add jueces`}
-            </MainButton>
-            <MainButton
-              onPress={() => {
-                setAddUsersModalType(EVENT_ROLE_PARTICIPANT)
-              }}
-              disabled={wip}
-              loading={isSubmitting}
+              <Text style={[styles.userTypeTitle, { color: color1 }]}>
+                {`Jueces (${judgesUsers.length})`}
+              </Text>
+
+              {isNonEmptyArray(judgesUsers) ? (
+                <View style={styles.userItemsContainer}>
+                  {judgesUsers.map((user) => (
+                    <View
+                      key={user?.uid}
+                      style={[
+                        styles.userItemCard,
+                        {
+                          backgroundColor: cardBg2,
+                        },
+                      ]}
+                    >
+                      <View style={styles.userItemTextContainer}>
+                        <Text
+                          style={[
+                            styles.userItemNameText,
+                            {
+                              color: color1,
+                            },
+                          ]}
+                        >
+                          {user?.displayName}
+                        </Text>
+                        <Text
+                          style={[
+                            styles.userItemUsernameText,
+                            {
+                              color: color4,
+                            },
+                          ]}
+                        >
+                          {'@' + user?.username}
+                        </Text>
+                      </View>
+
+                      <View style={styles.userItemButtonContainer}>
+                        <Pressable
+                          disabled={wip}
+                          style={({ pressed }) => {
+                            return [
+                              styles.searchIconButton,
+                              {
+                                backgroundColor: mbtnBgColor,
+                                borderColor: mbtnBorderColor,
+                                opacity: wip || pressed ? 0.8 : 1,
+                              },
+                            ]
+                          }}
+                          onPress={() => {
+                            setUserToRemoveObj({
+                              uid: user?.uid,
+                              username: user?.username,
+                              displayName: user?.displayName,
+                              _role: EVENT_ROLE_JUDGE,
+                            })
+                          }}
+                        >
+                          <FontAwesome
+                            name='trash-o'
+                            size={24}
+                            color={mbtnColor}
+                          />
+                        </Pressable>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              ) : (
+                <View
+                  style={[
+                    styles.userTypeCard,
+                    {
+                      backgroundColor: cardBg2,
+                    },
+                  ]}
+                >
+                  <Text style={[styles.userTypeDescription, { color: color1 }]}>
+                    {`Sin jueces`}
+                  </Text>
+                </View>
+              )}
+
+              <ThirdButton
+                onPress={() => {
+                  setAddUsersModalType(EVENT_ROLE_JUDGE)
+                }}
+                disabled={wip}
+              >
+                {`Agregar Jueces`}
+              </ThirdButton>
+            </View>
+
+            <View
+              style={[
+                styles.card,
+                styles.userTypeContainerCard,
+                { backgroundColor: cardBg1 },
+              ]}
             >
-              {`add participantes`}
-            </MainButton>
+              <Text style={[styles.userTypeTitle, { color: color1 }]}>
+                {`Participantes (${participantsUsers.length})`}
+              </Text>
+
+              {isNonEmptyArray(participantsUsers) ? (
+                <View style={styles.userItemsContainer}>
+                  {participantsUsers.map((user) => (
+                    <View
+                      key={user?.uid}
+                      style={[
+                        styles.userItemCard,
+                        {
+                          backgroundColor: cardBg2,
+                        },
+                      ]}
+                    >
+                      <View style={styles.userItemTextContainer}>
+                        <Text
+                          style={[
+                            styles.userItemNameText,
+                            {
+                              color: color1,
+                            },
+                          ]}
+                        >
+                          {user?.displayName}
+                        </Text>
+                        <Text
+                          style={[
+                            styles.userItemUsernameText,
+                            {
+                              color: color4,
+                            },
+                          ]}
+                        >
+                          {'@' + user?.username}
+                        </Text>
+                      </View>
+
+                      <View style={styles.userItemButtonContainer}>
+                        <Pressable
+                          disabled={wip}
+                          style={({ pressed }) => {
+                            return [
+                              styles.searchIconButton,
+                              {
+                                backgroundColor: mbtnBgColor,
+                                borderColor: mbtnBorderColor,
+                                opacity: wip || pressed ? 0.8 : 1,
+                              },
+                            ]
+                          }}
+                          onPress={() => {
+                            setUserToRemoveObj({
+                              uid: user?.uid,
+                              username: user?.username,
+                              displayName: user?.displayName,
+                              _role: EVENT_ROLE_PARTICIPANT,
+                            })
+                          }}
+                        >
+                          <FontAwesome
+                            name='trash-o'
+                            size={24}
+                            color={mbtnColor}
+                          />
+                        </Pressable>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              ) : (
+                <View
+                  style={[
+                    styles.userTypeCard,
+                    {
+                      backgroundColor: cardBg2,
+                    },
+                  ]}
+                >
+                  <Text style={[styles.userTypeDescription, { color: color1 }]}>
+                    {`Sin participantes`}
+                  </Text>
+                </View>
+              )}
+
+              <ThirdButton
+                onPress={() => {
+                  setAddUsersModalType(EVENT_ROLE_PARTICIPANT)
+                }}
+                disabled={wip}
+              >
+                {`Agregar Participantes`}
+              </ThirdButton>
+            </View>
 
             <MainButton
               onPress={handleSubmit(onSubmit, onError)}
@@ -730,7 +1072,7 @@ export default function CreateEditEvent({ eventUid }) {
         <MainModal
           title={
             `Agregar ${addUsersModalType ? (isAddingJudges ? 'Jueces' : 'Participantes') : ''}` +
-            (uidsToAddArr.length > 0 ? ` (${uidsToAddArr.length})` : '')
+            (isNonEmptyArray(uidsToAddArr) ? ` (${uidsToAddArr.length})` : '')
           }
           visible={Boolean(addUsersModalType)}
           onPressClose={() => {
@@ -774,15 +1116,18 @@ export default function CreateEditEvent({ eventUid }) {
               </View>
 
               <View style={styles.searchIconContainer}>
-                {uidsToAddArr.length > 0 && (
+                {isNonEmptyArray(uidsToAddArr) && (
                   <Pressable
-                    style={[
-                      styles.searchIconButton,
-                      {
-                        backgroundColor: mbtnBgColor,
-                        borderColor: mbtnBorderColor,
-                      },
-                    ]}
+                    style={({ pressed }) => {
+                      return [
+                        styles.searchIconButton,
+                        {
+                          backgroundColor: mbtnBgColor,
+                          borderColor: mbtnBorderColor,
+                          opacity: pressed ? 0.8 : 1,
+                        },
+                      ]
+                    }}
                     onPress={() => {
                       if (isAddingJudges) {
                         setEventJudgesUids((prevState) => {
@@ -966,6 +1311,76 @@ export default function CreateEditEvent({ eventUid }) {
         </MainModal>
 
         <MainModal
+          title={
+            userToRemoveObj?._role === EVENT_ROLE_JUDGE ||
+            userToRemoveObj?._role === EVENT_ROLE_PARTICIPANT
+              ? userToRemoveObj?._role === EVENT_ROLE_JUDGE
+                ? `Eliminar Juez`
+                : `Eliminar Participante`
+              : 'Eliminar'
+          }
+          visible={Boolean(userToRemoveObj?.uid)}
+          onPressClose={() => {
+            setUserToRemoveObj({})
+          }}
+        >
+          <View style={styles.modalContainer}>
+            <Text style={[styles.modalText, { color: modalColor }]}>
+              {`¿Deseas eliminar este usuario del evento?`}
+            </Text>
+
+            <View>
+              <Text
+                style={[
+                  styles.modalText,
+                  {
+                    color: color4,
+                  },
+                ]}
+              >
+                {'@' + userToRemoveObj?.username}
+              </Text>
+              <Text
+                style={[
+                  styles.modalText,
+                  {
+                    color: color1,
+                  },
+                ]}
+              >
+                {userToRemoveObj?.displayName}
+              </Text>
+            </View>
+
+            <MainButton
+              onPress={() => {
+                if (userToRemoveObj?._role === EVENT_ROLE_JUDGE) {
+                  setEventJudgesUids((prevState) => {
+                    return prevState.filter(
+                      (uid) => uid !== userToRemoveObj?.uid,
+                    )
+                  })
+                }
+                if (userToRemoveObj?._role === EVENT_ROLE_PARTICIPANT) {
+                  setEventParticipantsUids((prevState) => {
+                    return prevState.filter(
+                      (uid) => uid !== userToRemoveObj?.uid,
+                    )
+                  })
+                }
+                setUserToRemoveObj({})
+              }}
+            >{`Si, eliminar`}</MainButton>
+
+            <ThirdButton
+              onPress={() => {
+                setUserToRemoveObj({})
+              }}
+            >{`Cancelar`}</ThirdButton>
+          </View>
+        </MainModal>
+
+        <MainModal
           title={`Confirmar`}
           visible={deletePhotoModal}
           onPressClose={() => {
@@ -1047,7 +1462,7 @@ const styles = StyleSheet.create({
   card: {
     padding: 20,
     borderRadius: 10,
-    marginBottom: 20,
+    marginBottom: 30,
     gap: 25,
   },
   bannerPhotoContainer: {
@@ -1177,4 +1592,47 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   emptyResultsContainer: { padding: 20 },
+  userTypeContainerCard: {
+    padding: 10,
+  },
+  userTypeTitle: {
+    fontSize: 20,
+    fontFamily: 'Ubuntu500',
+    textAlign: 'center',
+    marginTop: 10,
+  },
+  userTypeDescription: {
+    fontSize: 18,
+    fontFamily: 'Ubuntu400',
+    textAlign: 'center',
+  },
+  userTypeCard: {
+    padding: 10,
+    borderRadius: 5,
+  },
+  userItemsContainer: { gap: 10 },
+  userItemCard: {
+    padding: 10,
+    borderRadius: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  userItemTextContainer: { flexShrink: 1 },
+  userItemButtonContainer: {
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: 40,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  userItemNameText: {
+    fontSize: 16,
+    fontFamily: 'Ubuntu500',
+  },
+  userItemUsernameText: {
+    fontSize: 16,
+    fontFamily: 'Ubuntu400',
+  },
 })
