@@ -168,7 +168,10 @@ export default function RootLayout() {
 
               if (route.name === '(tabs)') {
                 if (activeTabName === 'index') {
-                  options.headerTitle = ''
+                  options.headerTitle = 'Próximos Eventos'
+                  options.headerStyle.backgroundColor = isDark
+                    ? colors.dark.mainBg1
+                    : colors.light.mainBg1
                 }
 
                 if (activeTabName === 'my-calendar') {

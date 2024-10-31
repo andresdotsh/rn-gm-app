@@ -118,7 +118,9 @@ export default function UserDetail() {
     >
       <Stack.Screen
         options={{
-          headerTitle: 'Perfil',
+          headerTitle: isNonEmptyString(userData?.displayName)
+            ? userData?.displayName
+            : 'Perfil',
           headerLeft: null,
           headerRight: null,
           headerStyle: {

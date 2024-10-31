@@ -2,9 +2,9 @@ import { getDocs, collection, query, orderBy } from 'firebase/firestore'
 
 import { db } from '@/data/firebase'
 
-async function getAllEventTypes() {
+async function getAllEvents() {
   const querySnap = await getDocs(
-    query(collection(db, 'event_types'), orderBy('name')),
+    query(collection(db, 'events'), orderBy('startDate')),
   )
   const dataArr = querySnap.docs.map((doc) => {
     const data = doc.data()
@@ -14,4 +14,4 @@ async function getAllEventTypes() {
   return dataArr
 }
 
-export default getAllEventTypes
+export default getAllEvents

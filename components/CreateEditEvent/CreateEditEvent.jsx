@@ -416,6 +416,9 @@ export default function CreateEditEvent({ eventUid }) {
       await queryClient.invalidateQueries({
         queryKey: ['cm_user_events_calendar', loggedUserUid],
       })
+      await queryClient.invalidateQueries({
+        queryKey: ['cm_home_events'],
+      })
 
       setIsSubmitting(false)
       showToast('Cambios guardados')

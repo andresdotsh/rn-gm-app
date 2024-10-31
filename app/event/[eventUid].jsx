@@ -118,7 +118,11 @@ export default function EventDetail() {
     >
       <Stack.Screen
         options={{
-          headerTitle: isPublished ? 'Evento' : 'Evento Pausado',
+          headerTitle: isNonEmptyString(eventData?.name)
+            ? eventData?.name
+            : isPublished
+              ? 'Evento'
+              : 'Evento Pausado',
           headerLeft: null,
           headerRight: null,
           headerStyle: {
