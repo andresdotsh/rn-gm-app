@@ -80,7 +80,13 @@ const schema = yup
       .min(FIELD_EVENT_NAME_MIN_LENGTH, 'Mínimo ${min} caracteres')
       .max(FIELD_EVENT_NAME_MAX_LENGTH, 'Máximo ${max} caracteres'),
     eventType: yup.string().trim().required('Campo requerido'),
-    startDate: yup.date().required('Campo requerido'),
+    startDate: yup
+      .date()
+      .required('Campo requerido')
+      .test('is-future', 'No debe ser una fecha pasada', (value) => {
+        const now = new Date()
+        return Boolean(value) && isValid(value) && value > now
+      }),
     description: yup
       .string()
       .trim()
