@@ -130,6 +130,28 @@ export default function Settings() {
           style={({ pressed }) => {
             return [
               styles.settingsPressable,
+              {
+                backgroundColor: pressed ? cardBg2 : cardBg1,
+                borderColor: settingsItemBorderColor,
+              },
+            ]
+          }}
+          onPress={() => {
+            router.push({ pathname: '/events-history' })
+          }}
+        >
+          <View style={styles.settingsItemIconContainer}>
+            <MaterialIcons name='history' size={24} color={color1} />
+          </View>
+          <Text style={[styles.settingsItemText, { color: textColor1 }]}>
+            {`Eventos Pasados`}
+          </Text>
+        </Pressable>
+
+        <Pressable
+          style={({ pressed }) => {
+            return [
+              styles.settingsPressable,
               styles.logoutPressable,
               {
                 backgroundColor: pressed ? cardBg2 : cardBg1,
@@ -141,7 +163,9 @@ export default function Settings() {
             setLogoutModal(true)
           }}
         >
-          <FontAwesome6 name='power-off' size={18} color={color1} />
+          <View style={styles.settingsItemIconContainer}>
+            <FontAwesome6 name='power-off' size={20} color={color1} />
+          </View>
           <Text style={[styles.settingsItemText, { color: textColor1 }]}>
             {`Cerrar Sesión`}
           </Text>
@@ -209,18 +233,25 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 20,
+    gap: 6,
     padding: 10,
     borderTopWidth: 1,
   },
   settingsItemText: {
     fontSize: 18,
     fontFamily: 'Ubuntu400',
+    flexShrink: 1,
+  },
+  settingsItemIconContainer: {
+    flexShrink: 0,
+    flexGrow: 0,
+    flexBasis: 30,
   },
   profilePressable: {
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     borderTopWidth: 0,
+    gap: 20,
   },
   profileLinkImage: {
     width: 60,

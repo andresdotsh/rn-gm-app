@@ -2,8 +2,8 @@ import { useLocalSearchParams } from 'expo-router'
 
 import EventDetail from '@/components/EventDetail/EventDetail'
 
-export default function Event() {
+export default function PastEvent() {
   const { eventUid } = useLocalSearchParams()
 
-  return <EventDetail eventUid={eventUid} isPastEvent={false} />
+  return <EventDetail eventUid={eventUid} isPastEvent={true} />
 }
