@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   },
   text: {
     textAlign: 'center',
-    fontFamily: 'Ubuntu500',
+    fontFamily: 'Ubuntu400',
     fontSize: 18,
   },
 })

@@ -266,10 +266,10 @@ const styles = StyleSheet.create({
   input: {
     fontFamily: 'Ubuntu400',
     fontSize: 18,
-    textAlign: 'right',
     borderRadius: 50,
     paddingVertical: 10,
     paddingHorizontal: 20,
+    textAlign: 'right',
   },
   pt1: {
     paddingTop: 10,

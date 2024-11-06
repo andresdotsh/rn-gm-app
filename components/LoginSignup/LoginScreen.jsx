@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
   },
   error: { fontFamily: 'Ubuntu400', fontSize: 16 },
   input: {
-    fontFamily: 'Ubuntu500',
+    fontFamily: 'Ubuntu400',
     fontSize: 18,
     borderRadius: 50,
     paddingVertical: 10,

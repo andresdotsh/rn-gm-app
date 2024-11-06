@@ -249,8 +249,11 @@ export default function MyCalendar() {
         </>
       ) : (
         <View style={styles.noContent}>
-          <Text style={[styles.errorText, { color: color1 }]}>
-            {`No tienes eventos en tu calendario.`}
+          <Text style={[styles.errorText, { color: color2 }]}>
+            {`No hay eventos en tu calendario.`}
+          </Text>
+          <Text style={[styles.errorText, { color: color2 }]}>
+            {`Aquí aparecerán los eventos que hayas creado, o en los que tengas un rol como juez o participante.`}
           </Text>
         </View>
       )}

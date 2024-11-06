@@ -164,6 +164,8 @@ export default function LoginSignup() {
           resetFn()
         }
 
+        scrollToIndex(0)
+
         return null
       }
 
@@ -174,7 +176,7 @@ export default function LoginSignup() {
       setIsAuthenticating(false)
       setIsUserLoggedIn(true)
     },
-    [setIsUserLoggedIn],
+    [scrollToIndex, setIsUserLoggedIn],
   )
 
   const recovOnSubmit = useCallback(
@@ -248,19 +250,19 @@ export default function LoginSignup() {
           setShowVerifyModal(false)
         }}
       >
-        <View style={styles.modalVerifContainer}>
+        <View style={styles.modalIconContainer}>
           <MaterialCommunityIcons
             name='email-check'
             size={96}
             color={modalIconColor}
           />
-          <Text style={[styles.modalVerifTitle, { color: modalTitleColor }]}>
+          <Text style={[styles.modalIconTitle, { color: modalTitleColor }]}>
             {`Verifica Tu Email`}
           </Text>
-          <Text style={[styles.modalVerifMessage, { color: modalColor }]}>
+          <Text style={[styles.modalIconMessage, { color: modalColor }]}>
             {`Te enviamos un correo con un link de verificación a tu email.`}
           </Text>
-          <Text style={[styles.modalVerifMessage, { color: modalColor }]}>
+          <Text style={[styles.modalIconMessage, { color: modalColor }]}>
             {`Verifica tu email y luego regresa para que puedas Ingresar.`}
           </Text>
         </View>
@@ -275,22 +277,22 @@ export default function LoginSignup() {
         }}
       >
         {recovSentMode ? (
-          <View style={styles.modalRecovContainer}>
+          <View style={styles.modalIconContainer}>
             <MaterialCommunityIcons
               name='email-check'
               size={96}
               color={modalIconColor}
             />
-            <Text style={[styles.modalRecovTitle, { color: modalTitleColor }]}>
+            <Text style={[styles.modalIconTitle, { color: modalTitleColor }]}>
               {`Revisa Tu Email`}
             </Text>
-            <Text style={[styles.modalRecovMessage, { color: modalColor }]}>
+            <Text style={[styles.modalIconMessage, { color: modalColor }]}>
               {`Te enviamos un link a tu email para cambiar tu contraseña.`}
             </Text>
           </View>
         ) : (
-          <View style={styles.modalRecovContainer}>
-            <Text style={[styles.modalRecovMessage, { color: modalColor }]}>
+          <View style={styles.modalIconContainer}>
+            <Text style={[styles.modalIconMessage, { color: modalColor }]}>
               {`Te enviaremos un link a tu email para que puedas cambiar tu contraseña.`}
             </Text>
 
@@ -355,40 +357,20 @@ const styles = StyleSheet.create({
     fontFamily: 'Ubuntu400',
     textAlign: 'center',
   },
-  modalVerifContainer: {
+  modalIconContainer: {
     padding: 20,
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  modalVerifTitle: {
+  modalIconTitle: {
     fontSize: 24,
     fontFamily: 'Ubuntu600',
     textAlign: 'center',
     marginTop: 40,
     marginBottom: 20,
   },
-  modalVerifMessage: {
-    fontSize: 18,
-    fontFamily: 'Ubuntu400',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  modalRecovContainer: {
-    paddingVertical: 20,
-    paddingHorizontal: 40,
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalRecovTitle: {
-    fontSize: 24,
-    fontFamily: 'Ubuntu600',
-    textAlign: 'center',
-    marginTop: 40,
-    marginBottom: 20,
-  },
-  modalRecovMessage: {
+  modalIconMessage: {
     fontSize: 18,
     fontFamily: 'Ubuntu400',
     textAlign: 'center',

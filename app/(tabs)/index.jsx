@@ -164,8 +164,11 @@ export default function Index() {
         </>
       ) : (
         <View style={styles.noContent}>
-          <Text style={[styles.errorText, { color: color1 }]}>
+          <Text style={[styles.errorText, { color: color2 }]}>
             {`No hay eventos para mostrar.`}
+          </Text>
+          <Text style={[styles.errorText, { color: color2 }]}>
+            {`Aquí aparecerán todos los eventos activos publicados.`}
           </Text>
         </View>
       )}
