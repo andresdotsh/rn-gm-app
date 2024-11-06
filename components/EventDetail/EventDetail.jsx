@@ -166,116 +166,118 @@ export default function EventDetail({ eventUid, isPastEvent }) {
               </View>
             )}
 
-            <View>
-              <Text
-                style={[
-                  styles.eventTitle,
-                  { color: isPublished ? color1 : color3 },
-                ]}
-              >
-                {eventData?.name}
-              </Text>
-
-              <View style={styles.eventSubtitleContainer}>
-                <Feather
-                  name='user'
-                  size={18}
-                  color={isPublished ? color2 : color3}
-                />
+            <View style={styles.cardContent}>
+              <View>
                 <Text
                   style={[
-                    styles.eventRoleSubtitle,
-                    { color: isPublished ? color2 : color3 },
+                    styles.eventTitle,
+                    { color: isPublished ? color1 : color3 },
                   ]}
                 >
-                  {userEventRoleText}
+                  {eventData?.name}
                 </Text>
+
+                <View style={styles.eventSubtitleContainer}>
+                  <Feather
+                    name='user'
+                    size={18}
+                    color={isPublished ? color2 : color3}
+                  />
+                  <Text
+                    style={[
+                      styles.eventRoleSubtitle,
+                      { color: isPublished ? color2 : color3 },
+                    ]}
+                  >
+                    {userEventRoleText}
+                  </Text>
+                </View>
+
+                <View style={styles.eventSubtitleContainer}>
+                  <Feather
+                    name='calendar'
+                    size={18}
+                    color={isPublished ? color4 : color3}
+                  />
+                  <Text
+                    style={[
+                      styles.eventSubtitle,
+                      styles.eventDate,
+                      { color: isPublished ? color4 : color3 },
+                    ]}
+                  >
+                    {isNonEmptyString(eventData?.startDateIsoString)
+                      ? dateFnsFormat(
+                          new Date(eventData?.startDateIsoString),
+                          DATEPICKER_DEFAULT_PROPS.dateTimeFormat,
+                        )
+                      : '---'}
+                  </Text>
+                </View>
+
+                <View style={styles.eventSubtitleContainer}>
+                  <Ionicons
+                    name='medal-outline'
+                    size={18}
+                    color={isPublished ? color3 : color3}
+                  />
+                  <Text
+                    style={[
+                      styles.eventSubtitle,
+                      { color: isPublished ? color3 : color3 },
+                    ]}
+                  >
+                    {eventType?.name || '---'}
+                  </Text>
+                </View>
               </View>
 
-              <View style={styles.eventSubtitleContainer}>
-                <Feather
-                  name='calendar'
-                  size={18}
-                  color={isPublished ? color4 : color3}
-                />
+              {isNonEmptyString(eventData?.description) && (
                 <Text
                   style={[
-                    styles.eventSubtitle,
-                    styles.eventDate,
-                    { color: isPublished ? color4 : color3 },
+                    styles.eventDescription,
+                    { color: isPublished ? color1 : color3 },
                   ]}
                 >
-                  {isNonEmptyString(eventData?.startDateIsoString)
-                    ? dateFnsFormat(
-                        new Date(eventData?.startDateIsoString),
-                        DATEPICKER_DEFAULT_PROPS.dateTimeFormat,
-                      )
-                    : '---'}
+                  {eventData?.description}
                 </Text>
-              </View>
+              )}
 
-              <View style={styles.eventSubtitleContainer}>
-                <Ionicons
-                  name='medal-outline'
-                  size={18}
-                  color={isPublished ? color3 : color3}
-                />
+              <View>
                 <Text
                   style={[
-                    styles.eventSubtitle,
+                    styles.eventAuhtor,
                     { color: isPublished ? color3 : color3 },
                   ]}
                 >
-                  {eventType?.name || '---'}
+                  {`Creado por:`}
+                </Text>
+                <Text
+                  style={[
+                    styles.eventAuhtor,
+                    { color: isPublished ? color4 : color3 },
+                  ]}
+                >
+                  {'@' + ownerData?.username}
+                </Text>
+                <Text
+                  style={[
+                    styles.eventAuhtor,
+                    { color: isPublished ? color4 : color3 },
+                  ]}
+                >
+                  {ownerData?.displayName}
                 </Text>
               </View>
+
+              {not(isPastEvent) &&
+                loggedUserIsOwner &&
+                (isPublished ? (
+                  <MainButton onPress={goToEditEvent}>{`Editar`}</MainButton>
+                ) : (
+                  <ThirdButton onPress={goToEditEvent}>{`Editar`}</ThirdButton>
+                ))}
             </View>
-
-            {isNonEmptyString(eventData?.description) && (
-              <Text
-                style={[
-                  styles.eventDescription,
-                  { color: isPublished ? color1 : color3 },
-                ]}
-              >
-                {eventData?.description}
-              </Text>
-            )}
-
-            <View>
-              <Text
-                style={[
-                  styles.eventAuhtor,
-                  { color: isPublished ? color3 : color3 },
-                ]}
-              >
-                {`Creado por:`}
-              </Text>
-              <Text
-                style={[
-                  styles.eventAuhtor,
-                  { color: isPublished ? color4 : color3 },
-                ]}
-              >
-                {'@' + ownerData?.username}
-              </Text>
-              <Text
-                style={[
-                  styles.eventAuhtor,
-                  { color: isPublished ? color4 : color3 },
-                ]}
-              >
-                {ownerData?.displayName}
-              </Text>
-            </View>
-
-            {not(isPastEvent) &&
-              loggedUserIsOwner &&
-              (isPublished ? (
-                <MainButton onPress={goToEditEvent}>{`Editar`}</MainButton>
-              ) : (
-                <ThirdButton onPress={goToEditEvent}>{`Editar`}</ThirdButton>
-              ))}
           </View>
 
           {loggedUserIsOwner && (
@@ -474,10 +476,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   card: {
-    padding: 20,
     borderRadius: 10,
-    gap: 25,
     marginBottom: 30,
+    overflow: 'hidden',
+  },
+  cardContent: {
+    gap: 25,
+    padding: 20,
+  },
+  userTypeContainerCard: {
+    padding: 10,
+    gap: 25,
   },
   eventBannerContainer: {
     flexDirection: 'row',
@@ -497,6 +506,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: 'Ubuntu700',
     textAlign: 'center',
+    padding: 5,
   },
   eventSubtitleContainer: {
     flexDirection: 'row',
@@ -523,9 +533,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Ubuntu400',
     textAlign: 'right',
-  },
-  userTypeContainerCard: {
-    padding: 10,
   },
   userTypeTitle: {
     fontSize: 20,

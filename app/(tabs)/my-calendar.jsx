@@ -154,92 +154,94 @@ export default function MyCalendar() {
                   </View>
                 )}
 
-                <View>
-                  <Text
-                    style={[
-                      styles.eventTitle,
-                      { color: isPublished ? color1 : color3 },
-                    ]}
-                  >
-                    {userEvent?.name}
-                  </Text>
-
-                  <View style={styles.eventSubtitleContainer}>
-                    <Feather
-                      name='user'
-                      size={16}
-                      color={isPublished ? color2 : color3}
-                    />
+                <View style={styles.cardContent}>
+                  <View>
                     <Text
                       style={[
-                        styles.eventRoleSubtitle,
+                        styles.eventTitle,
+                        { color: isPublished ? color1 : color3 },
+                      ]}
+                    >
+                      {userEvent?.name}
+                    </Text>
+
+                    <View style={styles.eventSubtitleContainer}>
+                      <Feather
+                        name='user'
+                        size={16}
+                        color={isPublished ? color2 : color3}
+                      />
+                      <Text
+                        style={[
+                          styles.eventRoleSubtitle,
+                          { color: isPublished ? color2 : color3 },
+                        ]}
+                      >
+                        {userEventRoleText}
+                      </Text>
+                    </View>
+
+                    <View style={styles.eventSubtitleContainer}>
+                      <Feather
+                        name='calendar'
+                        size={16}
+                        color={isPublished ? color4 : color3}
+                      />
+                      <Text
+                        style={[
+                          styles.eventSubtitle,
+                          styles.eventDate,
+                          { color: isPublished ? color4 : color3 },
+                        ]}
+                      >
+                        {isNonEmptyString(userEvent?.startDateIsoString)
+                          ? dateFnsFormat(
+                              new Date(userEvent?.startDateIsoString),
+                              DATEPICKER_DEFAULT_PROPS.dateTimeFormat,
+                            )
+                          : '---'}
+                      </Text>
+                    </View>
+
+                    <View style={styles.eventSubtitleContainer}>
+                      <Ionicons
+                        name='medal-outline'
+                        size={16}
+                        color={isPublished ? color3 : color3}
+                      />
+                      <Text
+                        style={[
+                          styles.eventSubtitle,
+                          { color: isPublished ? color3 : color3 },
+                        ]}
+                      >
+                        {userEvent?._eventType?.name || '---'}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {isNonEmptyString(userEvent?.description) && (
+                    <Text
+                      style={[
+                        styles.eventDescription,
                         { color: isPublished ? color2 : color3 },
                       ]}
                     >
-                      {userEventRoleText}
+                      {userEvent?.description}
                     </Text>
-                  </View>
-
-                  <View style={styles.eventSubtitleContainer}>
-                    <Feather
-                      name='calendar'
-                      size={16}
-                      color={isPublished ? color4 : color3}
-                    />
-                    <Text
-                      style={[
-                        styles.eventSubtitle,
-                        styles.eventDate,
-                        { color: isPublished ? color4 : color3 },
-                      ]}
-                    >
-                      {isNonEmptyString(userEvent?.startDateIsoString)
-                        ? dateFnsFormat(
-                            new Date(userEvent?.startDateIsoString),
-                            DATEPICKER_DEFAULT_PROPS.dateTimeFormat,
-                          )
-                        : '---'}
-                    </Text>
-                  </View>
-
-                  <View style={styles.eventSubtitleContainer}>
-                    <Ionicons
-                      name='medal-outline'
-                      size={16}
-                      color={isPublished ? color3 : color3}
-                    />
-                    <Text
-                      style={[
-                        styles.eventSubtitle,
-                        { color: isPublished ? color3 : color3 },
-                      ]}
-                    >
-                      {userEvent?._eventType?.name || '---'}
-                    </Text>
-                  </View>
-                </View>
-
-                {isNonEmptyString(userEvent?.description) && (
-                  <Text
-                    style={[
-                      styles.eventDescription,
-                      { color: isPublished ? color2 : color3 },
-                    ]}
-                  >
-                    {userEvent?.description}
-                  </Text>
-                )}
-
-                <View style={styles.buttonContainer}>
-                  {isPublished ? (
-                    <MainButton
-                      onPress={goToEventDetail}
-                    >{`Detalle`}</MainButton>
-                  ) : (
-                    <ThirdButton
-                      onPress={goToEventDetail}
-                    >{`Detalle`}</ThirdButton>
                   )}
+
+                  <View style={styles.buttonContainer}>
+                    {isPublished ? (
+                      <MainButton
+                        onPress={goToEventDetail}
+                      >{`Detalle`}</MainButton>
+                    ) : (
+                      <ThirdButton
+                        onPress={goToEventDetail}
+                      >{`Detalle`}</ThirdButton>
+                    )}
+                  </View>
                 </View>
               </View>
             )
@@ -283,10 +285,13 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   card: {
-    padding: 20,
     borderRadius: 10,
-    gap: 25,
     marginBottom: 30,
+    overflow: 'hidden',
+  },
+  cardContent: {
+    gap: 25,
+    padding: 20,
   },
   eventBannerContainer: {
     flexDirection: 'row',
@@ -303,9 +308,10 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   pausedEventTitle: {
-    fontSize: 22,
+    fontSize: 24,
     fontFamily: 'Ubuntu700',
     textAlign: 'center',
+    padding: 5,
   },
   eventSubtitleContainer: {
     flexDirection: 'row',

@@ -116,45 +116,49 @@ export default function Index() {
                   </View>
                 )}
 
-                <View>
-                  <Text style={[styles.eventTitle, { color: color1 }]}>
-                    {userEvent?.name}
-                  </Text>
-
-                  <View style={styles.eventSubtitleContainer}>
-                    <Feather name='calendar' size={16} color={color4} />
-                    <Text
-                      style={[
-                        styles.eventSubtitle,
-                        styles.eventDate,
-                        { color: color4 },
-                      ]}
-                    >
-                      {isNonEmptyString(userEvent?.startDateIsoString)
-                        ? dateFnsFormat(
-                            new Date(userEvent?.startDateIsoString),
-                            DATEPICKER_DEFAULT_PROPS.dateTimeFormat,
-                          )
-                        : '---'}
+                <View style={styles.cardContent}>
+                  <View>
+                    <Text style={[styles.eventTitle, { color: color1 }]}>
+                      {userEvent?.name}
                     </Text>
+
+                    <View style={styles.eventSubtitleContainer}>
+                      <Feather name='calendar' size={16} color={color4} />
+                      <Text
+                        style={[
+                          styles.eventSubtitle,
+                          styles.eventDate,
+                          { color: color4 },
+                        ]}
+                      >
+                        {isNonEmptyString(userEvent?.startDateIsoString)
+                          ? dateFnsFormat(
+                              new Date(userEvent?.startDateIsoString),
+                              DATEPICKER_DEFAULT_PROPS.dateTimeFormat,
+                            )
+                          : '---'}
+                      </Text>
+                    </View>
+
+                    <View style={styles.eventSubtitleContainer}>
+                      <Ionicons name='medal-outline' size={16} color={color3} />
+                      <Text style={[styles.eventSubtitle, { color: color3 }]}>
+                        {userEvent?._eventType?.name || '---'}
+                      </Text>
+                    </View>
                   </View>
 
-                  <View style={styles.eventSubtitleContainer}>
-                    <Ionicons name='medal-outline' size={16} color={color3} />
-                    <Text style={[styles.eventSubtitle, { color: color3 }]}>
-                      {userEvent?._eventType?.name || '---'}
+                  {isNonEmptyString(userEvent?.description) && (
+                    <Text style={[styles.eventDescription, { color: color2 }]}>
+                      {userEvent?.description}
                     </Text>
+                  )}
+
+                  <View style={styles.buttonContainer}>
+                    <MainButton
+                      onPress={goToEventDetail}
+                    >{`Detalle`}</MainButton>
                   </View>
-                </View>
-
-                {isNonEmptyString(userEvent?.description) && (
-                  <Text style={[styles.eventDescription, { color: color2 }]}>
-                    {userEvent?.description}
-                  </Text>
-                )}
-
-                <View style={styles.buttonContainer}>
-                  <MainButton onPress={goToEventDetail}>{`Detalle`}</MainButton>
                 </View>
               </View>
             )
@@ -195,10 +199,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   card: {
-    padding: 20,
     borderRadius: 10,
-    gap: 25,
     marginBottom: 30,
+    overflow: 'hidden',
+  },
+  cardContent: {
+    gap: 25,
+    padding: 20,
   },
   eventBannerContainer: {
     flexDirection: 'row',
