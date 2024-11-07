@@ -71,7 +71,10 @@ export default function MyCalendar() {
 
   return (
     <View style={[styles.mainContainer, { backgroundColor: mainBg1 }]}>
-      <LinearGradient colors={['transparent', mainBg2]} style={styles.lgBg} />
+      <LinearGradient
+        colors={['transparent', mainBg2, mainBg2]}
+        style={styles.lgBg}
+      />
 
       <ScrollView
         contentContainerStyle={styles.svContentContainer}
