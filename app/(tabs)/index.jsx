@@ -13,6 +13,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import { useRouter } from 'expo-router'
 import { isNonEmptyArray, isNonEmptyString } from 'ramda-adjunct'
 import { useQuery } from '@tanstack/react-query'
+import { LinearGradient } from 'expo-linear-gradient'
 
 import useThemeColor from '@/hooks/useThemeColor'
 import BlankSpaceView from '@/ui/BlankSpaceView'
@@ -29,6 +30,7 @@ export default function Index() {
   const [refreshing, setRefreshing] = useState(false)
 
   const mainBg1 = useThemeColor('mainBg1')
+  const mainBg2 = useThemeColor('mainBg2')
   const color1 = useThemeColor('color1')
   const color2 = useThemeColor('color2')
   const color3 = useThemeColor('color3')
@@ -60,127 +62,144 @@ export default function Index() {
   }, [cmHomeEventsIsFetching])
 
   return (
-    <ScrollView
-      style={{ backgroundColor: mainBg1 }}
-      contentContainerStyle={styles.svContentContainer}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          progressBackgroundColor={mainBg1}
-          colors={[color1]}
-          tintColor={color1}
-        />
-      }
-    >
-      {cmHomeEventsIsLoading ? (
-        <View style={styles.noContent}>
-          <ActivityIndicator size='large' color={color1} />
-        </View>
-      ) : !cmHomeEventsData || cmHomeEventsError ? (
-        <View style={styles.noContent}>
-          <Text style={[styles.errorText, { color: color1 }]}>
-            {`Ha ocurrido un error al obtener los datos. Puede ser que no tengas conexión a internet.`}
-          </Text>
+    <View style={[styles.mainContainer, { backgroundColor: mainBg1 }]}>
+      <LinearGradient colors={['transparent', mainBg2]} style={styles.lgBg} />
 
-          <ThirdButton
-            loading={cmHomeEventsIsFetching}
-            disabled={cmHomeEventsIsFetching}
-            onPress={() => {
-              cmHomeEventsRefetch()
-            }}
-          >{`Reintentar`}</ThirdButton>
-        </View>
-      ) : isNonEmptyArray(cmHomeEventsData) ? (
-        <>
-          {cmHomeEventsData.map((userEvent) => {
-            const goToEventDetail = () => {
-              router.push({
-                pathname: '/event/[uid]',
-                params: { uid: userEvent?.uid },
-              })
-            }
+      <ScrollView
+        contentContainerStyle={styles.svContentContainer}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            progressBackgroundColor={mainBg2}
+            colors={[color1]}
+            tintColor={color1}
+          />
+        }
+      >
+        {cmHomeEventsIsLoading ? (
+          <View style={styles.noContent}>
+            <ActivityIndicator size='large' color={color1} />
+          </View>
+        ) : !cmHomeEventsData || cmHomeEventsError ? (
+          <View style={styles.noContent}>
+            <Text style={[styles.errorText, { color: color1 }]}>
+              {`Ha ocurrido un error al obtener los datos. Puede ser que no tengas conexión a internet.`}
+            </Text>
 
-            return (
-              <View
-                key={userEvent?.uid}
-                style={[styles.card, { backgroundColor: cardBg2 }]}
-              >
-                {isNonEmptyString(userEvent?.bannerUrl) && (
-                  <View style={styles.eventBannerContainer}>
-                    <Image
-                      source={{ uri: userEvent?.bannerUrl }}
-                      style={styles.eventBanner}
-                      resizeMode='contain'
-                    />
-                  </View>
-                )}
+            <ThirdButton
+              loading={cmHomeEventsIsFetching}
+              disabled={cmHomeEventsIsFetching}
+              onPress={() => {
+                cmHomeEventsRefetch()
+              }}
+            >{`Reintentar`}</ThirdButton>
+          </View>
+        ) : isNonEmptyArray(cmHomeEventsData) ? (
+          <>
+            {cmHomeEventsData.map((userEvent) => {
+              const goToEventDetail = () => {
+                router.push({
+                  pathname: '/event/[uid]',
+                  params: { uid: userEvent?.uid },
+                })
+              }
 
-                <View style={styles.cardContent}>
-                  <View>
-                    <Text style={[styles.eventTitle, { color: color1 }]}>
-                      {userEvent?.name}
-                    </Text>
-
-                    <View style={styles.eventSubtitleContainer}>
-                      <Feather name='calendar' size={16} color={color4} />
-                      <Text
-                        style={[
-                          styles.eventSubtitle,
-                          styles.eventDate,
-                          { color: color4 },
-                        ]}
-                      >
-                        {isNonEmptyString(userEvent?.startDateIsoString)
-                          ? dateFnsFormat(
-                              new Date(userEvent?.startDateIsoString),
-                              DATEPICKER_DEFAULT_PROPS.dateTimeFormat,
-                            )
-                          : '---'}
-                      </Text>
+              return (
+                <View
+                  key={userEvent?.uid}
+                  style={[styles.card, { backgroundColor: cardBg2 }]}
+                >
+                  {isNonEmptyString(userEvent?.bannerUrl) && (
+                    <View style={styles.eventBannerContainer}>
+                      <Image
+                        source={{ uri: userEvent?.bannerUrl }}
+                        style={styles.eventBanner}
+                        resizeMode='contain'
+                      />
                     </View>
-
-                    <View style={styles.eventSubtitleContainer}>
-                      <Ionicons name='medal-outline' size={16} color={color3} />
-                      <Text style={[styles.eventSubtitle, { color: color3 }]}>
-                        {userEvent?._eventType?.name || '---'}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {isNonEmptyString(userEvent?.description) && (
-                    <Text style={[styles.eventDescription, { color: color2 }]}>
-                      {userEvent?.description}
-                    </Text>
                   )}
 
-                  <View style={styles.buttonContainer}>
-                    <MainButton
-                      onPress={goToEventDetail}
-                    >{`Detalle`}</MainButton>
+                  <View style={styles.cardContent}>
+                    <View>
+                      <Text style={[styles.eventTitle, { color: color1 }]}>
+                        {userEvent?.name}
+                      </Text>
+
+                      <View style={styles.eventSubtitleContainer}>
+                        <Feather name='calendar' size={16} color={color4} />
+                        <Text
+                          style={[
+                            styles.eventSubtitle,
+                            styles.eventDate,
+                            { color: color4 },
+                          ]}
+                        >
+                          {isNonEmptyString(userEvent?.startDateIsoString)
+                            ? dateFnsFormat(
+                                new Date(userEvent?.startDateIsoString),
+                                DATEPICKER_DEFAULT_PROPS.dateTimeFormat,
+                              )
+                            : '---'}
+                        </Text>
+                      </View>
+
+                      <View style={styles.eventSubtitleContainer}>
+                        <Ionicons
+                          name='medal-outline'
+                          size={16}
+                          color={color3}
+                        />
+                        <Text style={[styles.eventSubtitle, { color: color3 }]}>
+                          {userEvent?._eventType?.name || '---'}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {isNonEmptyString(userEvent?.description) && (
+                      <Text
+                        style={[styles.eventDescription, { color: color2 }]}
+                      >
+                        {userEvent?.description}
+                      </Text>
+                    )}
+
+                    <View style={styles.buttonContainer}>
+                      <MainButton
+                        onPress={goToEventDetail}
+                      >{`Detalle`}</MainButton>
+                    </View>
                   </View>
                 </View>
-              </View>
-            )
-          })}
+              )
+            })}
 
-          <BlankSpaceView />
-        </>
-      ) : (
-        <View style={styles.noContent}>
-          <Text style={[styles.errorText, { color: color2 }]}>
-            {`No hay eventos para mostrar.`}
-          </Text>
-          <Text style={[styles.errorText, { color: color2 }]}>
-            {`Aquí aparecerán todos los eventos activos publicados.`}
-          </Text>
-        </View>
-      )}
-    </ScrollView>
+            <BlankSpaceView />
+          </>
+        ) : (
+          <View style={styles.noContent}>
+            <Text style={[styles.errorText, { color: color2 }]}>
+              {`No hay eventos para mostrar.`}
+            </Text>
+            <Text style={[styles.errorText, { color: color2 }]}>
+              {`Aquí aparecerán todos los eventos activos publicados.`}
+            </Text>
+          </View>
+        )}
+      </ScrollView>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
+  mainContainer: { flex: 1 },
+  lgBg: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  },
   svContentContainer: {
     flexGrow: 1,
     paddingVertical: 10,

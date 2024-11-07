@@ -167,7 +167,7 @@ export default function RootLayout() {
               }
 
               if (route.name === '(tabs)') {
-                if (activeTabName === 'index') {
+                if (activeTabName === 'index' || !activeTabName) {
                   options.headerTitle = 'Próximos Eventos'
                   options.headerStyle.backgroundColor = isDark
                     ? colors.dark.mainBg1
@@ -177,8 +177,8 @@ export default function RootLayout() {
                 if (activeTabName === 'my-calendar') {
                   options.headerTitle = 'Mi Calendario'
                   options.headerStyle.backgroundColor = isDark
-                    ? colors.dark.mainBg2
-                    : colors.light.mainBg2
+                    ? colors.dark.mainBg1
+                    : colors.light.mainBg1
                 }
 
                 if (activeTabName === 'settings') {

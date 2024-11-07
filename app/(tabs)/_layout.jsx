@@ -1,32 +1,49 @@
 import { Tabs } from 'expo-router'
 import Feather from '@expo/vector-icons/Feather'
+import { useNavigationState } from '@react-navigation/native'
 
 import LoginSignup from '@/components/LoginSignup/LoginSignup'
 import useThemeColor from '@/hooks/useThemeColor'
 import { useLoggedUserStore } from '@/hooks/useStore'
 
 export default function TabsLayout() {
-  const tabsBg = useThemeColor('cardBg2')
-  const tabsBorderColor = useThemeColor('cardBg1')
-  const tabIconColor = useThemeColor('color3')
-  const activeTabIconColor = useThemeColor('color4')
+  const modalBg1 = useThemeColor('modalBg1')
+  const mainBg2 = useThemeColor('mainBg2')
+  const cardBg1 = useThemeColor('cardBg1')
+  const color3 = useThemeColor('color3')
+  const color4 = useThemeColor('color4')
 
   const isUserLoggedIn = useLoggedUserStore((s) => s.isUserLoggedIn)
+
+  const navState = useNavigationState((state) => state)
 
   if (!isUserLoggedIn) {
     return <LoginSignup />
   }
 
+  const activeRouteState = navState.routes?.[navState.index]?.state
+  const activeTabName =
+    activeRouteState?.routes?.[activeRouteState?.index]?.name
+
   return (
     <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarShowLabel: false,
-        tabBarStyle: {
-          display: 'flex',
-          backgroundColor: tabsBg,
-          borderTopColor: tabsBorderColor,
-        },
+      screenOptions={({ route }) => {
+        const options = {
+          headerShown: false,
+          tabBarShowLabel: false,
+          tabBarStyle: {
+            borderTopColor: cardBg1,
+            backgroundColor: modalBg1,
+          },
+        }
+
+        if (route.name === 'settings' && activeTabName === 'settings') {
+          options.tabBarStyle = {
+            backgroundColor: mainBg2,
+          }
+        }
+
+        return options
       }}
     >
       <Tabs.Screen
@@ -37,7 +54,7 @@ export default function TabsLayout() {
               <Feather
                 name='home'
                 size={size}
-                color={focused ? activeTabIconColor : tabIconColor}
+                color={focused ? color4 : color3}
               />
             )
           },
@@ -52,7 +69,7 @@ export default function TabsLayout() {
               <Feather
                 name='calendar'
                 size={size}
-                color={focused ? activeTabIconColor : tabIconColor}
+                color={focused ? color4 : color3}
               />
             )
           },
@@ -67,7 +84,7 @@ export default function TabsLayout() {
               <Feather
                 name='settings'
                 size={size}
-                color={focused ? activeTabIconColor : tabIconColor}
+                color={focused ? color4 : color3}
               />
             )
           },
