@@ -13,6 +13,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import { useRouter, Stack } from 'expo-router'
 import { isNonEmptyArray, isNonEmptyString } from 'ramda-adjunct'
 import { useQuery } from '@tanstack/react-query'
+import { Shadow } from 'react-native-shadow-2'
 
 import useThemeColor from '@/hooks/useThemeColor'
 import BlankSpaceView from '@/ui/BlankSpaceView'
@@ -33,6 +34,7 @@ export default function EventsHistory() {
   const color2 = useThemeColor('color2')
   const color3 = useThemeColor('color3')
   const color4 = useThemeColor('color4')
+  const cardBg1 = useThemeColor('cardBg1')
   const cardBg2 = useThemeColor('cardBg2')
 
   const router = useRouter()
@@ -113,65 +115,81 @@ export default function EventsHistory() {
             }
 
             return (
-              <View
+              <Shadow
                 key={userEvent?.uid}
-                style={[styles.card, { backgroundColor: cardBg2 }]}
+                distance={5}
+                startColor={cardBg1}
+                style={styles.cardShadow}
               >
-                {isNonEmptyString(userEvent?.bannerUrl) && (
-                  <View style={styles.eventBannerContainer}>
-                    <Image
-                      source={{ uri: userEvent?.bannerUrl }}
-                      style={styles.eventBanner}
-                      resizeMode='contain'
-                    />
-                  </View>
-                )}
-
-                <View style={styles.cardContent}>
-                  <View>
-                    <Text style={[styles.eventTitle, { color: color1 }]}>
-                      {userEvent?.name}
-                    </Text>
-
-                    <View style={styles.eventSubtitleContainer}>
-                      <Feather name='calendar' size={16} color={color4} />
-                      <Text
-                        style={[
-                          styles.eventSubtitle,
-                          styles.eventDate,
-                          { color: color4 },
-                        ]}
-                      >
-                        {isNonEmptyString(userEvent?.startDateIsoString)
-                          ? dateFnsFormat(
-                              new Date(userEvent?.startDateIsoString),
-                              DATEPICKER_DEFAULT_PROPS.dateTimeFormat,
-                            )
-                          : '---'}
-                      </Text>
+                <View
+                  key={userEvent?.uid}
+                  style={[
+                    styles.card,
+                    { backgroundColor: cardBg2, borderColor: color3 },
+                  ]}
+                >
+                  {isNonEmptyString(userEvent?.bannerUrl) && (
+                    <View style={styles.eventBannerContainer}>
+                      <Image
+                        source={{ uri: userEvent?.bannerUrl }}
+                        style={styles.eventBanner}
+                        resizeMode='contain'
+                      />
                     </View>
-
-                    <View style={styles.eventSubtitleContainer}>
-                      <Ionicons name='medal-outline' size={16} color={color3} />
-                      <Text style={[styles.eventSubtitle, { color: color3 }]}>
-                        {userEvent?._eventType?.name || '---'}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {isNonEmptyString(userEvent?.description) && (
-                    <Text style={[styles.eventDescription, { color: color2 }]}>
-                      {userEvent?.description}
-                    </Text>
                   )}
 
-                  <View style={styles.buttonContainer}>
-                    <MainButton
-                      onPress={goToEventDetail}
-                    >{`Detalle`}</MainButton>
+                  <View style={styles.cardContent}>
+                    <View>
+                      <Text style={[styles.eventTitle, { color: color1 }]}>
+                        {userEvent?.name}
+                      </Text>
+
+                      <View style={styles.eventSubtitleContainer}>
+                        <Feather name='calendar' size={16} color={color4} />
+                        <Text
+                          style={[
+                            styles.eventSubtitle,
+                            styles.eventDate,
+                            { color: color4 },
+                          ]}
+                        >
+                          {isNonEmptyString(userEvent?.startDateIsoString)
+                            ? dateFnsFormat(
+                                new Date(userEvent?.startDateIsoString),
+                                DATEPICKER_DEFAULT_PROPS.dateTimeFormat,
+                              )
+                            : '---'}
+                        </Text>
+                      </View>
+
+                      <View style={styles.eventSubtitleContainer}>
+                        <Ionicons
+                          name='medal-outline'
+                          size={16}
+                          color={color3}
+                        />
+                        <Text style={[styles.eventSubtitle, { color: color3 }]}>
+                          {userEvent?._eventType?.name || '---'}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {isNonEmptyString(userEvent?.description) && (
+                      <Text
+                        style={[styles.eventDescription, { color: color2 }]}
+                      >
+                        {userEvent?.description}
+                      </Text>
+                    )}
+
+                    <View style={styles.buttonContainer}>
+                      <MainButton
+                        onPress={goToEventDetail}
+                      >{`Detalle`}</MainButton>
+                    </View>
                   </View>
                 </View>
-              </View>
+              </Shadow>
             )
           })}
 
@@ -191,8 +209,7 @@ export default function EventsHistory() {
 const styles = StyleSheet.create({
   svContentContainer: {
     flexGrow: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    padding: 20,
     ...CC_WIDTH_STYLES,
   },
   noContent: {
@@ -206,10 +223,11 @@ const styles = StyleSheet.create({
     fontFamily: 'Ubuntu400',
     textAlign: 'center',
   },
+  cardShadow: { marginBottom: 30 },
   card: {
     borderRadius: 10,
-    marginBottom: 30,
     overflow: 'hidden',
+    borderWidth: 1,
   },
   cardContent: {
     gap: 25,

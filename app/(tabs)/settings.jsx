@@ -137,7 +137,7 @@ export default function Settings() {
             ]
           }}
           onPress={() => {
-            router.push({ pathname: '/events-history' })
+            router.push({ pathname: '/past-events' })
           }}
         >
           <View style={styles.settingsItemIconContainer}>
