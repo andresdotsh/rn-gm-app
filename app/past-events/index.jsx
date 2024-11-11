@@ -115,10 +115,7 @@ export default function EventsHistory() {
             return (
               <View
                 key={userEvent?.uid}
-                style={[
-                  styles.card,
-                  { backgroundColor: cardBg2, borderColor: color3 },
-                ]}
+                style={[styles.card, { backgroundColor: cardBg2 }]}
               >
                 {isNonEmptyString(userEvent?.bannerUrl) && (
                   <View style={styles.eventBannerContainer}>
@@ -212,7 +209,6 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     borderRadius: 10,
     overflow: 'hidden',
-    borderWidth: 1,
   },
   cardContent: {
     gap: 25,

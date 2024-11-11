@@ -139,10 +139,7 @@ export default function MyCalendar() {
               return (
                 <View
                   key={userEvent?.uid}
-                  style={[
-                    styles.card,
-                    { backgroundColor: cardBg2, borderColor: color3 },
-                  ]}
+                  style={[styles.card, { backgroundColor: cardBg2 }]}
                 >
                   {!isPublished && (
                     <Text style={[styles.pausedEventTitle, { color: color3 }]}>
@@ -302,7 +299,6 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     borderRadius: 10,
     overflow: 'hidden',
-    borderWidth: 1,
   },
   cardContent: {
     gap: 25,
