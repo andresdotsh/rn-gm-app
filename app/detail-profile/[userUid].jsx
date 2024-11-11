@@ -35,7 +35,7 @@ import ThirdButton from '@/ui/ThirdButton'
 import BlankSpaceView from '@/ui/BlankSpaceView'
 import isValidSkill from '@/utils/isValidSkill'
 
-export default function UserDetail() {
+export default function DetailProfile() {
   const [refreshing, setRefreshing] = useState(false)
 
   const mainBg2 = useThemeColor('mainBg2')

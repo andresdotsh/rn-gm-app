@@ -918,8 +918,8 @@ export default function CreateEditEvent({ eventUid }) {
                     },
                   ]}
                 >
-                  <Text style={[styles.userTypeDescription, { color: color1 }]}>
-                    {`Sin jueces`}
+                  <Text style={[styles.userTypeDescription, { color: color3 }]}>
+                    {`Puedes saltar este paso por ahora y agregarlos después.`}
                   </Text>
                 </View>
               )}
@@ -1021,8 +1021,8 @@ export default function CreateEditEvent({ eventUid }) {
                     },
                   ]}
                 >
-                  <Text style={[styles.userTypeDescription, { color: color1 }]}>
-                    {`Sin participantes`}
+                  <Text style={[styles.userTypeDescription, { color: color3 }]}>
+                    {`Puedes saltar este paso por ahora y agregarlos después.`}
                   </Text>
                 </View>
               )}
@@ -1619,8 +1619,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   userTypeCard: {
-    padding: 10,
+    padding: 20,
     borderRadius: 5,
+    gap: 10,
   },
   userItemsContainer: { gap: 10 },
   userItemCard: {

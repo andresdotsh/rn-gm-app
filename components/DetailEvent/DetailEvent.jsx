@@ -28,7 +28,7 @@ import ThirdButton from '@/ui/ThirdButton'
 import BlankSpaceView from '@/ui/BlankSpaceView'
 import dateFnsFormat from '@/utils/dateFnsFormat'
 
-export default function EventDetail({ eventUid, isPastEvent }) {
+export default function DetailEvent({ eventUid, isPastEvent }) {
   const [refreshing, setRefreshing] = useState(false)
 
   const mainBg2 = useThemeColor('mainBg2')

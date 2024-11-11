@@ -40,6 +40,7 @@ export default function MyCalendar() {
   const color2 = useThemeColor('color2')
   const color3 = useThemeColor('color3')
   const color4 = useThemeColor('color4')
+  const cardBg1 = useThemeColor('cardBg1')
   const cardBg2 = useThemeColor('cardBg2')
 
   const router = useRouter()
@@ -131,7 +132,7 @@ export default function MyCalendar() {
 
               const goToEventDetail = () => {
                 router.push({
-                  pathname: '/event/[uid]',
+                  pathname: '/detail-event/[uid]',
                   params: { uid: userEvent?.uid },
                 })
               }
@@ -254,12 +255,22 @@ export default function MyCalendar() {
           </>
         ) : (
           <View style={styles.noContent}>
-            <Text style={[styles.errorText, { color: color2 }]}>
-              {`No hay eventos en tu calendario.`}
-            </Text>
-            <Text style={[styles.errorText, { color: color2 }]}>
-              {`Aquí aparecerán los eventos que hayas creado, o en los que tengas un rol como juez o participante.`}
-            </Text>
+            <View
+              style={[
+                styles.card,
+                styles.cardFullWidth,
+                { backgroundColor: cardBg1 },
+              ]}
+            >
+              <View style={styles.cardContent}>
+                <Text style={[styles.errorText, { color: color2 }]}>
+                  {`No hay eventos en tu calendario.`}
+                </Text>
+                <Text style={[styles.errorText, { color: color2 }]}>
+                  {`Aquí aparecerán los eventos que hayas creado, o en los que tengas un rol como juez o participante.`}
+                </Text>
+              </View>
+            </View>
           </View>
         )}
       </ScrollView>
@@ -304,6 +315,7 @@ const styles = StyleSheet.create({
     gap: 25,
     padding: 20,
   },
+  cardFullWidth: { width: '100%' },
   eventBannerContainer: {
     flexDirection: 'row',
     justifyContent: 'center',

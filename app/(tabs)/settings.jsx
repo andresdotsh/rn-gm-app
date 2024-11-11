@@ -91,7 +91,7 @@ export default function Settings() {
           }}
           onPress={() => {
             router.push({
-              pathname: '/user/[uid]',
+              pathname: '/detail-profile/[uid]',
               params: { uid: loggedUserUid },
             })
           }}
