@@ -57,6 +57,15 @@ export const SN_FACEBOOK_USER_LABEL = 'facebook.com/'
 
 export const API_BASE_URL = process.env.EXPO_PUBLIC_REST_API_BASE_URL
 
+export const GOOGLE_IOS_CLIENT_ID =
+  process.env.EXPO_PUBLIC_GOOGLE_SSO_IOS_CLIENT_ID
+export const GOOGLE_ANDROID_CLIENT_ID =
+  process.env.EXPO_PUBLIC_GOOGLE_SSO_ANDROID_CLIENT_ID
+export const FACEBOOK_IOS_CLIENT_ID =
+  process.env.EXPO_PUBLIC_FACEBOOK_SSO_IOS_CLIENT_ID
+export const FACEBOOK_ANDROID_CLIENT_ID =
+  process.env.EXPO_PUBLIC_FACEBOOK_SSO_ANDROID_CLIENT_ID
+
 export const CC_WIDTH_STYLES = {
   marginHorizontal: 'auto',
   minWidth: 320,

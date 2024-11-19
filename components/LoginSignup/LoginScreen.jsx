@@ -13,12 +13,14 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { signInWithEmailAndPassword } from 'firebase/auth'
+// import Fontisto from '@expo/vector-icons/Fontisto'
 
 import { auth } from '@/data/firebase'
 import useThemeColor from '@/hooks/useThemeColor'
 import ShowToggleButton from '@/ui/ShowToggleButton'
 import BlankSpaceView from '@/ui/BlankSpaceView'
 import MainButton from '@/ui/MainButton'
+// import SecondButton from '@/ui/SecondButton'
 import ThirdButton from '@/ui/ThirdButton'
 import {
   CC_WIDTH_STYLES,
@@ -59,6 +61,7 @@ export default function LoginScreen({
   const placeholderColor = useThemeColor('cardBg1')
   const textInputBgColor = useThemeColor('btn2')
   const showToggleBgColor = useThemeColor('btn4')
+  // const secondButtonColor = useThemeColor('mainBg2')
 
   const [showPassword, setShowPassword] = useState(false)
 
@@ -111,6 +114,36 @@ export default function LoginScreen({
           <Text
             style={[styles.title, { color: titleColor }]}
           >{`Ingresar`}</Text>
+
+          {/* <View style={styles.pt2}>
+            <Text
+              style={[styles.label, { color: color }]}
+            >{`Puedes ingresar con:`}</Text>
+          </View>
+
+          <View style={styles.pt1}>
+            <SecondButton
+              disabled={isAuthenticating}
+              leftIcon={
+                <Fontisto name='google' size={16} color={secondButtonColor} />
+              }
+            >{`Google`}</SecondButton>
+          </View>
+
+          <View style={styles.pt1}>
+            <SecondButton
+              disabled={isAuthenticating}
+              leftIcon={
+                <Fontisto name='facebook' size={16} color={secondButtonColor} />
+              }
+            >{`Facebook`}</SecondButton>
+          </View>
+
+          <View style={styles.pt2}>
+            <Text
+              style={[styles.label, { color: color }]}
+            >{`O continuar con:`}</Text>
+          </View> */}
 
           <View style={styles.pt2}>
             <Controller
@@ -231,6 +264,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Ubuntu600',
     fontSize: 30,
   },
+  // label: { fontFamily: 'Ubuntu400', fontSize: 18 },
   error: { fontFamily: 'Ubuntu400', fontSize: 16 },
   input: {
     fontFamily: 'Ubuntu400',

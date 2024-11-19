@@ -13,14 +13,22 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
+// import Fontisto from '@expo/vector-icons/Fontisto'
+// import * as Google from 'expo-auth-session/providers/google'
+// import * as Facebook from 'expo-auth-session/providers/facebook'
 
 import { auth } from '@/data/firebase'
 import useThemeColor from '@/hooks/useThemeColor'
 import BlankSpaceView from '@/ui/BlankSpaceView'
 import MainButton from '@/ui/MainButton'
+// import SecondButton from '@/ui/SecondButton'
 import ThirdButton from '@/ui/ThirdButton'
 import ShowToggleButton from '@/ui/ShowToggleButton'
 import {
+  // GOOGLE_IOS_CLIENT_ID,
+  // GOOGLE_ANDROID_CLIENT_ID,
+  // FACEBOOK_IOS_CLIENT_ID,
+  // FACEBOOK_ANDROID_CLIENT_ID,
   CC_WIDTH_STYLES,
   FIELD_EMAIL_MAX_LENGTH,
   FIELD_NAME_MAX_LENGTH,
@@ -71,6 +79,7 @@ export default function SignupScreen({
   const color = useThemeColor('color1')
   const placeholderColor = useThemeColor('color3')
   const textInputBgColor = useThemeColor('mainBg2')
+  // const secondButtonColor = useThemeColor('mainBg2')
 
   const [showPassword, setShowPassword] = useState(true)
 
@@ -105,6 +114,20 @@ export default function SignupScreen({
     [setIsAuthenticating, handleErrorMessage, performLogin, reset],
   )
 
+  // const [requestGoogle, responseGoogle, promptGoogle] =
+  //   Google.useIdTokenAuthRequest({
+  //     clientId:
+  //       Platform.OS === 'ios' ? GOOGLE_IOS_CLIENT_ID : GOOGLE_ANDROID_CLIENT_ID,
+  //   })
+
+  // const [requestFacebook, responseFacebook, promptFacebook] =
+  //   Facebook.useAuthRequest({
+  //     clientId:
+  //       Platform.OS === 'ios'
+  //         ? FACEBOOK_IOS_CLIENT_ID
+  //         : FACEBOOK_ANDROID_CLIENT_ID,
+  //   })
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -124,6 +147,36 @@ export default function SignupScreen({
           <Text
             style={[styles.title, { color: titleColor }]}
           >{`Crear cuenta`}</Text>
+
+          {/* <View style={styles.pt2}>
+            <Text
+              style={[styles.label, { color: color }]}
+            >{`Puedes crear tu cuenta con:`}</Text>
+          </View>
+
+          <View style={styles.pt1}>
+            <SecondButton
+              disabled={isAuthenticating}
+              leftIcon={
+                <Fontisto name='google' size={16} color={secondButtonColor} />
+              }
+            >{`Google`}</SecondButton>
+          </View>
+
+          <View style={styles.pt1}>
+            <SecondButton
+              disabled={isAuthenticating}
+              leftIcon={
+                <Fontisto name='facebook' size={16} color={secondButtonColor} />
+              }
+            >{`Facebook`}</SecondButton>
+          </View>
+
+          <View style={styles.pt2}>
+            <Text
+              style={[styles.label, { color: color }]}
+            >{`O continuar con:`}</Text>
+          </View> */}
 
           <View style={styles.pt2}>
             <Controller
@@ -262,6 +315,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     textAlign: 'right',
   },
+  // label: { fontFamily: 'Ubuntu400', fontSize: 18, textAlign: 'right' },
   error: { fontFamily: 'Ubuntu400', fontSize: 16, textAlign: 'right' },
   input: {
     fontFamily: 'Ubuntu400',
