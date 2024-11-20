@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   Image,
   TextInput,
-  Platform,
   KeyboardAvoidingView,
   Pressable,
   Switch,
@@ -56,6 +55,7 @@ import {
 } from '@/constants/constants'
 import { useLoggedUserStore } from '@/hooks/useStore'
 import useThemeColor from '@/hooks/useThemeColor'
+import usePlatform from '@/hooks/usePlatform'
 import { db, storage } from '@/data/firebase'
 import cmGetEventEdit from '@/data/cmGetEventEdit'
 import MainButton from '@/ui/MainButton'
@@ -141,6 +141,8 @@ export default function CreateEditEvent({ eventUid }) {
   const mbtnBgColor = useThemeColor('btn1')
   const mbtnColor = useThemeColor('color1')
   const mbtnBorderColor = useThemeColor('btn4')
+
+  const { isIOS } = usePlatform()
 
   const loggedUserUid = useLoggedUserStore((s) => s.loggedUserUid)
 
@@ -517,7 +519,7 @@ export default function CreateEditEvent({ eventUid }) {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={isIOS ? 'padding' : 'height'}
       style={styles.kbAvoidingView}
     >
       <ScrollView

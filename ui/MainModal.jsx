@@ -6,13 +6,13 @@ import {
   Text,
   ScrollView,
   KeyboardAvoidingView,
-  Platform,
 } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isNonEmptyString, isFunction } from 'ramda-adjunct'
 
 import useThemeColor from '@/hooks/useThemeColor'
+import usePlatform from '@/hooks/usePlatform'
 import { CC_WIDTH_STYLES } from '@/constants/constants'
 
 const SUPPORTED_ORIENTATIONS = [
@@ -37,6 +37,8 @@ export default function MainModal({
   const modalBg1 = useThemeColor('modalBg1')
   const modalTitleColor = useThemeColor('color1')
 
+  const { isIOS } = usePlatform()
+
   const insets = useSafeAreaInsets()
 
   return (
@@ -52,7 +54,7 @@ export default function MainModal({
       }}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={isIOS ? 'padding' : 'height'}
         style={styles.kbAvoidingView}
       >
         <View

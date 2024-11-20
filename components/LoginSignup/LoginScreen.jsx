@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TextInput,
-  Platform,
   KeyboardAvoidingView,
 } from 'react-native'
 import { useForm, Controller } from 'react-hook-form'
@@ -17,6 +16,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth'
 
 import { auth } from '@/data/firebase'
 import useThemeColor from '@/hooks/useThemeColor'
+import usePlatform from '@/hooks/usePlatform'
 import ShowToggleButton from '@/ui/ShowToggleButton'
 import BlankSpaceView from '@/ui/BlankSpaceView'
 import MainButton from '@/ui/MainButton'
@@ -63,6 +63,8 @@ export default function LoginScreen({
   const showToggleBgColor = useThemeColor('btn4')
   // const secondButtonColor = useThemeColor('mainBg2')
 
+  const { isIOS } = usePlatform()
+
   const [showPassword, setShowPassword] = useState(false)
 
   const insets = useSafeAreaInsets()
@@ -97,7 +99,7 @@ export default function LoginScreen({
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={isIOS ? 'padding' : 'height'}
       style={styles.kbAvoidingView}
     >
       <ScrollView

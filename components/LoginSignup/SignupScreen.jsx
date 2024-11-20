@@ -5,7 +5,6 @@ import {
   TextInput,
   StyleSheet,
   ScrollView,
-  Platform,
   KeyboardAvoidingView,
 } from 'react-native'
 import { useForm, Controller } from 'react-hook-form'
@@ -19,6 +18,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth'
 
 import { auth } from '@/data/firebase'
 import useThemeColor from '@/hooks/useThemeColor'
+import usePlatform from '@/hooks/usePlatform'
 import BlankSpaceView from '@/ui/BlankSpaceView'
 import MainButton from '@/ui/MainButton'
 // import SecondButton from '@/ui/SecondButton'
@@ -81,6 +81,8 @@ export default function SignupScreen({
   const textInputBgColor = useThemeColor('mainBg2')
   // const secondButtonColor = useThemeColor('mainBg2')
 
+  const { isIOS } = usePlatform()
+
   const [showPassword, setShowPassword] = useState(true)
 
   const insets = useSafeAreaInsets()
@@ -117,20 +119,20 @@ export default function SignupScreen({
   // const [requestGoogle, responseGoogle, promptGoogle] =
   //   Google.useIdTokenAuthRequest({
   //     clientId:
-  //       Platform.OS === 'ios' ? GOOGLE_IOS_CLIENT_ID : GOOGLE_ANDROID_CLIENT_ID,
+  //       isIOS ? GOOGLE_IOS_CLIENT_ID : GOOGLE_ANDROID_CLIENT_ID,
   //   })
 
   // const [requestFacebook, responseFacebook, promptFacebook] =
   //   Facebook.useAuthRequest({
   //     clientId:
-  //       Platform.OS === 'ios'
+  //       isIOS
   //         ? FACEBOOK_IOS_CLIENT_ID
   //         : FACEBOOK_ANDROID_CLIENT_ID,
   //   })
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={isIOS ? 'padding' : 'height'}
       style={styles.kbAvoidingView}
     >
       <ScrollView

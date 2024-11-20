@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   Image,
   TextInput,
-  Platform,
   KeyboardAvoidingView,
 } from 'react-native'
 import {
@@ -53,6 +52,7 @@ import {
 } from '@/constants/constants'
 import { useLoggedUserStore } from '@/hooks/useStore'
 import useThemeColor from '@/hooks/useThemeColor'
+import usePlatform from '@/hooks/usePlatform'
 import { db, storage } from '@/data/firebase'
 import getUserByUid from '@/data/getUserByUid'
 import getAllSkills from '@/data/getAllSkills'
@@ -163,6 +163,8 @@ export default function EditProfile() {
   const inputBorderColor = useThemeColor('color3')
   const pgColor = useThemeColor('btn1')
   const pgBgColor = useThemeColor('cardBg2')
+
+  const { isIOS } = usePlatform()
 
   const loggedUserUid = useLoggedUserStore((s) => s.loggedUserUid)
   const wip = isSubmitting || settingProfilePhoto
@@ -459,7 +461,7 @@ export default function EditProfile() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={isIOS ? 'padding' : 'height'}
       style={styles.kbAvoidingView}
     >
       <ScrollView
