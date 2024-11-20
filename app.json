@@ -7,8 +7,9 @@
     "userInterfaceStyle": "automatic",
     "orientation": "default",
     "icon": "./assets/icon.png",
+    "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#2b1a14"
     },
@@ -18,7 +19,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#2b1a14"
+        "backgroundColor": "#ffffff"
       }
     },
     "platforms": ["ios", "android"],
