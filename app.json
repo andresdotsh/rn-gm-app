@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "gamemaster",
+    "name": "Game Master",
     "slug": "gamemaster",
     "scheme": "gamemaster",
     "version": "1.0.0",
@@ -14,13 +14,17 @@
       "backgroundColor": "#2b1a14"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.gmcol.gamemaster"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#2b1a14"
-      }
+      },
+      "permissions": [],
+      "blockedPermissions": ["android.permission.RECORD_AUDIO"],
+      "package": "com.gmcol.gamemaster"
     },
     "platforms": ["ios", "android"],
     "plugins": ["expo-router", "expo-font", "expo-image-picker"]
