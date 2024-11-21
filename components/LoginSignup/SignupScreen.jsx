@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect } from 'react'
+import { useCallback, useState } from 'react'
 import {
   View,
   Text,
@@ -13,28 +13,30 @@ import * as yup from 'yup'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import {
   createUserWithEmailAndPassword,
-  GoogleAuthProvider,
-  FacebookAuthProvider,
-  signInWithCredential,
+  // GoogleAuthProvider,
+  // FacebookAuthProvider,
+  // signInWithCredential,
 } from 'firebase/auth'
-import Fontisto from '@expo/vector-icons/Fontisto'
-import { makeRedirectUri } from 'expo-auth-session'
-import * as Google from 'expo-auth-session/providers/google'
-import * as Facebook from 'expo-auth-session/providers/facebook'
+// import Fontisto from '@expo/vector-icons/Fontisto'
+// import { makeRedirectUri } from 'expo-auth-session'
+// import * as Google from 'expo-auth-session/providers/google'
+// import * as Facebook from 'expo-auth-session/providers/facebook'
 
 import { auth } from '@/data/firebase'
 import useThemeColor from '@/hooks/useThemeColor'
 import usePlatform from '@/hooks/usePlatform'
 import BlankSpaceView from '@/ui/BlankSpaceView'
 import MainButton from '@/ui/MainButton'
-import SecondButton from '@/ui/SecondButton'
+// import SecondButton from '@/ui/SecondButton'
 import ThirdButton from '@/ui/ThirdButton'
 import ShowToggleButton from '@/ui/ShowToggleButton'
 import {
-  GOOGLE_IOS_CLIENT_ID,
-  GOOGLE_ANDROID_CLIENT_ID,
-  FACEBOOK_IOS_CLIENT_ID,
-  FACEBOOK_ANDROID_CLIENT_ID,
+  // APP_SCHEME,
+  // APP_BUNDLE_ID,
+  // GOOGLE_IOS_CLIENT_ID,
+  // GOOGLE_ANDROID_CLIENT_ID,
+  // FACEBOOK_IOS_CLIENT_ID,
+  // FACEBOOK_ANDROID_CLIENT_ID,
   CC_WIDTH_STYLES,
   FIELD_EMAIL_MAX_LENGTH,
   FIELD_NAME_MAX_LENGTH,
@@ -42,8 +44,6 @@ import {
   FIELD_PASSWORD_MAX_LENGTH,
   FIELD_PASSWORD_MIN_LENGTH,
   REGEX_USER_PASSWORD,
-  APP_SCHEME,
-  APP_BUNDLE_ID,
 } from '@/constants/constants'
 import normalizeSpaces from '@/utils/normalizeSpaces'
 
@@ -87,7 +87,7 @@ export default function SignupScreen({
   const color = useThemeColor('color1')
   const placeholderColor = useThemeColor('color3')
   const textInputBgColor = useThemeColor('mainBg2')
-  const secondButtonColor = useThemeColor('mainBg2')
+  // const secondButtonColor = useThemeColor('mainBg2')
 
   const { isIOS } = usePlatform()
 
@@ -124,61 +124,61 @@ export default function SignupScreen({
     [setIsAuthenticating, handleErrorMessage, performLogin, reset],
   )
 
-  const redirectUri = makeRedirectUri({
-    scheme: APP_SCHEME,
-    native: APP_BUNDLE_ID + '://',
-  })
+  // const redirectUri = makeRedirectUri({
+  //   scheme: APP_SCHEME,
+  //   native: APP_BUNDLE_ID + '://',
+  // })
 
-  const [requestGoogle, responseGoogle, promptGoogle] = Google.useAuthRequest({
-    redirectUri,
-    clientId: isIOS ? GOOGLE_IOS_CLIENT_ID : GOOGLE_ANDROID_CLIENT_ID,
-    iosClientId: GOOGLE_IOS_CLIENT_ID,
-    androidClientId: GOOGLE_ANDROID_CLIENT_ID,
-  })
+  // const [requestGoogle, responseGoogle, promptGoogle] = Google.useAuthRequest({
+  //   redirectUri,
+  //   clientId: isIOS ? GOOGLE_IOS_CLIENT_ID : GOOGLE_ANDROID_CLIENT_ID,
+  //   iosClientId: GOOGLE_IOS_CLIENT_ID,
+  //   androidClientId: GOOGLE_ANDROID_CLIENT_ID,
+  // })
 
-  const [requestFacebook, responseFacebook, promptFacebook] =
-    Facebook.useAuthRequest({
-      redirectUri,
-      clientId: isIOS ? FACEBOOK_IOS_CLIENT_ID : FACEBOOK_ANDROID_CLIENT_ID,
-      iosClientId: FACEBOOK_IOS_CLIENT_ID,
-      androidClientId: FACEBOOK_ANDROID_CLIENT_ID,
-    })
+  // const [requestFacebook, responseFacebook, promptFacebook] =
+  //   Facebook.useAuthRequest({
+  //     redirectUri,
+  //     clientId: isIOS ? FACEBOOK_IOS_CLIENT_ID : FACEBOOK_ANDROID_CLIENT_ID,
+  //     iosClientId: FACEBOOK_IOS_CLIENT_ID,
+  //     androidClientId: FACEBOOK_ANDROID_CLIENT_ID,
+  //   })
 
-  useEffect(() => {
-    async function handleSingleSignOn() {
-      try {
-        if (responseGoogle?.type === 'success') {
-          const { id_token } = responseGoogle.params
-          const credential = GoogleAuthProvider.credential(id_token)
-          const result = await signInWithCredential(auth, credential)
+  // useEffect(() => {
+  //   async function handleSingleSignOn() {
+  //     try {
+  //       if (responseGoogle?.type === 'success') {
+  //         const { id_token } = responseGoogle.params
+  //         const credential = GoogleAuthProvider.credential(id_token)
+  //         const result = await signInWithCredential(auth, credential)
 
-          await performLogin(result, null, reset)
-        } else if (responseFacebook?.type === 'success') {
-          const { access_token } = responseFacebook.params
-          const credential = FacebookAuthProvider.credential(access_token)
-          const result = await signInWithCredential(auth, credential)
+  //         await performLogin(result, null, reset)
+  //       } else if (responseFacebook?.type === 'success') {
+  //         const { access_token } = responseFacebook.params
+  //         const credential = FacebookAuthProvider.credential(access_token)
+  //         const result = await signInWithCredential(auth, credential)
 
-          await performLogin(result, null, reset)
-        } else {
-          setIsAuthenticating(false)
-        }
-      } catch (error) {
-        console.error(error)
-        console.error(`💥> HSS '${error?.message}'`)
-        handleErrorMessage(error)
-        setIsAuthenticating(false)
-      }
-    }
+  //         await performLogin(result, null, reset)
+  //       } else {
+  //         setIsAuthenticating(false)
+  //       }
+  //     } catch (error) {
+  //       console.error(error)
+  //       console.error(`💥> HSS '${error?.message}'`)
+  //       handleErrorMessage(error)
+  //       setIsAuthenticating(false)
+  //     }
+  //   }
 
-    handleSingleSignOn()
-  }, [
-    handleErrorMessage,
-    performLogin,
-    reset,
-    responseFacebook,
-    responseGoogle,
-    setIsAuthenticating,
-  ])
+  //   handleSingleSignOn()
+  // }, [
+  //   handleErrorMessage,
+  //   performLogin,
+  //   reset,
+  //   responseFacebook,
+  //   responseGoogle,
+  //   setIsAuthenticating,
+  // ])
 
   return (
     <KeyboardAvoidingView
@@ -200,7 +200,7 @@ export default function SignupScreen({
             style={[styles.title, { color: titleColor }]}
           >{`Crear cuenta`}</Text>
 
-          <View style={styles.pt2}>
+          {/* <View style={styles.pt2}>
             <Text
               style={[styles.label, { color: color }]}
             >{`Puedes crear tu cuenta con:`}</Text>
@@ -236,7 +236,7 @@ export default function SignupScreen({
             <Text
               style={[styles.label, { color: color }]}
             >{`O continuar con:`}</Text>
-          </View>
+          </View> */}
 
           <View style={styles.pt2}>
             <Controller
@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     textAlign: 'right',
   },
-  label: { fontFamily: 'Ubuntu400', fontSize: 18, textAlign: 'right' },
+  // label: { fontFamily: 'Ubuntu400', fontSize: 18, textAlign: 'right' },
   error: { fontFamily: 'Ubuntu400', fontSize: 16, textAlign: 'right' },
   input: {
     fontFamily: 'Ubuntu400',
