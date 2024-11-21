@@ -1,3 +1,6 @@
+export const APP_SCHEME = 'gamemaster'
+export const APP_BUNDLE_ID = 'com.gmcol.gamemaster'
+
 // event roles
 export const EVENT_ROLE_OWNER = 'owner'
 export const EVENT_ROLE_JUDGE = 'judge'

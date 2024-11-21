@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import {
   View,
   Text,
@@ -11,8 +11,16 @@ import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { signInWithEmailAndPassword } from 'firebase/auth'
-// import Fontisto from '@expo/vector-icons/Fontisto'
+import {
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  signInWithCredential,
+} from 'firebase/auth'
+import Fontisto from '@expo/vector-icons/Fontisto'
+import { makeRedirectUri } from 'expo-auth-session'
+import * as Google from 'expo-auth-session/providers/google'
+import * as Facebook from 'expo-auth-session/providers/facebook'
 
 import { auth } from '@/data/firebase'
 import useThemeColor from '@/hooks/useThemeColor'
@@ -20,13 +28,19 @@ import usePlatform from '@/hooks/usePlatform'
 import ShowToggleButton from '@/ui/ShowToggleButton'
 import BlankSpaceView from '@/ui/BlankSpaceView'
 import MainButton from '@/ui/MainButton'
-// import SecondButton from '@/ui/SecondButton'
+import SecondButton from '@/ui/SecondButton'
 import ThirdButton from '@/ui/ThirdButton'
 import {
+  GOOGLE_IOS_CLIENT_ID,
+  GOOGLE_ANDROID_CLIENT_ID,
+  FACEBOOK_IOS_CLIENT_ID,
+  FACEBOOK_ANDROID_CLIENT_ID,
   CC_WIDTH_STYLES,
   FIELD_EMAIL_MAX_LENGTH,
   FIELD_PASSWORD_MAX_LENGTH,
   FIELD_PASSWORD_MIN_LENGTH,
+  APP_SCHEME,
+  APP_BUNDLE_ID,
 } from '@/constants/constants'
 
 const schema = yup
@@ -61,7 +75,7 @@ export default function LoginScreen({
   const placeholderColor = useThemeColor('cardBg1')
   const textInputBgColor = useThemeColor('btn2')
   const showToggleBgColor = useThemeColor('btn4')
-  // const secondButtonColor = useThemeColor('mainBg2')
+  const secondButtonColor = useThemeColor('mainBg2')
 
   const { isIOS } = usePlatform()
 
@@ -97,6 +111,62 @@ export default function LoginScreen({
     [handleErrorMessage, performLogin, reset, setIsAuthenticating],
   )
 
+  const redirectUri = makeRedirectUri({
+    scheme: APP_SCHEME,
+    native: APP_BUNDLE_ID + '://',
+  })
+
+  const [requestGoogle, responseGoogle, promptGoogle] = Google.useAuthRequest({
+    redirectUri,
+    clientId: isIOS ? GOOGLE_IOS_CLIENT_ID : GOOGLE_ANDROID_CLIENT_ID,
+    iosClientId: GOOGLE_IOS_CLIENT_ID,
+    androidClientId: GOOGLE_ANDROID_CLIENT_ID,
+  })
+
+  const [requestFacebook, responseFacebook, promptFacebook] =
+    Facebook.useAuthRequest({
+      redirectUri,
+      clientId: isIOS ? FACEBOOK_IOS_CLIENT_ID : FACEBOOK_ANDROID_CLIENT_ID,
+      iosClientId: FACEBOOK_IOS_CLIENT_ID,
+      androidClientId: FACEBOOK_ANDROID_CLIENT_ID,
+    })
+
+  useEffect(() => {
+    async function handleSingleSignOn() {
+      try {
+        if (responseGoogle?.type === 'success') {
+          const { id_token } = responseGoogle.params
+          const credential = GoogleAuthProvider.credential(id_token)
+          const result = await signInWithCredential(auth, credential)
+
+          await performLogin(result, null, reset)
+        } else if (responseFacebook?.type === 'success') {
+          const { access_token } = responseFacebook.params
+          const credential = FacebookAuthProvider.credential(access_token)
+          const result = await signInWithCredential(auth, credential)
+
+          await performLogin(result, null, reset)
+        } else {
+          setIsAuthenticating(false)
+        }
+      } catch (error) {
+        console.error(error)
+        console.error(`💥> HSS '${error?.message}'`)
+        handleErrorMessage(error)
+        setIsAuthenticating(false)
+      }
+    }
+
+    handleSingleSignOn()
+  }, [
+    handleErrorMessage,
+    performLogin,
+    reset,
+    responseFacebook,
+    responseGoogle,
+    setIsAuthenticating,
+  ])
+
   return (
     <KeyboardAvoidingView
       behavior={isIOS ? 'padding' : 'height'}
@@ -117,7 +187,7 @@ export default function LoginScreen({
             style={[styles.title, { color: titleColor }]}
           >{`Ingresar`}</Text>
 
-          {/* <View style={styles.pt2}>
+          <View style={styles.pt2}>
             <Text
               style={[styles.label, { color: color }]}
             >{`Puedes ingresar con:`}</Text>
@@ -125,19 +195,27 @@ export default function LoginScreen({
 
           <View style={styles.pt1}>
             <SecondButton
-              disabled={isAuthenticating}
+              disabled={isAuthenticating || !requestGoogle}
               leftIcon={
                 <Fontisto name='google' size={16} color={secondButtonColor} />
               }
+              onPress={() => {
+                setIsAuthenticating(true)
+                promptGoogle()
+              }}
             >{`Google`}</SecondButton>
           </View>
 
           <View style={styles.pt1}>
             <SecondButton
-              disabled={isAuthenticating}
+              disabled={isAuthenticating || !requestFacebook}
               leftIcon={
                 <Fontisto name='facebook' size={16} color={secondButtonColor} />
               }
+              onPress={() => {
+                setIsAuthenticating(true)
+                promptFacebook()
+              }}
             >{`Facebook`}</SecondButton>
           </View>
 
@@ -145,7 +223,7 @@ export default function LoginScreen({
             <Text
               style={[styles.label, { color: color }]}
             >{`O continuar con:`}</Text>
-          </View> */}
+          </View>
 
           <View style={styles.pt2}>
             <Controller
@@ -266,7 +344,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Ubuntu600',
     fontSize: 30,
   },
-  // label: { fontFamily: 'Ubuntu400', fontSize: 18 },
+  label: { fontFamily: 'Ubuntu400', fontSize: 18 },
   error: { fontFamily: 'Ubuntu400', fontSize: 16 },
   input: {
     fontFamily: 'Ubuntu400',
